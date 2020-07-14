@@ -34,7 +34,7 @@ Twino WebSocket includes websocket server and websocket client. Websocket server
      client.MessageReceived += (c, m) => Console.WriteLine("# " + m);
      client.Connected += c => Console.WriteLine("Connected");
      client.Disconnected += c => Console.WriteLine("Disconnected");
-     client.Connect("ws://127.0.0.1:83");
+     client.Connect("wss://echo.websocket.org");
 
      while (true)
      {
