@@ -42,22 +42,22 @@ namespace Sample.WebSocket.Client
 
         static void ConnectWithTwino()
         {
-            TwinoWebSocket cx = new TwinoWebSocket();
-            cx.MessageReceived += (c, m) => Console.WriteLine("# " + m);
-            cx.Connected += c => Console.WriteLine("Connected");
-            cx.Disconnected += c => Console.WriteLine("Disconnected");
-            cx.Connect("ws://127.0.0.1:83");
+            TwinoWebSocket client = new TwinoWebSocket();
+            client.MessageReceived += (c, m) => Console.WriteLine("# " + m);
+            client.Connected += c => Console.WriteLine("Connected");
+            client.Disconnected += c => Console.WriteLine("Disconnected");
+            client.Connect("wss://echo.websocket.org");
 
             while (true)
             {
                 string s = Console.ReadLine();
-                cx.Send(s);
+                client.Send(s);
             }
         }
 
         static void Main(string[] args)
         {
-            StartServer();
+           // StartServer();
             ConnectWithTwino();
         }
     }
