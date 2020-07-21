@@ -11,9 +11,9 @@
         <PackageVersion>3.2.1</PackageVersion>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Authors>Mehmet Helvacıköylü;Emre Hızlı</Authors>
-        <PackageProjectUrl>https://github.com/mhelvacikoylu/twino</PackageProjectUrl>
-        <PackageLicenseUrl>https://github.com/mhelvacikoylu/twino/blob/master/LICENSE</PackageLicenseUrl>
-        <RepositoryUrl>https://github.com/mhelvacikoylu/twino</RepositoryUrl>
+        <PackageProjectUrl>https://github.com/twino-framework/twino-websocket</PackageProjectUrl>
+        <PackageLicenseUrl>https://github.com/twino-framework/twino-websocket/blob/master/LICENSE</PackageLicenseUrl>
+        <RepositoryUrl>https://github.com/twino-framework/twino-websocket</RepositoryUrl>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
