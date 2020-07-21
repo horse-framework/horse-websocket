@@ -6,9 +6,9 @@
     <Product>Twino.Client.WebSocket</Product>
     <Description>Twino WebSocket Client to connect all WebSocket servers</Description>
     <PackageTags>twino,websocket,client</PackageTags>
-    <AssemblyVersion>3.2.1</AssemblyVersion>
-    <FileVersion>3.2.1</FileVersion>
-    <PackageVersion>3.2.1</PackageVersion>
+    <AssemblyVersion>3.2.3</AssemblyVersion>
+    <FileVersion>3.2.3</FileVersion>
+    <PackageVersion>3.2.3</PackageVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>Mehmet Helvacıköylü;Emre Hızlı</Authors>
     <PackageProjectUrl>https://github.com/twino-framework/twino-websocket</PackageProjectUrl>
@@ -25,7 +25,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Twino.Protocols.Http" Version="3.2.1"/>
+    <PackageReference Include="Twino.Protocols.Http" Version="3.2.3"/>
     <PackageReference Include="Twino.Client.Connectors" Version="3.2.0" />
   </ItemGroup>
   
