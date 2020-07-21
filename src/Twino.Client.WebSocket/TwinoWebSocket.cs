@@ -150,7 +150,7 @@ namespace Twino.Client.WebSocket
 
             //Creates HttpRequest class from the response message
             RequestBuilder reader = new RequestBuilder();
-            HttpRequest requestResponse = reader.Build(response.Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries));
+            HttpRequest requestResponse = reader.Build(response.Split(new[] {"\r\n"}, StringSplitOptions.RemoveEmptyEntries));
 
             //server must send the web socket accept key for the websocket protocol
             if (!requestResponse.Headers.ContainsKey(HttpHeaders.WEBSOCKET_ACCEPT))
@@ -240,7 +240,9 @@ namespace Twino.Client.WebSocket
                 return;
             }
 
-            KeepAlive();
+            if (SmartHealthCheck)
+                KeepAlive();
+
             switch (message.OpCode)
             {
                 case SocketOpCode.Binary:
@@ -253,6 +255,7 @@ namespace Twino.Client.WebSocket
                     break;
 
                 case SocketOpCode.Pong:
+                    KeepAlive();
                     break;
 
                 case SocketOpCode.Ping:

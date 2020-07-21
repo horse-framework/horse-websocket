@@ -113,7 +113,9 @@ namespace Twino.Protocols.WebSocket
                     return;
                 }
 
-                handshakeResult.Socket.KeepAlive();
+                if (handshakeResult.Socket.SmartHealthCheck)
+                    handshakeResult.Socket.KeepAlive();
+
                 await ProcessMessage(info, handshakeResult.Socket, message);
             }
         }
@@ -129,7 +131,7 @@ namespace Twino.Protocols.WebSocket
             ms.Write(PredefinedMessages.CONNECTION_UPGRADE_CRLF);
             ms.Write(PredefinedMessages.UPGRADE_WEBSOCKET_CRLF);
             ms.Write(PredefinedMessages.SEC_WEB_SOCKET_COLON);
-                    
+
             byte[] memory = Encoding.UTF8.GetBytes(CreateWebSocketGuid(websocketKey) + "\r\n\r\n");
             ms.Write(memory);
 
