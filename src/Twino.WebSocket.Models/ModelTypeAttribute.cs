@@ -3,7 +3,8 @@
 namespace Twino.WebSocket.Models
 {
     /// <summary>
-    /// Model type descriptor attribute for observer objects
+    /// Model type descriptor attribute for objects.
+    /// That attribute should be used on models, not handlers.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
     public class ModelTypeAttribute : Attribute

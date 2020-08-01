@@ -12,7 +12,7 @@ namespace Twino.WebSocket.Models
         /// <summary>
         /// Creates new websocket connector and registers IWebSocketBus to the container
         /// </summary>
-        public static ITwinoServiceCollection UseTwinoWebSockets(this ITwinoServiceCollection services, Action<TwinoWebSocketBuilder> config)
+        public static ITwinoServiceCollection UseWebSocketClient(this ITwinoServiceCollection services, Action<TwinoWebSocketBuilder> config)
         {
             TwinoWebSocketBuilder builder = new TwinoWebSocketBuilder();
             config(builder);
@@ -44,7 +44,7 @@ namespace Twino.WebSocket.Models
             }
         }
 
-        private static void AddHandlerIntoContainer(ITwinoServiceCollection container, ImplementationType implementationType, Type consumerType)
+        internal static void AddHandlerIntoContainer(ITwinoServiceCollection container, ImplementationType implementationType, Type consumerType)
         {
             switch (implementationType)
             {

@@ -52,6 +52,7 @@ namespace Twino.WebSocket.Models.Internal
         /// </summary>
         public object Get(WebSocketMessage message, Type modelType)
         {
+            message.Content.Position = 0;
             StreamReader reader = new StreamReader(message.Content);
             string serialized = reader.ReadToEnd();
             int index = serialized.IndexOf(COLON_CHAR);

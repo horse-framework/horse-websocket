@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Twino.Protocols.WebSocket;
 using Twino.WebSocket.Models.Internal;
 
@@ -27,22 +28,24 @@ namespace Twino.WebSocket.Models
         /// <summary>
         /// Reads websocket message over network and process it
         /// </summary>
-        public void Read(WebSocketMessage message, ITwinoWebSocket client)
+        public Task Read(WebSocketMessage message, ITwinoWebSocket client)
         {
             try
             {
                 Type type = _provider.Resolve(message);
                 if (type == null)
-                    return;
+                    return Task.CompletedTask;
 
                 object model = _provider.Get(message, type);
                 ObserverExecuter executer = _executers[type];
-                executer.Execute(model, message, client);
+                return executer.Execute(model, message, client);
             }
             catch (Exception e)
             {
                 if (ErrorAction != null)
                     ErrorAction(e);
+                
+                return Task.CompletedTask;
             }
         }
 
@@ -103,9 +106,9 @@ namespace Twino.WebSocket.Models
         /// <summary>
         /// Registers a websocket message handler
         /// </summary>
-        public void RegisterWebSocketHandler<TModel>(Type observerType, Func<Type, object> observerFactory)
+        public void RegisterWebSocketHandler(Type observerType, Func<Type, object> observerFactory)
         {
-            RegisterWebSocketHandler(observerType, typeof(TModel), null, observerFactory);
+            RegisterWebSocketHandler(observerType, observerType, null, observerFactory);
         }
 
         /// <summary>
