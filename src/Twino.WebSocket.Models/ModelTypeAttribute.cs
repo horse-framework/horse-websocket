@@ -2,14 +2,23 @@
 
 namespace Twino.WebSocket.Models
 {
+    /// <summary>
+    /// Model type descriptor attribute for observer objects
+    /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
     public class ModelTypeAttribute : Attribute
     {
-        public string TypeName { get; }
+        /// <summary>
+        /// Type code of the model
+        /// </summary>
+        public string TypeCode { get; }
 
-        public ModelTypeAttribute(string typeName)
+        /// <summary>
+        /// Creates new model type attribute
+        /// </summary>
+        public ModelTypeAttribute(string typeCode)
         {
-            TypeName = typeName;
+            TypeCode = typeCode;
         }
     }
 }

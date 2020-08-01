@@ -1,20 +1,24 @@
 using System;
 using System.Collections.Generic;
-using Twino.Client.WebSocket.Connectors;
+using Twino.Ioc;
 using Twino.WebSocket.Models.Internal;
 
 namespace Twino.WebSocket.Models
 {
+    /// <summary>
+    /// Builder for websocket client connector and bus
+    /// </summary>
     public class TwinoWebSocketBuilder
     {
         #region Fields
 
+        private readonly List<Tuple<ImplementationType, Type, Type>> _individualConsumers = new List<Tuple<ImplementationType, Type, Type>>();
+        private readonly List<Tuple<ImplementationType, Type>> _assembyConsumers = new List<Tuple<ImplementationType, Type>>();
+
         private WebSocketModelConnector _connector;
         private TimeSpan _reconnectInterval = TimeSpan.FromSeconds(1);
 
-        private IWebSocketModelResolver _resolver;
-        private IWebSocketModelWriter _writer;
-        private IWebSocketModelReader _reader;
+        private IWebSocketModelProvider _modelProvider;
 
         private Action<WebSocketModelConnector> _connected;
         private Action<WebSocketModelConnector> _disconnected;
@@ -23,22 +27,35 @@ namespace Twino.WebSocket.Models
         private readonly List<string> _hosts = new List<string>();
         private readonly List<KeyValuePair<string, string>> _headers = new List<KeyValuePair<string, string>>();
 
+        internal List<Tuple<ImplementationType, Type, Type>> IndividualConsumers => _individualConsumers;
+
+        internal List<Tuple<ImplementationType, Type>> AssembyConsumers => _assembyConsumers;
+
         #endregion
 
         #region Connection
 
+        /// <summary>
+        /// Adds remote host
+        /// </summary>
         public TwinoWebSocketBuilder AddHost(string hostname)
         {
             _hosts.Add(hostname);
             return this;
         }
 
+        /// <summary>
+        /// Adds a request header for HTTP protocol
+        /// </summary>
         public TwinoWebSocketBuilder AddRequestHeader(string key, string value)
         {
             _headers.Add(new KeyValuePair<string, string>(key, value));
             return this;
         }
 
+        /// <summary>
+        /// Sets reconnect interval for connector
+        /// </summary>
         public TwinoWebSocketBuilder SetReconnectInterval(TimeSpan reconnectInterval)
         {
             _reconnectInterval = reconnectInterval;
@@ -49,18 +66,27 @@ namespace Twino.WebSocket.Models
 
         #region Events
 
-        public TwinoWebSocketBuilder OnConnected(Action<WsStickyConnector> action)
+        /// <summary>
+        /// Action event is triggered when connection is established
+        /// </summary>
+        public TwinoWebSocketBuilder OnConnected(Action<WebSocketModelConnector> action)
         {
             _connected = action;
             return this;
         }
 
-        public TwinoWebSocketBuilder OnDisconnected(Action<WsStickyConnector> action)
+        /// <summary>
+        /// Action event is triggered when disconnected from the server
+        /// </summary>
+        public TwinoWebSocketBuilder OnDisconnected(Action<WebSocketModelConnector> action)
         {
             _disconnected = action;
             return this;
         }
 
+        /// <summary>
+        /// Action event is triggered when an exception is thrown
+        /// </summary>
         public TwinoWebSocketBuilder OnException(Action<Exception> action)
         {
             _error = action;
@@ -71,19 +97,89 @@ namespace Twino.WebSocket.Models
 
         #region Custom Processors
 
-        public TwinoWebSocketBuilder UseCustomResolver<TResolver>()
-            where TResolver : IWebSocketModelResolver, new()
+        /// <summary>
+        /// Uses custom model provider
+        /// </summary>
+        public TwinoWebSocketBuilder UseCustomModelProvider<TProvider>()
+            where TProvider : IWebSocketModelProvider, new()
         {
-            _resolver = new TResolver();
+            _modelProvider = new TProvider();
             return this;
         }
 
-        public TwinoWebSocketBuilder UseCustomReaderWriter<TReader, TWriter>()
-            where TReader : IWebSocketModelReader, new()
-            where TWriter : IWebSocketModelWriter, new()
+        /// <summary>
+        /// Uses custom model provider
+        /// </summary>
+        public TwinoWebSocketBuilder UseCustomModelProvider(IWebSocketModelProvider provider)
         {
-            _reader = new TReader();
-            _writer = new TWriter();
+            _modelProvider = provider;
+            return this;
+        }
+
+        #endregion
+
+        #region Handlers
+
+        /// <summary>
+        /// Registers new transient consumer
+        /// </summary>
+        public TwinoWebSocketBuilder AddTransientHandler<THandler, TModel>()
+            where THandler : class, IWebSocketMessageHandler<TModel>
+        {
+            _individualConsumers.Add(new Tuple<ImplementationType, Type, Type>(ImplementationType.Transient, typeof(THandler), typeof(TModel)));
+            return this;
+        }
+
+        /// <summary>
+        /// Registers new scoped consumer
+        /// </summary>
+        public TwinoWebSocketBuilder AddScopedHandler<THandler, TModel>()
+            where THandler : class, IWebSocketMessageHandler<TModel>
+        {
+            _individualConsumers.Add(new Tuple<ImplementationType, Type, Type>(ImplementationType.Scoped, typeof(THandler), typeof(TModel)));
+            return this;
+        }
+
+        /// <summary>
+        /// Registers new singleton consumer
+        /// </summary>
+        public TwinoWebSocketBuilder AddSingletonHandler<THandler, TModel>()
+            where THandler : class, IWebSocketMessageHandler<TModel>
+        {
+            _individualConsumers.Add(new Tuple<ImplementationType, Type, Type>(ImplementationType.Singleton, typeof(THandler), typeof(TModel)));
+            return this;
+        }
+
+        /// <summary>
+        /// Registers all consumers types with transient lifetime in type assemblies
+        /// </summary>
+        public TwinoWebSocketBuilder AddTransientHandlers(params Type[] assemblyTypes)
+        {
+            foreach (Type type in assemblyTypes)
+                _assembyConsumers.Add(new Tuple<ImplementationType, Type>(ImplementationType.Transient, type));
+
+            return this;
+        }
+
+        /// <summary>
+        /// Registers all consumers types with scoped lifetime in type assemblies
+        /// </summary>
+        public TwinoWebSocketBuilder AddScopedHandlers(params Type[] assemblyTypes)
+        {
+            foreach (Type type in assemblyTypes)
+                _assembyConsumers.Add(new Tuple<ImplementationType, Type>(ImplementationType.Scoped, type));
+
+            return this;
+        }
+
+        /// <summary>
+        /// Registers all consumers types with singleton lifetime in type assemblies
+        /// </summary>
+        public TwinoWebSocketBuilder AddSingletonHandlers(params Type[] assemblyTypes)
+        {
+            foreach (Type type in assemblyTypes)
+                _assembyConsumers.Add(new Tuple<ImplementationType, Type>(ImplementationType.Singleton, type));
+
             return this;
         }
 
@@ -91,6 +187,9 @@ namespace Twino.WebSocket.Models
 
         #region Build
 
+        /// <summary>
+        /// Creates, builds and returns connector
+        /// </summary>
         public WebSocketModelConnector Build()
         {
             if (_connector != null)
@@ -121,9 +220,8 @@ namespace Twino.WebSocket.Models
             if (_error != null)
                 connector.ExceptionThrown += new ExceptionEventMapper(connector, _error).Action;
 
-            connector.ModelResolver = _resolver ?? new DefaultModelResolver();
-            connector.ModelWriter = _writer ?? new DefaultModelWriter();
-            connector.ModelReader = _reader ?? new DefaultModelReader();
+            connector.ModelProvider = _modelProvider ?? new WebSocketModelProvider();
+            connector.Observer = new WebSocketMessageObserver(_modelProvider, _error);
         }
 
         /// <summary>
