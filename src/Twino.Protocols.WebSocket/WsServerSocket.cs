@@ -7,7 +7,7 @@ namespace Twino.Protocols.WebSocket
     /// <summary>
     /// Websocket Server socket object
     /// </summary>
-    public class WsServerSocket : SocketBase
+    public class WsServerSocket : SocketBase, ITwinoWebSocket
     {
         /// <summary>
         /// WebSocketWriter singleton instance

@@ -1,8 +1,12 @@
 using System.Net;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Twino.Core;
 using Twino.Core.Protocols;
 using Twino.Protocols.Http;
+
+[assembly: InternalsVisibleTo("Twino.WebSocket.Models")]
 
 namespace Twino.Protocols.WebSocket
 {
@@ -16,7 +20,7 @@ namespace Twino.Protocols.WebSocket
         /// </summary>
         public async Task<SocketBase> Connected(ITwinoServer server, IConnectionInfo connection, ConnectionData data)
         {
-            return await Task.FromResult((SocketBase)null);
+            return await Task.FromResult((SocketBase) null);
         }
 
         /// <summary>

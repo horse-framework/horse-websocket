@@ -20,6 +20,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.Connector", "Tests\Tes
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.SerializableModel", "Tests\Test.SerializableModel\Test.SerializableModel.csproj", "{9366FE0F-6E77-41CA-AF72-DBCCBEA4ABB6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Twino.WebSocket.Models", "Twino.WebSocket.Models\Twino.WebSocket.Models.csproj", "{0437DBF5-3303-40C4-8C14-08B594BE03AA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample.ModelServer", "Samples\Sample.ModelServer\Sample.ModelServer.csproj", "{99FACD70-93B1-4EA8-BB4C-D27A2CB8A6E3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -58,6 +62,14 @@ Global
 		{9366FE0F-6E77-41CA-AF72-DBCCBEA4ABB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9366FE0F-6E77-41CA-AF72-DBCCBEA4ABB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9366FE0F-6E77-41CA-AF72-DBCCBEA4ABB6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0437DBF5-3303-40C4-8C14-08B594BE03AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0437DBF5-3303-40C4-8C14-08B594BE03AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0437DBF5-3303-40C4-8C14-08B594BE03AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0437DBF5-3303-40C4-8C14-08B594BE03AA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{99FACD70-93B1-4EA8-BB4C-D27A2CB8A6E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{99FACD70-93B1-4EA8-BB4C-D27A2CB8A6E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{99FACD70-93B1-4EA8-BB4C-D27A2CB8A6E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{99FACD70-93B1-4EA8-BB4C-D27A2CB8A6E3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{AC155579-AF01-410C-8509-7216B43895FA} = {0412C48D-9071-49B4-98DB-87DEE843B43C}
@@ -65,5 +77,6 @@ Global
 		{1468A7B1-BCD4-4362-8637-8A616277B133} = {0412C48D-9071-49B4-98DB-87DEE843B43C}
 		{BC6DCA76-6528-4F4C-BA2C-734C21B75E52} = {F4E026D1-E7B8-4C3E-86D8-1E63FC599221}
 		{9366FE0F-6E77-41CA-AF72-DBCCBEA4ABB6} = {F4E026D1-E7B8-4C3E-86D8-1E63FC599221}
+		{99FACD70-93B1-4EA8-BB4C-D27A2CB8A6E3} = {0412C48D-9071-49B4-98DB-87DEE843B43C}
 	EndGlobalSection
 EndGlobal

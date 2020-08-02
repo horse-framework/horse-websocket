@@ -17,7 +17,7 @@ namespace Twino.Client.WebSocket
     /// Can be used directly with event subscriptions
     /// Or can be base class to a derived Client class and provides virtual methods for all events
     /// </summary>
-    public class TwinoWebSocket : ClientSocketBase<WebSocketMessage>
+    public class TwinoWebSocket : ClientSocketBase<WebSocketMessage>, ITwinoWebSocket
     {
         #region Events - Properties
 
@@ -293,6 +293,15 @@ namespace Twino.Client.WebSocket
         /// Sends a string websocket message
         /// </summary>
         public async Task<bool> SendAsync(string message)
+        {
+            byte[] data = await _writer.Create(message);
+            return await SendAsync(data);
+        }
+
+        /// <summary>
+        /// Sends a string websocket message
+        /// </summary>
+        public async Task<bool> SendAsync(WebSocketMessage message)
         {
             byte[] data = await _writer.Create(message);
             return await SendAsync(data);
