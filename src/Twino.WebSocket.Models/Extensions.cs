@@ -19,7 +19,7 @@ namespace Twino.WebSocket.Models
 
             WebSocketModelConnector connector = builder.Build();
 
-            RegisterHandlers((IServiceContainer) services, connector, builder);
+            AddHandlers((IServiceContainer) services, connector, builder);
             services.AddSingleton(connector);
             services.AddSingleton<IWebSocketBus>(connector);
 
@@ -27,7 +27,7 @@ namespace Twino.WebSocket.Models
             return services;
         }
 
-        private static void RegisterHandlers(IServiceContainer container, WebSocketModelConnector connector, TwinoWebSocketBuilder builder)
+        private static void AddHandlers(IServiceContainer container, WebSocketModelConnector connector, TwinoWebSocketBuilder builder)
         {
             foreach (Tuple<ImplementationType, Type> pair in builder.AssembyConsumers)
             {
