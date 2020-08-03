@@ -17,6 +17,11 @@ namespace Twino.WebSocket.Models
         internal Action<Exception> ErrorAction { get; set; }
 
         /// <summary>
+        /// Model provider for websocket
+        /// </summary>
+        public IWebSocketModelProvider Provider => _provider;
+
+        /// <summary>
         /// Creates new websocket message observer
         /// </summary>
         public WebSocketMessageObserver(IWebSocketModelProvider provider, Action<Exception> errorAction)

@@ -10,7 +10,7 @@ namespace Twino.WebSocket.Models
     /// <summary>
     /// Model based websocket connection handler
     /// </summary>
-    internal sealed class ModelWsConnectionHandler : IProtocolConnectionHandler<WsServerSocket, WebSocketMessage>
+    internal sealed class ModelWsConnectionHandler : IWebSocketServerBus, IProtocolConnectionHandler<WsServerSocket, WebSocketMessage>
     {
         #region Properties
 
@@ -43,6 +43,8 @@ namespace Twino.WebSocket.Models
         {
             Observer = new WebSocketMessageObserver(new WebSocketModelProvider(), ErrorAction);
         }
+
+        #region Events
 
         /// <summary>
         /// Connected event
@@ -87,5 +89,28 @@ namespace Twino.WebSocket.Models
 
             return Task.CompletedTask;
         }
+
+        #endregion
+
+        #region Actions
+
+        /// <summary>
+        /// Sends a model to a receiver client
+        /// </summary>
+        public Task<bool> SendAsync<TModel>(WsServerSocket target, TModel model)
+        {
+            WebSocketMessage message = Observer.Provider.Write(model);
+            return target.SendAsync(message);
+        }
+
+        /// <summary>
+        /// Removes client from server
+        /// </summary>
+        public void Disconnect(WsServerSocket client)
+        {
+            client.Disconnect();
+        }
+
+        #endregion
     }
 }

@@ -150,6 +150,10 @@ namespace Twino.WebSocket.Models
         private WebSocketServerBuilder RegisterHandler(ITwinoServiceCollection services, ImplementationType implementation, Type handlerType)
         {
             IServiceContainer container = (IServiceContainer) services;
+
+            if (!container.Contains(typeof(IWebSocketServerBus)))
+                container.AddSingleton<IWebSocketServerBus>(_handler);
+            
             _handler.Observer.RegisterWebSocketHandler(handlerType, t => container.Get(t));
             Extensions.AddHandlerIntoContainer(container, implementation, handlerType);
             return this;
@@ -161,11 +165,38 @@ namespace Twino.WebSocket.Models
         private WebSocketServerBuilder RegisterHandlers(ITwinoServiceCollection services, ImplementationType implementation, params Type[] assemblyTypes)
         {
             IServiceContainer container = (IServiceContainer) services;
+            
+            if (!container.Contains(typeof(IWebSocketServerBus)))
+                container.AddSingleton<IWebSocketServerBus>(_handler);
+            
             List<Type> types = _handler.Observer.RegisterWebSocketHandlers(t => container.Get(t), assemblyTypes);
             foreach (Type type in types)
                 Extensions.AddHandlerIntoContainer(container, implementation, type);
 
             return this;
+        }
+
+        /// <summary>
+        /// Gets message bus of websocket server
+        /// </summary>
+        /// <returns></returns>
+        public WebSocketServerBuilder AddBus(ITwinoServiceCollection services)
+        {
+            IServiceContainer container = (IServiceContainer) services;
+            
+            if (!container.Contains(typeof(IWebSocketServerBus)))
+                container.AddSingleton<IWebSocketServerBus>(_handler);
+
+            return this;
+        }
+        
+        /// <summary>
+        /// Gets message bus of websocket server
+        /// </summary>
+        /// <returns></returns>
+        public IWebSocketServerBus GetBus()
+        {
+            return _handler;
         }
 
         #endregion
