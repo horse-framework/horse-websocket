@@ -13,7 +13,7 @@ namespace Sample.ModelServer
         {
             IServiceContainer services = new ServiceContainer();
             TwinoServer server = new TwinoServer();
-            server.UseWebSockets(cfg => cfg.RegisterSingletonHandlers(services, typeof(Program)));
+            server.UseWebSockets(cfg => cfg.AddSingletonHandlers(services, typeof(Program)));
             server.Start(9999);
             return server.BlockWhileRunningAsync();
         }

@@ -89,7 +89,7 @@ namespace Twino.WebSocket.Models
         /// All handlers must have parameterless constructor.
         /// If you need to inject services, use overloads.
         /// </summary>
-        public WebSocketServerBuilder RegisterHandlers(params Type[] assemblyTypes)
+        public WebSocketServerBuilder AddHandlers(params Type[] assemblyTypes)
         {
             _handler.Observer.RegisterWebSocketHandlers(null, assemblyTypes);
             return this;
@@ -98,58 +98,62 @@ namespace Twino.WebSocket.Models
         /// <summary>
         /// Registers a handler as transient
         /// </summary>
-        public WebSocketServerBuilder RegisterTransientHandler(ITwinoServiceCollection services, Type handlerType)
+        public WebSocketServerBuilder AddTransientHandler(ITwinoServiceCollection services, Type handlerType)
         {
-            return RegisterHandler(services, ImplementationType.Transient, handlerType);
+            return AddHandler(services, ImplementationType.Transient, handlerType);
         }
 
         /// <summary>
         /// Registers a handler as scoped
         /// </summary>
-        public WebSocketServerBuilder RegisterScopedHandler(ITwinoServiceCollection services, Type handlerType)
+        public WebSocketServerBuilder AddScopedHandler(ITwinoServiceCollection services, Type handlerType)
         {
-            return RegisterHandler(services, ImplementationType.Scoped, handlerType);
+            return AddHandler(services, ImplementationType.Scoped, handlerType);
         }
 
         /// <summary>
         /// Registers a handler as singleton
         /// </summary>
-        public WebSocketServerBuilder RegisterSingletonHandler(ITwinoServiceCollection services, Type handlerType)
+        public WebSocketServerBuilder AddSingletonHandler(ITwinoServiceCollection services, Type handlerType)
         {
-            return RegisterHandler(services, ImplementationType.Singleton, handlerType);
+            return AddHandler(services, ImplementationType.Singleton, handlerType);
         }
 
 
         /// <summary>
         /// Registers handlers as transient
         /// </summary>
-        public WebSocketServerBuilder RegisterTransientHandlers(ITwinoServiceCollection services, params Type[] assemblyTypes)
+        public WebSocketServerBuilder AddTransientHandlers(ITwinoServiceCollection services, params Type[] assemblyTypes)
         {
-            return RegisterHandlers(services, ImplementationType.Transient, assemblyTypes);
+            return AddHandlers(services, ImplementationType.Transient, assemblyTypes);
         }
 
         /// <summary>
         /// Registers handlers as scoped
         /// </summary>
-        public WebSocketServerBuilder RegisterScopedHandlers(ITwinoServiceCollection services, params Type[] assemblyTypes)
+        public WebSocketServerBuilder AddScopedHandlers(ITwinoServiceCollection services, params Type[] assemblyTypes)
         {
-            return RegisterHandlers(services, ImplementationType.Scoped, assemblyTypes);
+            return AddHandlers(services, ImplementationType.Scoped, assemblyTypes);
         }
 
         /// <summary>
         /// Registers handlers as singleton
         /// </summary>
-        public WebSocketServerBuilder RegisterSingletonHandlers(ITwinoServiceCollection services, params Type[] assemblyTypes)
+        public WebSocketServerBuilder AddSingletonHandlers(ITwinoServiceCollection services, params Type[] assemblyTypes)
         {
-            return RegisterHandlers(services, ImplementationType.Singleton, assemblyTypes);
+            return AddHandlers(services, ImplementationType.Singleton, assemblyTypes);
         }
 
         /// <summary>
         /// Registers handlers
         /// </summary>
-        private WebSocketServerBuilder RegisterHandler(ITwinoServiceCollection services, ImplementationType implementation, Type handlerType)
+        private WebSocketServerBuilder AddHandler(ITwinoServiceCollection services, ImplementationType implementation, Type handlerType)
         {
             IServiceContainer container = (IServiceContainer) services;
+
+            if (!container.Contains(typeof(IWebSocketServerBus)))
+                container.AddSingleton<IWebSocketServerBus>(_handler);
+            
             _handler.Observer.RegisterWebSocketHandler(handlerType, t => container.Get(t));
             Extensions.AddHandlerIntoContainer(container, implementation, handlerType);
             return this;
@@ -158,14 +162,41 @@ namespace Twino.WebSocket.Models
         /// <summary>
         /// Registers handlers
         /// </summary>
-        private WebSocketServerBuilder RegisterHandlers(ITwinoServiceCollection services, ImplementationType implementation, params Type[] assemblyTypes)
+        private WebSocketServerBuilder AddHandlers(ITwinoServiceCollection services, ImplementationType implementation, params Type[] assemblyTypes)
         {
             IServiceContainer container = (IServiceContainer) services;
+            
+            if (!container.Contains(typeof(IWebSocketServerBus)))
+                container.AddSingleton<IWebSocketServerBus>(_handler);
+            
             List<Type> types = _handler.Observer.RegisterWebSocketHandlers(t => container.Get(t), assemblyTypes);
             foreach (Type type in types)
                 Extensions.AddHandlerIntoContainer(container, implementation, type);
 
             return this;
+        }
+
+        /// <summary>
+        /// Gets message bus of websocket server
+        /// </summary>
+        /// <returns></returns>
+        public WebSocketServerBuilder AddBus(ITwinoServiceCollection services)
+        {
+            IServiceContainer container = (IServiceContainer) services;
+            
+            if (!container.Contains(typeof(IWebSocketServerBus)))
+                container.AddSingleton<IWebSocketServerBus>(_handler);
+
+            return this;
+        }
+        
+        /// <summary>
+        /// Gets message bus of websocket server
+        /// </summary>
+        /// <returns></returns>
+        public IWebSocketServerBus GetBus()
+        {
+            return _handler;
         }
 
         #endregion
