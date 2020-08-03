@@ -67,7 +67,19 @@ namespace Twino.WebSocket.Models.Internal
         /// </summary>
         public WebSocketMessage Write(object model)
         {
-            string code = GetCode(model.GetType());
+            Type type = model.GetType();
+            string code;
+            if (_typeCodes.ContainsKey(type))
+                code = _typeCodes[type];
+            else
+            {
+                ModelTypeAttribute attr = type.GetCustomAttribute<ModelTypeAttribute>();
+                code = attr == null ? type.Name : attr.TypeCode;
+                
+                _typeCodes.Add(type, code);
+                _codeTypes.Add(code, type);
+            }
+
             string content = code + "|" + Newtonsoft.Json.JsonConvert.SerializeObject(model);
             return WebSocketMessage.FromString(content);
         }
