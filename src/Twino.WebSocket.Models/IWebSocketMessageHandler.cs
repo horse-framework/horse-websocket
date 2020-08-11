@@ -12,11 +12,11 @@ namespace Twino.WebSocket.Models
         /// <summary>
         /// Handles websocket message
         /// </summary>
-        Task<object> Handle(TModel model, WebSocketMessage message, ITwinoWebSocket client);
+        Task Handle(TModel model, WebSocketMessage message, ITwinoWebSocket client);
 
         /// <summary>
         /// Triggered when an error occured in handle method
         /// </summary>
-        Task<object> OnError(Exception exception, TModel model, WebSocketMessage message, ITwinoWebSocket client);
+        Task OnError(Exception exception, TModel model, WebSocketMessage message, ITwinoWebSocket client);
     }
 }

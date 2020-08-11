@@ -29,7 +29,6 @@ namespace Twino.WebSocket.Models.Internal
         {
             IWebSocketMessageHandler<TModel> handler = null;
 
-            object response = null;
             try
             {
                 if (_instance != null)
@@ -38,8 +37,8 @@ namespace Twino.WebSocket.Models.Internal
                     handler = (IWebSocketMessageHandler<TModel>) _factory(_consumerType);
                 else
                     return;
-
-                response = await handler.Handle((TModel) model, message, client);
+                
+                await handler.Handle((TModel) model, message, client);
             }
             catch (Exception e)
             {
@@ -53,7 +52,7 @@ namespace Twino.WebSocket.Models.Internal
 
                 try
                 {
-                    response = await handler.OnError(e, (TModel) model, message, client);
+                    await handler.OnError(e, (TModel) model, message, client);
 
                     if (_error != null)
                         _error(e);
@@ -63,12 +62,6 @@ namespace Twino.WebSocket.Models.Internal
                     if (_error != null)
                         _error(e2);
                 }
-            }
-
-            if (response != null)
-            {
-                WebSocketMessage responseMessage = _provider.Write(response);
-                await client.SendAsync(responseMessage);
             }
         }
     }
