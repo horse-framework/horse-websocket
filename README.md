@@ -1,12 +1,10 @@
 # Twino WebSocket
 
+[![NuGet](https://img.shields.io/nuget/v/Twino.Client.WebSocket?label=client%20nuget)](https://www.nuget.org/packages/Twino.Client.WebSocket)
+[![NuGet](https://img.shields.io/nuget/v/Twino.Protocols.WebSocket?label=server%20nuget)](https://www.nuget.org/packages/Twino.Protocols.WebSocket)
+[![NuGet](https://img.shields.io/nuget/v/Twino.WebSocket.Models?label=extensions%20nuget)](https://www.nuget.org/packages/Twino.WebSocket.Models)
+
 Twino WebSocket includes websocket server and websocket client. Websocket servers runs on Twino Server. You can implement websocket server with Twino MVC and Twino MQ too, or alone.
-
-## NuGet Packages
-
-**[Twino WebSocket Server Library](https://www.nuget.org/packages/Twino.Protocols.WebSocket)**<br>
-**[Twino WebSocket Client](https://www.nuget.org/packages/Twino.Client.WebSocket)**<br>
-**[Model Serialize Helper Library](https://www.nuget.org/packages/Twino.SerializableModel)**<br>
 
 #### Basic WebSocket Server Example
 
@@ -41,3 +39,9 @@ Twino WebSocket includes websocket server and websocket client. Websocket server
          string s = Console.ReadLine();
          client.Send(s);
      }
+
+## Thanks
+
+Thanks to JetBrains for a open source license to use on this project.
+
+[![jetbrains](https://user-images.githubusercontent.com/21208762/90192662-10043700-ddcc-11ea-9533-c43b99801d56.png)](https://www.jetbrains.com/?from=twino-framework)
