@@ -27,7 +27,7 @@
     <ItemGroup>
         <PackageReference Include="Twino.Core" Version="3.7.0" />
         <PackageReference Include="Twino.Server" Version="3.7.0" />
-        <PackageReference Include="Twino.Protocols.Http" Version="3.4.2" />
+        <PackageReference Include="Twino.Protocols.Http" Version="3.7.0" />
     </ItemGroup>
 
 </Project>
