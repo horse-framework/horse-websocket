@@ -176,7 +176,7 @@ namespace Twino.Protocols.WebSocket
 
                 //if client sends a ping message, response with pong
                 case SocketOpCode.Ping:
-                    await socket.SendAsync(PredefinedMessages.PONG);
+                    socket.Pong(message);
                     break;
 
                 //client sent response pong to ping message

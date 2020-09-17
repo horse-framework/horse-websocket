@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Cryptography;
@@ -259,7 +260,7 @@ namespace Twino.Client.WebSocket
                     break;
 
                 case SocketOpCode.Ping:
-                    Pong();
+                    Pong(message);
                     break;
             }
         }
@@ -275,9 +276,29 @@ namespace Twino.Client.WebSocket
         /// <summary>
         /// Sends websocket pong message
         /// </summary>
-        public sealed override void Pong()
+        public sealed override void Pong(object pingMessage = null)
         {
-            Send(Protocols.WebSocket.PredefinedMessages.PONG);
+            if (pingMessage == null)
+            {
+                Send(Protocols.WebSocket.PredefinedMessages.PONG);
+                return;
+            }
+
+            WebSocketMessage ping = pingMessage as WebSocketMessage;
+            if (ping == null)
+            {
+                Send(Protocols.WebSocket.PredefinedMessages.PONG);
+                return;
+            }
+
+            WebSocketMessage pong = new WebSocketMessage();
+            pong.OpCode = SocketOpCode.Pong;
+            pong.Masking = ping.Masking;
+            if (ping.Length > 0)
+                pong.Content = new MemoryStream(ping.Content.ToArray());
+
+            byte[] data = _writer.Create(pong).Result;
+            Send(data);
         }
 
         /// <summary>

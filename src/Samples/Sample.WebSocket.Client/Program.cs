@@ -46,7 +46,9 @@ namespace Sample.WebSocket.Client
             client.MessageReceived += (c, m) => Console.WriteLine("# " + m);
             client.Connected += c => Console.WriteLine("Connected");
             client.Disconnected += c => Console.WriteLine("Disconnected");
-            client.Connect("wss://echo.websocket.org");
+            client.Connect("ws://127.0.0.1:4083");
+            //client.Connect("wss://echo.websocket.org");
+            client.PingInterval = TimeSpan.FromSeconds(5);
 
             while (true)
             {

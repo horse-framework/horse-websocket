@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Threading.Tasks;
 using Twino.Core;
 
@@ -67,9 +68,29 @@ namespace Twino.Protocols.WebSocket
         /// <summary>
         /// Sends websocket pong message
         /// </summary>
-        public override void Pong()
+        public override void Pong(object pingMessage = null)
         {
-            Send(PredefinedMessages.PONG);
+            if (pingMessage == null)
+            {
+                Send(PredefinedMessages.PONG);
+                return;
+            }
+
+            WebSocketMessage ping = pingMessage as WebSocketMessage;
+            if (ping == null)
+            {
+                Send(PredefinedMessages.PONG);
+                return;
+            }
+
+            WebSocketMessage pong = new WebSocketMessage();
+            pong.OpCode = SocketOpCode.Pong;
+            pong.Masking = ping.Masking;
+            if (ping.Length > 0)
+                pong.Content = new MemoryStream(ping.Content.ToArray());
+
+            byte[] data = _writer.Create(pong).Result;
+            Send(data);
         }
 
         /// <summary>
