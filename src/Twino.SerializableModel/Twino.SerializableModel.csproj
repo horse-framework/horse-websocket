@@ -6,9 +6,9 @@
         <Product>Twino.SerializableModel</Product>
         <Description>Twino Serializable Model library for object based communication with text-based protocols</Description>
         <PackageTags>twino,tcp,server,http,websocket,serilizable,model</PackageTags>
-        <AssemblyVersion>4.0.2</AssemblyVersion>
-        <FileVersion>4.0.2</FileVersion>
-        <PackageVersion>4.0.2</PackageVersion>
+        <AssemblyVersion>4.0.7</AssemblyVersion>
+        <FileVersion>4.0.7</FileVersion>
+        <PackageVersion>4.0.7</PackageVersion>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Authors>Mehmet Helvacıköylü;Emre Hızlı</Authors>
         <PackageProjectUrl>https://github.com/twino-framework/twino-websocket</PackageProjectUrl>

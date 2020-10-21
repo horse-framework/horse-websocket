@@ -97,7 +97,12 @@ namespace Twino.Client.WebSocket
             }
 
             else
-                request.Headers.Add(key, value);
+            {
+                if (request.Headers.ContainsKey(key))
+                    request.Headers[key] += ";" + value;
+                else
+                    request.Headers.Add(key, value);
+            }
         }
     }
 }
