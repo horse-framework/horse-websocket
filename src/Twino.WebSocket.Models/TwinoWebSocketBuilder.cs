@@ -8,6 +8,25 @@ namespace Twino.WebSocket.Models
     /// <summary>
     /// Builder for websocket client connector and bus
     /// </summary>
+    public class TwinoWebSocketBuilder<TIdentifier> : TwinoWebSocketBuilder
+    {
+        /// <summary>
+        /// Creates, builds and returns connector
+        /// </summary>
+        public override WebSocketModelConnector Build()
+        {
+            if (Connector != null)
+                return Connector;
+
+            Connector = new WebSocketModelConnector<TIdentifier>(ReconnectInterval);
+            ConfigureConnector(Connector);
+            return Connector;
+        }
+    }
+
+    /// <summary>
+    /// Builder for websocket client connector and bus
+    /// </summary>
     public class TwinoWebSocketBuilder
     {
         #region Fields
@@ -15,8 +34,15 @@ namespace Twino.WebSocket.Models
         private readonly List<Tuple<ImplementationType, Type, Type>> _individualConsumers = new List<Tuple<ImplementationType, Type, Type>>();
         private readonly List<Tuple<ImplementationType, Type>> _assembyConsumers = new List<Tuple<ImplementationType, Type>>();
 
-        private WebSocketModelConnector _connector;
-        private TimeSpan _reconnectInterval = TimeSpan.FromSeconds(1);
+        /// <summary>
+        /// Connector object of the builder
+        /// </summary>
+        protected internal WebSocketModelConnector Connector { get; set; }
+        
+        /// <summary>
+        /// Connector reconnection delay
+        /// </summary>
+        protected internal TimeSpan ReconnectInterval { get; private set; } = TimeSpan.FromSeconds(1);
 
         private IWebSocketModelProvider _modelProvider;
 
@@ -58,7 +84,7 @@ namespace Twino.WebSocket.Models
         /// </summary>
         public TwinoWebSocketBuilder SetReconnectInterval(TimeSpan reconnectInterval)
         {
-            _reconnectInterval = reconnectInterval;
+            ReconnectInterval = reconnectInterval;
             return this;
         }
 
@@ -190,20 +216,20 @@ namespace Twino.WebSocket.Models
         /// <summary>
         /// Creates, builds and returns connector
         /// </summary>
-        public WebSocketModelConnector Build()
+        public virtual WebSocketModelConnector Build()
         {
-            if (_connector != null)
-                return _connector;
+            if (Connector != null)
+                return Connector;
 
-            _connector = new WebSocketModelConnector(_reconnectInterval);
-            ConfigureConnector(_connector);
-            return _connector;
+            Connector = new WebSocketModelConnector(ReconnectInterval);
+            ConfigureConnector(Connector);
+            return Connector;
         }
 
         /// <summary>
         /// Applies configurations on connector
         /// </summary>
-        private void ConfigureConnector(WebSocketModelConnector connector)
+        protected void ConfigureConnector(WebSocketModelConnector connector)
         {
             foreach (string host in _hosts)
                 connector.AddHost(host);
@@ -229,7 +255,7 @@ namespace Twino.WebSocket.Models
         /// </summary>
         internal void Dispose()
         {
-            _connector = null;
+            Connector = null;
             _connected = null;
             _disconnected = null;
             _error = null;
