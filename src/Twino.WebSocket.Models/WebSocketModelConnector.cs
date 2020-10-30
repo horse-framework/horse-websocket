@@ -8,6 +8,21 @@ using Twino.Protocols.WebSocket;
 namespace Twino.WebSocket.Models
 {
     /// <summary>
+    /// Sticky Websocket connector with unique identifier to register multiple client buses into same ioc container.
+    /// If you are using only one bus in a container, use non-generic instead.
+    /// </summary>
+    public class WebSocketModelConnector<TIdentifier> : WebSocketModelConnector, IWebSocketBus<TIdentifier>
+    {
+        /// <summary>
+        /// Creates new websocket model connector
+        /// </summary>
+        public WebSocketModelConnector(TimeSpan reconnectInterval, Func<TwinoWebSocket> createInstance = null)
+            : base(reconnectInterval, createInstance)
+        {
+        }
+    }
+
+    /// <summary>
     /// Sticky Websocket connector with model provider
     /// </summary>
     public class WebSocketModelConnector : WsStickyConnector, IWebSocketBus
@@ -18,6 +33,8 @@ namespace Twino.WebSocket.Models
         public WebSocketMessageObserver Observer { get; internal set; }
 
         internal IWebSocketModelProvider ModelProvider { get; set; }
+
+        internal IServiceProvider ServiceProvider { get; set; }
 
         /// <summary>
         /// Creates new websocket model connector
