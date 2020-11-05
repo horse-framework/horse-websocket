@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Twino.Ioc;
+using Microsoft.Extensions.DependencyInjection;
 using Twino.WebSocket.Models.Internal;
 
 namespace Twino.WebSocket.Models
@@ -31,8 +31,8 @@ namespace Twino.WebSocket.Models
     {
         #region Fields
 
-        private readonly List<Tuple<ImplementationType, Type, Type>> _individualConsumers = new List<Tuple<ImplementationType, Type, Type>>();
-        private readonly List<Tuple<ImplementationType, Type>> _assembyConsumers = new List<Tuple<ImplementationType, Type>>();
+        private readonly List<Tuple<ServiceLifetime, Type, Type>> _individualConsumers = new List<Tuple<ServiceLifetime, Type, Type>>();
+        private readonly List<Tuple<ServiceLifetime, Type>> _assembyConsumers = new List<Tuple<ServiceLifetime, Type>>();
 
         /// <summary>
         /// Connector object of the builder
@@ -53,9 +53,9 @@ namespace Twino.WebSocket.Models
         private readonly List<string> _hosts = new List<string>();
         private readonly List<KeyValuePair<string, string>> _headers = new List<KeyValuePair<string, string>>();
 
-        internal List<Tuple<ImplementationType, Type, Type>> IndividualConsumers => _individualConsumers;
+        internal List<Tuple<ServiceLifetime, Type, Type>> IndividualConsumers => _individualConsumers;
 
-        internal List<Tuple<ImplementationType, Type>> AssembyConsumers => _assembyConsumers;
+        internal List<Tuple<ServiceLifetime, Type>> AssembyConsumers => _assembyConsumers;
 
         #endregion
 
@@ -152,7 +152,7 @@ namespace Twino.WebSocket.Models
         public TwinoWebSocketBuilder AddTransientHandler<THandler, TModel>()
             where THandler : class, IWebSocketMessageHandler<TModel>
         {
-            _individualConsumers.Add(new Tuple<ImplementationType, Type, Type>(ImplementationType.Transient, typeof(THandler), typeof(TModel)));
+            _individualConsumers.Add(new Tuple<ServiceLifetime, Type, Type>(ServiceLifetime.Transient, typeof(THandler), typeof(TModel)));
             return this;
         }
 
@@ -162,7 +162,7 @@ namespace Twino.WebSocket.Models
         public TwinoWebSocketBuilder AddScopedHandler<THandler, TModel>()
             where THandler : class, IWebSocketMessageHandler<TModel>
         {
-            _individualConsumers.Add(new Tuple<ImplementationType, Type, Type>(ImplementationType.Scoped, typeof(THandler), typeof(TModel)));
+            _individualConsumers.Add(new Tuple<ServiceLifetime, Type, Type>(ServiceLifetime.Scoped, typeof(THandler), typeof(TModel)));
             return this;
         }
 
@@ -172,7 +172,7 @@ namespace Twino.WebSocket.Models
         public TwinoWebSocketBuilder AddSingletonHandler<THandler, TModel>()
             where THandler : class, IWebSocketMessageHandler<TModel>
         {
-            _individualConsumers.Add(new Tuple<ImplementationType, Type, Type>(ImplementationType.Singleton, typeof(THandler), typeof(TModel)));
+            _individualConsumers.Add(new Tuple<ServiceLifetime, Type, Type>(ServiceLifetime.Singleton, typeof(THandler), typeof(TModel)));
             return this;
         }
 
@@ -182,7 +182,7 @@ namespace Twino.WebSocket.Models
         public TwinoWebSocketBuilder AddTransientHandlers(params Type[] assemblyTypes)
         {
             foreach (Type type in assemblyTypes)
-                _assembyConsumers.Add(new Tuple<ImplementationType, Type>(ImplementationType.Transient, type));
+                _assembyConsumers.Add(new Tuple<ServiceLifetime, Type>(ServiceLifetime.Transient, type));
 
             return this;
         }
@@ -193,7 +193,7 @@ namespace Twino.WebSocket.Models
         public TwinoWebSocketBuilder AddScopedHandlers(params Type[] assemblyTypes)
         {
             foreach (Type type in assemblyTypes)
-                _assembyConsumers.Add(new Tuple<ImplementationType, Type>(ImplementationType.Scoped, type));
+                _assembyConsumers.Add(new Tuple<ServiceLifetime, Type>(ServiceLifetime.Scoped, type));
 
             return this;
         }
@@ -204,7 +204,7 @@ namespace Twino.WebSocket.Models
         public TwinoWebSocketBuilder AddSingletonHandlers(params Type[] assemblyTypes)
         {
             foreach (Type type in assemblyTypes)
-                _assembyConsumers.Add(new Tuple<ImplementationType, Type>(ImplementationType.Singleton, type));
+                _assembyConsumers.Add(new Tuple<ServiceLifetime, Type>(ServiceLifetime.Singleton, type));
 
             return this;
         }

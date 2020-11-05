@@ -6,9 +6,9 @@
         <Product>Twino.WebSocket.Models</Product>
         <Description>Twino WebSocket Model library for object based communication with text-based protocols</Description>
         <PackageTags>twino,websocket,serilizable,model</PackageTags>
-        <AssemblyVersion>4.1.0</AssemblyVersion>
-        <FileVersion>4.1.0</FileVersion>
-        <PackageVersion>4.1.0</PackageVersion>
+        <AssemblyVersion>4.2.0</AssemblyVersion>
+        <FileVersion>4.2.0</FileVersion>
+        <PackageVersion>4.2.0</PackageVersion>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Authors>Mehmet Helvacıköylü;Emre Hızlı</Authors>
         <PackageProjectUrl>https://github.com/twino-framework/twino-websocket</PackageProjectUrl>
@@ -30,7 +30,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Twino.Ioc" Version="3.4.2" />
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.9" />
     </ItemGroup>
 
 </Project>

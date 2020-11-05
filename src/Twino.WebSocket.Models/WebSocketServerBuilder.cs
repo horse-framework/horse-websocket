@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
+using Microsoft.Extensions.DependencyInjection;
 using Twino.Core;
-using Twino.Ioc;
 using Twino.Protocols.WebSocket;
 
 namespace Twino.WebSocket.Models
@@ -13,6 +14,8 @@ namespace Twino.WebSocket.Models
     public class WebSocketServerBuilder
     {
         private readonly ModelWsConnectionHandler _handler;
+
+        private IServiceCollection _services;
 
         internal WebSocketServerBuilder()
         {
@@ -98,98 +101,114 @@ namespace Twino.WebSocket.Models
         /// <summary>
         /// Registers a handler as transient
         /// </summary>
-        public WebSocketServerBuilder AddTransientHandler(ITwinoServiceCollection services, Type handlerType)
+        public WebSocketServerBuilder AddTransientHandler(Type handlerType)
         {
-            return AddHandler(services, ImplementationType.Transient, handlerType);
+            return AddHandler(ServiceLifetime.Transient, handlerType);
         }
 
         /// <summary>
         /// Registers a handler as scoped
         /// </summary>
-        public WebSocketServerBuilder AddScopedHandler(ITwinoServiceCollection services, Type handlerType)
+        public WebSocketServerBuilder AddScopedHandler(Type handlerType)
         {
-            return AddHandler(services, ImplementationType.Scoped, handlerType);
+            return AddHandler(ServiceLifetime.Scoped, handlerType);
         }
 
         /// <summary>
         /// Registers a handler as singleton
         /// </summary>
-        public WebSocketServerBuilder AddSingletonHandler(ITwinoServiceCollection services, Type handlerType)
+        public WebSocketServerBuilder AddSingletonHandler(Type handlerType)
         {
-            return AddHandler(services, ImplementationType.Singleton, handlerType);
+            return AddHandler(ServiceLifetime.Singleton, handlerType);
         }
 
 
         /// <summary>
         /// Registers handlers as transient
         /// </summary>
-        public WebSocketServerBuilder AddTransientHandlers(ITwinoServiceCollection services, params Type[] assemblyTypes)
+        public WebSocketServerBuilder AddTransientHandlers(params Type[] assemblyTypes)
         {
-            return AddHandlers(services, ImplementationType.Transient, assemblyTypes);
+            return AddHandlers(ServiceLifetime.Transient, assemblyTypes);
         }
 
         /// <summary>
         /// Registers handlers as scoped
         /// </summary>
-        public WebSocketServerBuilder AddScopedHandlers(ITwinoServiceCollection services, params Type[] assemblyTypes)
+        public WebSocketServerBuilder AddScopedHandlers(params Type[] assemblyTypes)
         {
-            return AddHandlers(services, ImplementationType.Scoped, assemblyTypes);
+            return AddHandlers(ServiceLifetime.Scoped, assemblyTypes);
         }
 
         /// <summary>
         /// Registers handlers as singleton
         /// </summary>
-        public WebSocketServerBuilder AddSingletonHandlers(ITwinoServiceCollection services, params Type[] assemblyTypes)
+        public WebSocketServerBuilder AddSingletonHandlers(params Type[] assemblyTypes)
         {
-            return AddHandlers(services, ImplementationType.Singleton, assemblyTypes);
+            return AddHandlers(ServiceLifetime.Singleton, assemblyTypes);
         }
 
         /// <summary>
         /// Registers handlers
         /// </summary>
-        private WebSocketServerBuilder AddHandler(ITwinoServiceCollection services, ImplementationType implementation, Type handlerType)
+        private WebSocketServerBuilder AddHandler(ServiceLifetime lifetime, Type handlerType)
         {
-            IServiceContainer container = (IServiceContainer) services;
+            if (_services == null)
+                throw new ArgumentNullException("ServiceCollection is not attached yet. Use AddBus method before adding handlers.");
 
-            if (!container.Contains(typeof(IWebSocketServerBus)))
-                container.AddSingleton<IWebSocketServerBus>(_handler);
+            _handler.Observer.RegisterWebSocketHandler(handlerType, t => _handler.ServiceProvider.GetService(t));
+            RegisterHandler(lifetime, handlerType);
             
-            _handler.Observer.RegisterWebSocketHandler(handlerType, t => container.Get(t));
-            Extensions.AddHandlerIntoContainer(container, implementation, handlerType);
             return this;
         }
 
         /// <summary>
         /// Registers handlers
         /// </summary>
-        private WebSocketServerBuilder AddHandlers(ITwinoServiceCollection services, ImplementationType implementation, params Type[] assemblyTypes)
+        private WebSocketServerBuilder AddHandlers(ServiceLifetime lifetime, params Type[] assemblyTypes)
         {
-            IServiceContainer container = (IServiceContainer) services;
-            
-            if (!container.Contains(typeof(IWebSocketServerBus)))
-                container.AddSingleton<IWebSocketServerBus>(_handler);
-            
-            List<Type> types = _handler.Observer.RegisterWebSocketHandlers(t => container.Get(t), assemblyTypes);
+            if (_services == null)
+                throw new ArgumentNullException("ServiceCollection is not attached yet. Use AddBus method before adding handlers.");
+
+
+            List<Type> types = _handler.Observer.RegisterWebSocketHandlers(t => _handler.ServiceProvider.GetService(t), assemblyTypes);
             foreach (Type type in types)
-                Extensions.AddHandlerIntoContainer(container, implementation, type);
+                RegisterHandler(lifetime, type);
 
             return this;
+        }
+
+        private void RegisterHandler(ServiceLifetime lifetime, Type serviceType)
+        {
+            switch (lifetime)
+            {
+                case ServiceLifetime.Transient:
+                    _services.AddTransient(serviceType);
+                    break;
+                
+                case ServiceLifetime.Singleton:
+                    _services.AddSingleton(serviceType);
+                    break;
+                
+                case ServiceLifetime.Scoped:
+                    _services.AddScoped(serviceType);
+                    break;
+            }
         }
 
         /// <summary>
         /// Gets message bus of websocket server
         /// </summary>
         /// <returns></returns>
-        public WebSocketServerBuilder AddBus(ITwinoServiceCollection services)
+        public WebSocketServerBuilder AddBus(IServiceCollection services)
         {
-            IServiceContainer container = (IServiceContainer) services;
-            
-            if (!container.Contains(typeof(IWebSocketServerBus)))
-                container.AddSingleton<IWebSocketServerBus>(_handler);
+            if (!services.Any(x => x.ServiceType == typeof(IWebSocketServerBus)))
+                services.AddSingleton<IWebSocketServerBus>(_handler);
+
+            _services = services;
 
             return this;
         }
-        
+
         /// <summary>
         /// Gets message bus of websocket server
         /// </summary>

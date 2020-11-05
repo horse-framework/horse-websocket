@@ -1,7 +1,5 @@
-﻿using System;
-using System.Threading.Tasks;
-using Twino.Core;
-using Twino.Ioc;
+﻿using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Twino.Server;
 using Twino.WebSocket.Models;
 
@@ -11,10 +9,16 @@ namespace Sample.ModelServer
     {
         static Task Main(string[] args)
         {
-            IServiceContainer services = new ServiceContainer();
+            IServiceCollection services = new ServiceCollection();
             TwinoServer server = new TwinoServer();
-            server.UseWebSockets(cfg => cfg.AddSingletonHandlers(services, typeof(Program)));
+
+            server.AddWebSockets(cfg => cfg.AddBus(services)
+                                           .AddSingletonHandlers(typeof(Program)));
+
+            server.UseWebSockets(services.BuildServiceProvider());
+            
             server.Start(9999);
+            
             return server.BlockWhileRunningAsync();
         }
     }
