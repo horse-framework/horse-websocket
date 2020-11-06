@@ -14,15 +14,15 @@ namespace Twino.WebSocket.Models
         /// <summary>
         /// Uses websocket protocol
         /// </summary>
-        public static ITwinoServer UseWebSockets(this ITwinoServer server, Action<WebSocketServerBuilder> cfg)
+        public static ITwinoServer AddWebSockets(this ITwinoServer server, Action<WebSocketServerBuilder> cfg)
         {
-            return UseWebSockets(server, HttpOptions.CreateDefault(), cfg);
+            return AddWebSockets(server, HttpOptions.CreateDefault(), cfg);
         }
 
         /// <summary>
         /// Uses websocket protocol
         /// </summary>
-        public static ITwinoServer UseWebSockets(this ITwinoServer server, HttpOptions options, Action<WebSocketServerBuilder> cfg)
+        public static ITwinoServer AddWebSockets(this ITwinoServer server, HttpOptions options, Action<WebSocketServerBuilder> cfg)
         {
             //we need http protocol is added
             ITwinoProtocol http = server.FindProtocol("http");
@@ -38,6 +38,16 @@ namespace Twino.WebSocket.Models
 
             TwinoWebSocketProtocol protocol = new TwinoWebSocketProtocol(server, handler);
             server.UseProtocol(protocol);
+            return server;
+        }
+
+        /// <summary>
+        /// Uses websockets with service provider
+        /// </summary>
+        public static ITwinoServer UseWebSockets(this ITwinoServer server, IServiceProvider provider)
+        {
+            ModelWsConnectionHandler bus = (ModelWsConnectionHandler) provider.GetService(typeof(IWebSocketServerBus));
+            bus.ServiceProvider = provider;
             return server;
         }
     }
