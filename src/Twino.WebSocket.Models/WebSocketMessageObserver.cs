@@ -54,6 +54,36 @@ namespace Twino.WebSocket.Models
             }
         }
 
+        
+        /// <summary>
+        /// Resolves handle types
+        /// </summary>
+        internal List<Type> ResolveWebSocketHandlerTypes(params Type[] assemblyTypes)
+        {
+            List<Type> items = new List<Type>();
+            Type openQueueGeneric = typeof(IWebSocketMessageHandler<>);
+
+            foreach (Type assemblyType in assemblyTypes)
+            {
+                foreach (Type type in assemblyType.Assembly.GetTypes())
+                {
+                    Type[] interfaceTypes = type.GetInterfaces();
+                    foreach (Type interfaceType in interfaceTypes)
+                    {
+                        if (!interfaceType.IsGenericType)
+                            continue;
+
+                        Type generic = interfaceType.GetGenericTypeDefinition();
+                        if (openQueueGeneric.IsAssignableFrom(generic))
+                            items.Add(type);
+                    }
+                }
+            }
+
+            return items;
+        }
+
+        
         /// <summary>
         /// Registers all handlers in assemblies of the types
         /// </summary>

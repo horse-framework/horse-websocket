@@ -35,6 +35,8 @@ namespace Twino.WebSocket.Models
         internal IWebSocketModelProvider ModelProvider { get; set; }
 
         internal IServiceProvider ServiceProvider { get; set; }
+        
+        internal TwinoWebSocketBuilder Builder { get; set; }
 
         /// <summary>
         /// Creates new websocket model connector
