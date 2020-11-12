@@ -6,9 +6,9 @@
         <Product>Twino.WebSocket.Models</Product>
         <Description>Twino WebSocket Model library for object based communication with text-based protocols</Description>
         <PackageTags>twino,websocket,serilizable,model</PackageTags>
-        <AssemblyVersion>4.2.1</AssemblyVersion>
-        <FileVersion>4.2.1</FileVersion>
-        <PackageVersion>4.2.1</PackageVersion>
+        <AssemblyVersion>4.2.2</AssemblyVersion>
+        <FileVersion>4.2.2</FileVersion>
+        <PackageVersion>4.2.2</PackageVersion>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Authors>Mehmet Helvacıköylü;Emre Hızlı</Authors>
         <PackageProjectUrl>https://github.com/twino-framework/twino-websocket</PackageProjectUrl>

@@ -247,7 +247,7 @@ namespace Twino.WebSocket.Models
                 connector.ExceptionThrown += new ExceptionEventMapper(connector, _error).Action;
 
             connector.ModelProvider = _modelProvider ?? new WebSocketModelProvider();
-            connector.Observer = new WebSocketMessageObserver(_modelProvider, _error);
+            connector.Observer = new WebSocketMessageObserver(connector.ModelProvider, _error);
         }
 
         /// <summary>
