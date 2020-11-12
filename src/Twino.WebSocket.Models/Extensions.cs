@@ -18,6 +18,7 @@ namespace Twino.WebSocket.Models
             config(builder);
 
             WebSocketModelConnector connector = builder.Build();
+            connector.Builder = builder;
 
             AddMSDIHandlers(services, connector, builder);
             services.AddSingleton(connector);
@@ -47,17 +48,13 @@ namespace Twino.WebSocket.Models
         {
             foreach (Tuple<ServiceLifetime, Type> pair in builder.AssembyConsumers)
             {
-                List<Type> types = connector.Observer.RegisterWebSocketHandlers(type => connector.ServiceProvider.GetService(type), pair.Item2);
-
+                List<Type> types = connector.Observer.ResolveWebSocketHandlerTypes(pair.Item2);
                 foreach (Type type in types)
                     AddHandlerIntoMSDI(services, pair.Item1, type);
             }
 
             foreach (Tuple<ServiceLifetime, Type, Type> tuple in builder.IndividualConsumers)
-            {
-                connector.Observer.RegisterWebSocketHandler(tuple.Item2, tuple.Item3, null, type => connector.ServiceProvider.GetService(type));
                 AddHandlerIntoMSDI(services, tuple.Item1, tuple.Item2);
-            }
         }
 
         internal static void AddHandlerIntoMSDI(IServiceCollection services, ServiceLifetime lifetime, Type consumerType)
@@ -87,6 +84,15 @@ namespace Twino.WebSocket.Models
         {
             WebSocketModelConnector connector = provider.GetService<WebSocketModelConnector>();
             connector.ServiceProvider = provider;
+            
+            foreach (Tuple<ServiceLifetime, Type> pair in connector.Builder.AssembyConsumers)
+                connector.Observer.RegisterWebSocketHandlers(type => connector.ServiceProvider.GetService(type), pair.Item2);
+
+            foreach (Tuple<ServiceLifetime, Type, Type> tuple in connector.Builder.IndividualConsumers)
+                connector.Observer.RegisterWebSocketHandler(tuple.Item2, tuple.Item3, null, type => connector.ServiceProvider.GetService(type));
+
+            connector.Builder = null;
+            
             connector.Run();
             return provider;
         }
@@ -100,6 +106,15 @@ namespace Twino.WebSocket.Models
         {
             WebSocketModelConnector connector = provider.GetService<WebSocketModelConnector<TIdentier>>();
             connector.ServiceProvider = provider;
+            
+            foreach (Tuple<ServiceLifetime, Type> pair in connector.Builder.AssembyConsumers)
+                connector.Observer.RegisterWebSocketHandlers(type => connector.ServiceProvider.GetService(type), pair.Item2);
+
+            foreach (Tuple<ServiceLifetime, Type, Type> tuple in connector.Builder.IndividualConsumers)
+                connector.Observer.RegisterWebSocketHandler(tuple.Item2, tuple.Item3, null, type => connector.ServiceProvider.GetService(type));
+
+            connector.Builder = null;
+            
             connector.Run();
             return provider;
         }
