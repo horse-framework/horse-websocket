@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
-using Twino.Protocols.WebSocket;
-using Twino.Server;
+using Horse.Protocols.WebSocket;
+using Horse.Server;
 
 namespace Test.Connector.Helpers
 {
@@ -8,7 +8,7 @@ namespace Test.Connector.Helpers
     {
         public void Start(int port)
         {
-            TwinoServer server = new TwinoServer(ServerOptions.CreateDefault());
+            HorseServer server = new HorseServer(ServerOptions.CreateDefault());
 
             server.UseWebSockets(async delegate { await Task.CompletedTask; });
             server.Start(port);

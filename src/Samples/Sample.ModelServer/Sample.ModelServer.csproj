@@ -6,7 +6,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\Twino.WebSocket.Models\Twino.WebSocket.Models.csproj" />
+      <ProjectReference Include="..\..\Horse.WebSocket.Models\Horse.WebSocket.Models.csproj" />
     </ItemGroup>
 
 </Project>

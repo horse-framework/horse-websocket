@@ -1,25 +1,22 @@
 ﻿using System.Threading.Tasks;
+using Horse.Server;
+using Horse.WebSocket.Models;
 using Microsoft.Extensions.DependencyInjection;
-using Twino.Server;
-using Twino.WebSocket.Models;
 
 namespace Sample.ModelServer
 {
     class Program
     {
-        static Task Main(string[] args)
+        static void Main(string[] args)
         {
             IServiceCollection services = new ServiceCollection();
-            TwinoServer server = new TwinoServer();
+            HorseServer server = new HorseServer();
 
             server.AddWebSockets(cfg => cfg.AddBus(services)
                                            .AddSingletonHandlers(typeof(Program)));
 
             server.UseWebSockets(services.BuildServiceProvider());
-            
-            server.Start(9999);
-            
-            return server.BlockWhileRunningAsync();
+            server.Run(9999);
         }
     }
 }

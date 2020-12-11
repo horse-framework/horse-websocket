@@ -1,6 +1,6 @@
-using Twino.Protocols.WebSocket;
-using Twino.SerializableModel;
-using Twino.SerializableModel.Serialization;
+using Horse.Protocols.WebSocket;
+using Horse.SerializableModel;
+using Horse.SerializableModel.Serialization;
 
 namespace Test.SocketModels.Helpers
 {

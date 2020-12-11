@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 using System.Text.Json.Serialization;
-using Twino.SerializableModel;
+using Horse.SerializableModel;
 
 namespace Test.SocketModels.Models
 {

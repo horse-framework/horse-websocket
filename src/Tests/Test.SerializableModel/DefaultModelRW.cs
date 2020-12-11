@@ -1,5 +1,5 @@
 using Test.SocketModels.Models;
-using Twino.SerializableModel.Serialization;
+using Horse.SerializableModel.Serialization;
 using Xunit;
 
 namespace Test.SocketModels
@@ -11,8 +11,8 @@ namespace Test.SocketModels
 
         public DefaultModelRW()
         {
-            _writer = new TwinoModelWriter();
-            _reader = new TwinoModelReader();
+            _writer = new HorseModelWriter();
+            _reader = new HorseModelReader();
         }
 
         [Fact]

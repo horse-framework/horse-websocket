@@ -18,8 +18,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\Twino.Client.WebSocket\Twino.Client.WebSocket.csproj" />
-      <ProjectReference Include="..\..\Twino.SerializableModel\Twino.SerializableModel.csproj" />
+      <ProjectReference Include="..\..\Horse.Client.WebSocket\Horse.Client.WebSocket.csproj" />
+      <ProjectReference Include="..\..\Horse.SerializableModel\Horse.SerializableModel.csproj" />
     </ItemGroup>
 
 </Project>

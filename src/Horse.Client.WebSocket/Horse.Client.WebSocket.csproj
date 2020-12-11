@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <Title>Horse.Client.WebSocket</Title>
+        <Product>Horse.Client.WebSocket</Product>
+        <Description>Horse WebSocket Client to connect all WebSocket servers</Description>
+        <PackageTags>horse,websocket,client</PackageTags>
+        <AssemblyVersion>4.3.2</AssemblyVersion>
+        <FileVersion>4.3.2</FileVersion>
+        <PackageVersion>4.3.2</PackageVersion>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Authors>Mehmet Helvacıköylü;Emre Hızlı</Authors>
+        <PackageProjectUrl>https://github.com/horse-framework/horse-websocket</PackageProjectUrl>
+        <PackageLicenseUrl>https://github.com/horse-framework/horse-websocket/blob/master/LICENSE</PackageLicenseUrl>
+        <RepositoryUrl>https://github.com/horse-framework/horse-websocket</RepositoryUrl>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+        <DocumentationFile>bin\Debug\Horse.Client.WebSocket.xml</DocumentationFile>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+        <DocumentationFile>bin\Release\Horse.Client.WebSocket.xml</DocumentationFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Horse.Protocols.Http" Version="4.3.2" />
+        <PackageReference Include="Horse.Client.Connectors" Version="4.3.2" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Horse.Protocols.WebSocket\Horse.Protocols.WebSocket.csproj" />
+    </ItemGroup>
+
+</Project>

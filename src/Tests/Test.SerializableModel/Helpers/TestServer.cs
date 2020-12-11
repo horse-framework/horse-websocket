@@ -1,8 +1,8 @@
 using System.Linq;
 using System.Threading.Tasks;
-using Twino.Protocols.WebSocket;
-using Twino.SerializableModel;
-using Twino.Server;
+using Horse.Protocols.WebSocket;
+using Horse.SerializableModel;
+using Horse.Server;
 
 namespace Test.SocketModels.Helpers
 {
@@ -10,7 +10,7 @@ namespace Test.SocketModels.Helpers
     {
         private readonly int _port;
 
-        public TwinoServer Server { get; private set; }
+        public HorseServer Server { get; private set; }
 
         public TestServer(int port)
         {
@@ -22,7 +22,7 @@ namespace Test.SocketModels.Helpers
             ServerOptions options = ServerOptions.CreateDefault();
             options.Hosts.FirstOrDefault().Port = _port;
 
-            Server = new TwinoServer(ServerOptions.CreateDefault());
+            Server = new HorseServer(ServerOptions.CreateDefault());
             Server.UseWebSockets(async (socket, message) =>
             {
                 string msg = message.ToString();

@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Twino.Client.WebSocket;
-using Twino.Mvc;
-using Twino.Mvc.Controllers;
-using Twino.Mvc.Filters.Route;
-using Twino.Protocols.WebSocket;
-using Twino.Server;
+using Horse.Client.WebSocket;
+using Horse.Mvc;
+using Horse.Mvc.Controllers;
+using Horse.Mvc.Filters.Route;
+using Horse.Protocols.WebSocket;
+using Horse.Server;
 
 namespace Sample.WebSocket.Client
 {
     [Route("")]
-    public class TController : TwinoController
+    public class TController : HorseController
     {
         [HttpGet("")]
         public IActionResult Get()
@@ -23,7 +23,7 @@ namespace Sample.WebSocket.Client
     {
         static void StartServer()
         {
-            TwinoServer server = new TwinoServer(ServerOptions.CreateDefault());
+            HorseServer server = new HorseServer(ServerOptions.CreateDefault());
             server.UseWebSockets(async (socket, data) =>
                                  {
                                      Console.WriteLine("connected");
@@ -40,9 +40,9 @@ namespace Sample.WebSocket.Client
             server.Start();
         }
 
-        static void ConnectWithTwino()
+        static void ConnectWithHorse()
         {
-            TwinoWebSocket client = new TwinoWebSocket();
+            HorseWebSocket client = new HorseWebSocket();
             client.MessageReceived += (c, m) => Console.WriteLine("# " + m);
             client.Connected += c => Console.WriteLine("Connected");
             client.Disconnected += c => Console.WriteLine("Disconnected");
@@ -59,8 +59,8 @@ namespace Sample.WebSocket.Client
 
         static void Main(string[] args)
         {
-           // StartServer();
-            ConnectWithTwino();
+            // StartServer();
+            ConnectWithHorse();
         }
     }
 }
