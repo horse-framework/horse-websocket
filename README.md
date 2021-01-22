@@ -4,7 +4,7 @@
 [![NuGet](https://img.shields.io/nuget/v/Horse.Protocols.WebSocket?label=server%20nuget)](https://www.nuget.org/packages/Horse.Protocols.WebSocket)
 [![NuGet](https://img.shields.io/nuget/v/Horse.WebSocket.Models?label=extensions%20nuget)](https://www.nuget.org/packages/Horse.WebSocket.Models)
 
-Twino WebSocket includes websocket server and websocket client. Websocket servers runs on Horse Server. You can implement websocket server with Horse MVC and Twino MQ too, or alone.
+Horse WebSocket includes websocket server and websocket client. Websocket servers runs on Horse Server. You can implement websocket server with Horse MVC and/or Horse MQ, or alone.
 
 #### Basic WebSocket Server Example
 
