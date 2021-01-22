@@ -1,14 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <TargetFramework>net5.0</TargetFramework>
         <Title>Horse.Protocols.WebSocket</Title>
         <Product>Horse.Protocols.WebSocket</Product>
         <Description>WebSocket Protocol library and server extension for Horse Server</Description>
         <PackageTags>horse,tcp,server,http,websocket,protocol,ws</PackageTags>
-        <AssemblyVersion>4.3.2</AssemblyVersion>
-        <FileVersion>4.3.2</FileVersion>
-        <PackageVersion>4.3.2</PackageVersion>
+        <AssemblyVersion>5.0.1</AssemblyVersion>
+        <FileVersion>5.0.1</FileVersion>
+        <PackageVersion>5.0.1</PackageVersion>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Authors>Mehmet Helvacıköylü;Emre Hızlı</Authors>
         <PackageProjectUrl>https://github.com/horse-framework/horse-websocket</PackageProjectUrl>
@@ -25,9 +25,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Horse.Core" Version="4.3.2" />
-        <PackageReference Include="Horse.Server" Version="4.3.2" />
-        <PackageReference Include="Horse.Protocols.Http" Version="4.3.2" />
+        <PackageReference Include="Horse.Core" Version="5.0.1" />
+        <PackageReference Include="Horse.Server" Version="5.0.1" />
+        <PackageReference Include="Horse.Protocols.Http" Version="5.0.1" />
     </ItemGroup>
 
 </Project>
