@@ -1,8 +1,8 @@
 using System.Threading.Tasks;
 using Test.SocketModels.Helpers;
 using Test.SocketModels.Models;
-using Twino.Client.WebSocket;
-using Twino.SerializableModel;
+using Horse.Client.WebSocket;
+using Horse.SerializableModel;
 using Xunit;
 
 namespace Test.SocketModels
@@ -22,7 +22,7 @@ namespace Test.SocketModels
 
             System.Threading.Thread.Sleep(250);
 
-            TwinoWebSocket client = new TwinoWebSocket();
+            HorseWebSocket client = new HorseWebSocket();
             client.Connect("127.0.0.1", 44351, false);
 
             client.Send(new DefaultModel { Name = "Mehmet", Number = 500 });
@@ -48,7 +48,7 @@ namespace Test.SocketModels
             TestServer server = new TestServer(44352);
             server.Run(reader1, reader2);
 
-            TwinoWebSocket client = new TwinoWebSocket();
+            HorseWebSocket client = new HorseWebSocket();
             client.Connect("127.0.0.1", 44352, false);
 
             client.Send(new DefaultModel { Name = "Default", Number = 501 });

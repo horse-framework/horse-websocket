@@ -1,20 +1,20 @@
 using System;
 using System.Threading.Tasks;
+using Horse.Protocols.WebSocket;
 using Sample.ModelServer.Models;
-using Twino.Protocols.WebSocket;
-using Twino.WebSocket.Models;
+using Horse.WebSocket.Models;
 
 namespace Sample.ModelServer.Handlers
 {
     public class ModelBHandler : IWebSocketMessageHandler<ModelB>
     {
-        public Task Handle(ModelB model, WebSocketMessage message, ITwinoWebSocket client)
+        public Task Handle(ModelB model, WebSocketMessage message, IHorseWebSocket client)
         {
             Console.WriteLine("model b received: " + model.Foo);
             return Task.CompletedTask;
         }
 
-        public async Task OnError(Exception exception, ModelB model, WebSocketMessage message, ITwinoWebSocket client)
+        public Task OnError(Exception exception, ModelB model, WebSocketMessage message, IHorseWebSocket client)
         {
             throw new NotImplementedException();
         }

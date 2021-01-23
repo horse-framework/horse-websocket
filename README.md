@@ -1,10 +1,10 @@
-# Twino WebSocket
+# Horse WebSocket
 
-[![NuGet](https://img.shields.io/nuget/v/Twino.Client.WebSocket?label=client%20nuget)](https://www.nuget.org/packages/Twino.Client.WebSocket)
-[![NuGet](https://img.shields.io/nuget/v/Twino.Protocols.WebSocket?label=server%20nuget)](https://www.nuget.org/packages/Twino.Protocols.WebSocket)
-[![NuGet](https://img.shields.io/nuget/v/Twino.WebSocket.Models?label=extensions%20nuget)](https://www.nuget.org/packages/Twino.WebSocket.Models)
+[![NuGet](https://img.shields.io/nuget/v/Horse.Client.WebSocket?label=client%20nuget)](https://www.nuget.org/packages/Horse.Client.WebSocket)
+[![NuGet](https://img.shields.io/nuget/v/Horse.Protocols.WebSocket?label=server%20nuget)](https://www.nuget.org/packages/Horse.Protocols.WebSocket)
+[![NuGet](https://img.shields.io/nuget/v/Horse.WebSocket.Models?label=extensions%20nuget)](https://www.nuget.org/packages/Horse.WebSocket.Models)
 
-Twino WebSocket includes websocket server and websocket client. Websocket servers runs on Twino Server. You can implement websocket server with Twino MVC and Twino MQ too, or alone.
+Horse WebSocket includes websocket server and websocket client. Websocket servers runs on Horse Server. You can implement websocket server with Horse MVC and/or Horse MQ, or alone.
 
 #### Basic WebSocket Server Example
 
@@ -12,15 +12,13 @@ Twino WebSocket includes websocket server and websocket client. Websocket server
     {
         static void Main(string[] args)
         {
-            TwinoServer server = new TwinoServer();
+            HorseServer server = new HorseServer();
             server.UseWebSockets((socket, message) => { Console.WriteLine($"Received: {message}"); });
 	    
-	    //or advanced with IProtocolConnectionHandler<WebSocketMessage> implementation
-            //server.UseWebSockets(new ServerWsHandler());
-            server.Start(80);
+	          //or advanced with IProtocolConnectionHandler<WebSocketMessage> implementation
             
-            //optional
-            _server.Server.BlockWhileRunning();
+            //server.UseWebSockets(new ServerWsHandler());
+            server.Run(80);
         }
     }
 
@@ -28,7 +26,7 @@ Twino WebSocket includes websocket server and websocket client. Websocket server
 #### Basic WebSocket Client Example
 
 
-     TwinoWebSocket client = new TwinoWebSocket();
+     HorseWebSocket client = new HorseWebSocket();
      client.MessageReceived += (c, m) => Console.WriteLine("# " + m);
      client.Connected += c => Console.WriteLine("Connected");
      client.Disconnected += c => Console.WriteLine("Disconnected");

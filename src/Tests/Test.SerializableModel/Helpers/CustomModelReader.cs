@@ -1,6 +1,6 @@
 using System;
-using Twino.SerializableModel;
-using Twino.SerializableModel.Serialization;
+using Horse.SerializableModel;
+using Horse.SerializableModel.Serialization;
 
 namespace Test.SocketModels.Helpers
 {

@@ -1,23 +1,22 @@
 using System;
-using System.IO;
 using System.Threading.Tasks;
-using Twino.Client.WebSocket;
-using Twino.Client.WebSocket.Connectors;
-using Twino.Core;
-using Twino.Protocols.WebSocket;
-using Twino.Server;
+using Horse.Client.WebSocket;
+using Horse.Client.WebSocket.Connectors;
+using Horse.Core;
+using Horse.Protocols.WebSocket;
+using Horse.Server;
 using Xunit;
 
 namespace Test.Connector
 {
     public class AbsoluteConnectorTest
     {
-        private readonly TwinoServer _server;
+        private readonly HorseServer _server;
         private int _receivedMessages;
 
         public AbsoluteConnectorTest()
         {
-            _server = new TwinoServer(ServerOptions.CreateDefault());
+            _server = new HorseServer(ServerOptions.CreateDefault());
             _server.UseWebSockets(async (socket) => { await socket.SendAsync("Welcome"); },
                                   async (socket, message) =>
                                   {

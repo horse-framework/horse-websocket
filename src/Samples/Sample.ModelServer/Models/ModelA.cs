@@ -1,4 +1,4 @@
-using Twino.WebSocket.Models;
+using Horse.WebSocket.Models;
 
 namespace Sample.ModelServer.Models
 {

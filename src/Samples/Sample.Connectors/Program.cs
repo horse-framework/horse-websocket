@@ -1,7 +1,7 @@
 ﻿using System;
-using Twino.Client.WebSocket;
-using Twino.Client.WebSocket.Connectors;
-using Twino.Core;
+using Horse.Client.WebSocket;
+using Horse.Client.WebSocket.Connectors;
+using Horse.Core;
 
 namespace Sample.Connectors
 {
