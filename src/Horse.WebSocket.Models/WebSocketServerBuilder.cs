@@ -5,6 +5,8 @@ using System.Linq;
 using Horse.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Horse.Protocols.WebSocket;
+using Horse.WebSocket.Models.Providers;
+using Horse.WebSocket.Models.Serialization;
 
 namespace Horse.WebSocket.Models
 {
@@ -79,11 +81,57 @@ namespace Horse.WebSocket.Models
         #region Register
 
         /// <summary>
+        /// Uses pipe model provider
+        /// </summary>
+        public WebSocketServerBuilder UsePipeModelProvider(IJsonModelSerializer serializer = null)
+        {
+            if (serializer == null)
+                serializer = new NewtonsoftJsonModelSerializer();
+
+            if (_handler.Observer.HandlersRegistered)
+                throw new InvalidOperationException("You must use Use...Provider methods before Add..Handler(s) methods. Change method call order.");
+
+            _handler.Observer.Provider = new PipeModelProvider(serializer);
+            return this;
+        }
+
+        /// <summary>
+        /// Uses payload model provider
+        /// </summary>
+        public WebSocketServerBuilder UsePayloadModelProvider(IJsonModelSerializer serializer = null)
+        {
+            if (serializer == null)
+                serializer = new NewtonsoftJsonModelSerializer();
+
+            if (_handler.Observer.HandlersRegistered)
+                throw new InvalidOperationException("You must use Use...Provider methods before Add..Handler(s) methods. Change method call order.");
+
+            _handler.Observer.Provider = new PayloadModelProvider(serializer);
+            return this;
+        }
+
+        /// <summary>
         /// Uses custom model provider
         /// </summary>
         public WebSocketServerBuilder UseModelProvider(IWebSocketModelProvider provider)
         {
-            _handler.Observer = new WebSocketMessageObserver(provider, _handler.Observer.ErrorAction);
+            if (_handler.Observer.HandlersRegistered)
+                throw new InvalidOperationException("You must use Use...Provider methods before Add..Handler(s) methods. Change method call order.");
+
+            _handler.Observer.Provider = provider;
+            return this;
+        }
+
+        /// <summary>
+        /// Uses custom model provider
+        /// </summary>
+        public WebSocketServerBuilder UseModelProvider<TWebSocketModelProvider>()
+            where TWebSocketModelProvider : IWebSocketModelProvider, new()
+        {
+            if (_handler.Observer.HandlersRegistered)
+                throw new InvalidOperationException("You must use Use...Provider methods before Add..Handler(s) methods. Change method call order.");
+            
+            _handler.Observer.Provider = new TWebSocketModelProvider();
             return this;
         }
 
@@ -157,7 +205,7 @@ namespace Horse.WebSocket.Models
 
             _handler.Observer.RegisterWebSocketHandler(handlerType, t => _handler.ServiceProvider.GetService(t));
             RegisterHandler(lifetime, handlerType);
-            
+
             return this;
         }
 
@@ -168,7 +216,6 @@ namespace Horse.WebSocket.Models
         {
             if (_services == null)
                 throw new ArgumentNullException("ServiceCollection is not attached yet. Use AddBus method before adding handlers.");
-
 
             List<Type> types = _handler.Observer.RegisterWebSocketHandlers(t => _handler.ServiceProvider.GetService(t), assemblyTypes);
             foreach (Type type in types)
@@ -184,11 +231,11 @@ namespace Horse.WebSocket.Models
                 case ServiceLifetime.Transient:
                     _services.AddTransient(serviceType);
                     break;
-                
+
                 case ServiceLifetime.Singleton:
                     _services.AddSingleton(serviceType);
                     break;
-                
+
                 case ServiceLifetime.Scoped:
                     _services.AddScoped(serviceType);
                     break;

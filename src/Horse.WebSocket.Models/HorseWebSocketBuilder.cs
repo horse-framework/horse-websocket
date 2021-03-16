@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using Horse.WebSocket.Models.Internal;
+using Horse.WebSocket.Models.Providers;
+using Horse.WebSocket.Models.Serialization;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Horse.WebSocket.Models
@@ -38,7 +40,7 @@ namespace Horse.WebSocket.Models
         /// Connector object of the builder
         /// </summary>
         protected internal WebSocketModelConnector Connector { get; set; }
-        
+
         /// <summary>
         /// Connector reconnection delay
         /// </summary>
@@ -139,6 +141,32 @@ namespace Horse.WebSocket.Models
         public HorseWebSocketBuilder UseCustomModelProvider(IWebSocketModelProvider provider)
         {
             _modelProvider = provider;
+            return this;
+        }
+
+        /// <summary>
+        /// Uses pipe model provider.
+        /// Models are sent in payload property in JSON model model-type|{ name: "foo" }
+        /// </summary>
+        public HorseWebSocketBuilder UsePipeModelProvider(IJsonModelSerializer serializer = null)
+        {
+            if (serializer == null)
+                serializer = new NewtonsoftJsonModelSerializer();
+
+            _modelProvider = new PayloadModelProvider(serializer);
+            return this;
+        }
+
+        /// <summary>
+        /// Uses payload model provider.
+        /// Models are sent in payload property in JSON model { type: "model-type", payload: your_model }
+        /// </summary>
+        public HorseWebSocketBuilder UsePayloadModelProvider(IJsonModelSerializer serializer = null)
+        {
+            if (serializer == null)
+                serializer = new NewtonsoftJsonModelSerializer();
+
+            _modelProvider = new PayloadModelProvider(serializer);
             return this;
         }
 
@@ -246,7 +274,7 @@ namespace Horse.WebSocket.Models
             if (_error != null)
                 connector.ExceptionThrown += new ExceptionEventMapper(connector, _error).Action;
 
-            connector.ModelProvider = _modelProvider ?? new WebSocketModelProvider();
+            connector.ModelProvider = _modelProvider ?? new PipeModelProvider(new NewtonsoftJsonModelSerializer());
             connector.Observer = new WebSocketMessageObserver(connector.ModelProvider, _error);
         }
 

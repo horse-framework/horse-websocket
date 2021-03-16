@@ -12,21 +12,25 @@ namespace Horse.WebSocket.Models
     /// </summary>
     public class WebSocketMessageObserver
     {
-        private readonly Dictionary<Type, ObserverExecuter> _executers = new Dictionary<Type, ObserverExecuter>();
-        private readonly IWebSocketModelProvider _provider;
+        private readonly Dictionary<Type, ObserverExecuter> _executers = new();
         internal Action<Exception> ErrorAction { get; set; }
+        
+        /// <summary>
+        /// Returns true if at least one handler is registered
+        /// </summary>
+        internal bool HandlersRegistered { get; private set; }
 
         /// <summary>
         /// Model provider for websocket
         /// </summary>
-        public IWebSocketModelProvider Provider => _provider;
+        public IWebSocketModelProvider Provider { get; internal set; }
 
         /// <summary>
         /// Creates new websocket message observer
         /// </summary>
         public WebSocketMessageObserver(IWebSocketModelProvider provider, Action<Exception> errorAction)
         {
-            _provider = provider;
+            Provider = provider;
             ErrorAction = errorAction;
         }
 
@@ -37,11 +41,11 @@ namespace Horse.WebSocket.Models
         {
             try
             {
-                Type type = _provider.Resolve(message);
+                Type type = Provider.Resolve(message);
                 if (type == null)
                     return Task.CompletedTask;
 
-                object model = _provider.Get(message, type);
+                object model = Provider.Get(message, type);
                 ObserverExecuter executer = _executers[type];
                 return executer.Execute(model, message, client);
             }
@@ -49,12 +53,11 @@ namespace Horse.WebSocket.Models
             {
                 if (ErrorAction != null)
                     ErrorAction(e);
-                
+
                 return Task.CompletedTask;
             }
         }
 
-        
         /// <summary>
         /// Resolves handle types
         /// </summary>
@@ -83,7 +86,6 @@ namespace Horse.WebSocket.Models
             return items;
         }
 
-        
         /// <summary>
         /// Registers all handlers in assemblies of the types
         /// </summary>
@@ -151,15 +153,16 @@ namespace Horse.WebSocket.Models
         /// </summary>
         internal void RegisterWebSocketHandler(Type observerType, Type modelType, object instance, Func<Type, object> observerFactory)
         {
+            Func<Action<Exception>> errorFactory = () => ErrorAction;
             Type executerType = typeof(ObserverExecuter<>).MakeGenericType(modelType);
             ObserverExecuter executer = (ObserverExecuter) Activator.CreateInstance(executerType,
                                                                                     observerType,
-                                                                                    _provider,
                                                                                     instance,
                                                                                     observerFactory,
-                                                                                    ErrorAction);
-            _provider.Register(modelType);
+                                                                                    errorFactory);
+            Provider.Register(modelType);
             _executers.Add(modelType, executer);
+            HandlersRegistered = true;
         }
     }
 }

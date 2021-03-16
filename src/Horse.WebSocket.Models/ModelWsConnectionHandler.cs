@@ -3,7 +3,8 @@ using System.Threading.Tasks;
 using Horse.Core;
 using Horse.Core.Protocols;
 using Horse.Protocols.WebSocket;
-using Horse.WebSocket.Models.Internal;
+using Horse.WebSocket.Models.Providers;
+using Horse.WebSocket.Models.Serialization;
 
 namespace Horse.WebSocket.Models
 {
@@ -25,7 +26,7 @@ namespace Horse.WebSocket.Models
         internal Func<WsServerSocket, Task> DisconnectedAction { get; set; }
 
         private Action<Exception> _errorAction;
-        
+
         internal Action<Exception> ErrorAction
         {
             get => _errorAction;
@@ -36,14 +37,14 @@ namespace Horse.WebSocket.Models
                     Observer.ErrorAction = value;
             }
         }
-        
+
         internal IServiceProvider ServiceProvider { get; set; }
 
         #endregion
 
         internal ModelWsConnectionHandler()
         {
-            Observer = new WebSocketMessageObserver(new WebSocketModelProvider(), ErrorAction);
+            Observer = new WebSocketMessageObserver(new PipeModelProvider(new NewtonsoftJsonModelSerializer()), ErrorAction);
         }
 
         #region Events
