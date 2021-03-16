@@ -197,7 +197,6 @@ namespace Horse.WebSocket.Models
             if (_services == null)
                 throw new ArgumentNullException("ServiceCollection is not attached yet. Use AddBus method before adding handlers.");
 
-
             List<Type> types = _handler.Observer.RegisterWebSocketHandlers(t => _handler.ServiceProvider.GetService(t), assemblyTypes);
             foreach (Type type in types)
                 RegisterHandler(lifetime, type);

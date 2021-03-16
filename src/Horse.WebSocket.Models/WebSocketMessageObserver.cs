@@ -49,12 +49,12 @@ namespace Horse.WebSocket.Models
             {
                 if (ErrorAction != null)
                     ErrorAction(e);
-                
+
                 return Task.CompletedTask;
             }
         }
 
-        
+
         /// <summary>
         /// Resolves handle types
         /// </summary>
@@ -83,7 +83,7 @@ namespace Horse.WebSocket.Models
             return items;
         }
 
-        
+
         /// <summary>
         /// Registers all handlers in assemblies of the types
         /// </summary>
@@ -151,13 +151,15 @@ namespace Horse.WebSocket.Models
         /// </summary>
         internal void RegisterWebSocketHandler(Type observerType, Type modelType, object instance, Func<Type, object> observerFactory)
         {
+            Func<Action<Exception>> errorFactory = () => ErrorAction;
+
             Type executerType = typeof(ObserverExecuter<>).MakeGenericType(modelType);
             ObserverExecuter executer = (ObserverExecuter) Activator.CreateInstance(executerType,
                                                                                     observerType,
                                                                                     _provider,
                                                                                     instance,
                                                                                     observerFactory,
-                                                                                    ErrorAction);
+                                                                                    errorFactory);
             _provider.Register(modelType);
             _executers.Add(modelType, executer);
         }
