@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Horse.Protocols.WebSocket;
+using Horse.WebSocket.Models.Serialization;
 
 namespace Horse.WebSocket.Models.Providers
 {
@@ -9,8 +10,13 @@ namespace Horse.WebSocket.Models.Providers
     /// Payload provider by class name.
     /// Serialize data seems like; {type:"ModelA",payload:{name:"foo",no:123}}
     /// </summary>
-    public class PayloadModelProvider : IWebSocketModelProvider
+    public class PayloadModelProvider : ISerializableProvider
     {
+        /// <summary>
+        /// JSON serializer
+        /// </summary>
+        public IJsonModelSerializer Serializer { get; }
+
         /// <summary>
         /// For getting codes by type
         /// </summary>
@@ -30,6 +36,14 @@ namespace Horse.WebSocket.Models.Providers
         /// Finds type by code
         /// </summary>
         public Type GetType(string code) => _codeTypes[code];
+
+        /// <summary>
+        /// Creates new payload model provider
+        /// </summary>
+        public PayloadModelProvider(IJsonModelSerializer serializer)
+        {
+            Serializer = serializer;
+        }
 
         /// <summary>
         /// Registers a type into provider
@@ -53,7 +67,7 @@ namespace Horse.WebSocket.Models.Providers
             Type openGeneric = typeof(PayloadFrame<>);
             Type genericType = openGeneric.MakeGenericType(modelType);
 
-            object model = System.Text.Json.JsonSerializer.DeserializeAsync(message.Content, genericType);
+            object model = Serializer.Deserialize(message.ToString(), genericType);
             return model;
         }
 
@@ -81,7 +95,7 @@ namespace Horse.WebSocket.Models.Providers
                           payload = model
                       };
 
-            string content = Newtonsoft.Json.JsonConvert.SerializeObject(obj);
+            string content = Serializer.Serialize(obj);
             return WebSocketMessage.FromString(content);
         }
 
@@ -92,7 +106,7 @@ namespace Horse.WebSocket.Models.Providers
         {
             message.Content.Position = 0;
 
-            PayloadResolve resolve = System.Text.Json.JsonSerializer.DeserializeAsync<PayloadResolve>(message.Content).GetAwaiter().GetResult();
+            PayloadResolve resolve = (PayloadResolve) Serializer.Deserialize(message.ToString(), typeof(PayloadResolve));
             if (resolve == null || string.IsNullOrEmpty(resolve.Type))
                 return null;
             Type type;

@@ -3,8 +3,8 @@ using System.Threading.Tasks;
 using Horse.Core;
 using Horse.Core.Protocols;
 using Horse.Protocols.WebSocket;
-using Horse.WebSocket.Models.Internal;
 using Horse.WebSocket.Models.Providers;
+using Horse.WebSocket.Models.Serialization;
 
 namespace Horse.WebSocket.Models
 {
@@ -44,7 +44,7 @@ namespace Horse.WebSocket.Models
 
         internal ModelWsConnectionHandler()
         {
-            Observer = new WebSocketMessageObserver(new PipeModelProvider(), ErrorAction);
+            Observer = new WebSocketMessageObserver(new PipeModelProvider(new NewtonsoftJsonModelSerializer()), ErrorAction);
         }
 
         #region Events

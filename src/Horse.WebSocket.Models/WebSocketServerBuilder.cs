@@ -6,6 +6,7 @@ using Horse.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Horse.Protocols.WebSocket;
 using Horse.WebSocket.Models.Providers;
+using Horse.WebSocket.Models.Serialization;
 
 namespace Horse.WebSocket.Models
 {
@@ -82,18 +83,24 @@ namespace Horse.WebSocket.Models
         /// <summary>
         /// Uses pipe model provider
         /// </summary>
-        public WebSocketServerBuilder UsePipeModelProvider()
+        public WebSocketServerBuilder UsePipeModelProvider(IJsonModelSerializer serializer = null)
         {
-            _handler.Observer = new WebSocketMessageObserver(new PipeModelProvider(), _handler.Observer.ErrorAction);
+            if (serializer == null)
+                serializer = new NewtonsoftJsonModelSerializer();
+
+            _handler.Observer = new WebSocketMessageObserver(new PipeModelProvider(serializer), _handler.Observer.ErrorAction);
             return this;
         }
 
         /// <summary>
         /// Uses payload model provider
         /// </summary>
-        public WebSocketServerBuilder UsePayloadModelProvider()
+        public WebSocketServerBuilder UsePayloadModelProvider(IJsonModelSerializer serializer = null)
         {
-            _handler.Observer = new WebSocketMessageObserver(new PayloadModelProvider(), _handler.Observer.ErrorAction);
+            if (serializer == null)
+                serializer = new NewtonsoftJsonModelSerializer();
+
+            _handler.Observer = new WebSocketMessageObserver(new PayloadModelProvider(serializer), _handler.Observer.ErrorAction);
             return this;
         }
 
@@ -109,7 +116,8 @@ namespace Horse.WebSocket.Models
         /// <summary>
         /// Uses custom model provider
         /// </summary>
-        public WebSocketServerBuilder UseModelProvider<TWebSocketModelProvider>() where TWebSocketModelProvider : IWebSocketModelProvider, new()
+        public WebSocketServerBuilder UseModelProvider<TWebSocketModelProvider>()
+            where TWebSocketModelProvider : IWebSocketModelProvider, new()
         {
             _handler.Observer = new WebSocketMessageObserver(new TWebSocketModelProvider(), _handler.Observer.ErrorAction);
             return this;

@@ -4,6 +4,7 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using Horse.Protocols.WebSocket;
+using Horse.WebSocket.Models.Serialization;
 
 namespace Horse.WebSocket.Models.Providers
 {
@@ -11,10 +12,15 @@ namespace Horse.WebSocket.Models.Providers
     /// Code provider by class name.
     /// Serialize data seems like; ModelA|{name:"foo",no:123}
     /// </summary>
-    public class PipeModelProvider : IWebSocketModelProvider
+    public class PipeModelProvider : ISerializableProvider
     {
         private const char COLON_CHAR = '|';
         private const byte COLON = (byte) '|';
+
+        /// <summary>
+        /// JSON serializer
+        /// </summary>
+        public IJsonModelSerializer Serializer { get; }
 
         /// <summary>
         /// For getting codes by type
@@ -35,6 +41,14 @@ namespace Horse.WebSocket.Models.Providers
         /// Finds type by code
         /// </summary>
         public Type GetType(string code) => _codeTypes[code];
+
+        /// <summary>
+        /// Creates new pipe model provider
+        /// </summary>
+        public PipeModelProvider(IJsonModelSerializer serializer)
+        {
+            Serializer = serializer;
+        }
 
         /// <summary>
         /// Registers a type into provider
@@ -60,7 +74,7 @@ namespace Horse.WebSocket.Models.Providers
             if (index < 0)
                 return null;
 
-            return Newtonsoft.Json.JsonConvert.DeserializeObject(serialized.Substring(index + 1), modelType);
+            return Serializer.Deserialize(serialized.Substring(index + 1), modelType);
         }
 
         /// <summary>
@@ -76,12 +90,12 @@ namespace Horse.WebSocket.Models.Providers
             {
                 ModelTypeAttribute attr = type.GetCustomAttribute<ModelTypeAttribute>();
                 code = attr == null ? type.Name : attr.TypeCode;
-                
+
                 _typeCodes.Add(type, code);
                 _codeTypes.Add(code, type);
             }
 
-            string content = code + "|" + Newtonsoft.Json.JsonConvert.SerializeObject(model);
+            string content = code + "|" + Serializer.Serialize(model);
             return WebSocketMessage.FromString(content);
         }
 
