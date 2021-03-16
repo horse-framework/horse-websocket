@@ -8,72 +8,80 @@ Horse WebSocket includes websocket server and websocket client. Websocket server
 
 #### Basic WebSocket Server Example
 
-    class Program
+```C#
+class Program
+{
+    static void Main(string[] args)
     {
-        static void Main(string[] args)
-        {
-            HorseServer server = new HorseServer();
-            server.UseWebSockets((socket, message) => { Console.WriteLine($"Received: {message}"); });
-	    
-	          //or advanced with IProtocolConnectionHandler<WebSocketMessage> implementation
-            
-            //server.UseWebSockets(new ServerWsHandler());
-            server.Run(80);
-        }
+        HorseServer server = new HorseServer();
+        server.UseWebSockets((socket, message) => { Console.WriteLine($"Received: {message}"); });
+    
+          //or advanced with IProtocolConnectionHandler<WebSocketMessage> implementation
+        
+        //server.UseWebSockets(new ServerWsHandler());
+        server.Run(80);
     }
-
+}
+```
 
 #### Basic WebSocket Client Example
 
+```C#
+HorseWebSocket client = new HorseWebSocket();
+client.MessageReceived += (c, m) => Console.WriteLine("# " + m);
+client.Connected += c => Console.WriteLine("Connected");
+client.Disconnected += c => Console.WriteLine("Disconnected");
+client.Connect("wss://echo.websocket.org");
 
-     HorseWebSocket client = new HorseWebSocket();
-     client.MessageReceived += (c, m) => Console.WriteLine("# " + m);
-     client.Connected += c => Console.WriteLine("Connected");
-     client.Disconnected += c => Console.WriteLine("Disconnected");
-     client.Connect("wss://echo.websocket.org");
-
-     while (true)
-     {
-         string s = Console.ReadLine();
-         client.Send(s);
-     }
+while (true)
+{
+    string s = Console.ReadLine();
+    client.Send(s);
+}
+```
      
-#### Model Provider Example
+### Model Provider Example
 
-     IServiceCollection services = new ServiceCollection();
-     HorseServer server = new HorseServer();
+```C#
+IServiceCollection services = new ServiceCollection();
+HorseServer server = new HorseServer();
 
-     server.AddWebSockets(cfg => cfg.AddBus(services)
-                                    .AddTransientHandlers(typeof(Program));
+server.AddWebSockets(cfg => cfg.AddBus(services)
+                               .AddTransientHandlers(typeof(Program));
 
-     server.UseWebSockets(services.BuildServiceProvider());
+server.UseWebSockets(services.BuildServiceProvider());
 
-     server.Run(9999);
+server.Run(9999);
+```
      
-Handler
+**Handler Implementation**
 
-    public class ModelAHandler : IWebSocketMessageHandler<ModelA>
+```C#
+public class ModelAHandler : IWebSocketMessageHandler<ModelA>
+{
+    public Task Handle(ModelA model, WebSocketMessage message, IHorseWebSocket client)
     {
-        public Task Handle(ModelA model, WebSocketMessage message, IHorseWebSocket client)
-        {
-            Console.WriteLine("Model A received: " + model.Value);
-            return Task.CompletedTask;
-        }
-
-        public Task OnError(Exception exception, ModelA model, WebSocketMessage message, IHorseWebSocket client)
-        {
-            throw new NotImplementedException();
-        }
+        Console.WriteLine("Model A received: " + model.Value);
+        return Task.CompletedTask;
     }
+
+    public Task OnError(Exception exception, ModelA model, WebSocketMessage message, IHorseWebSocket client)
+    {
+        throw new NotImplementedException();
+    }
+}
+```
     
-Model
+**Model**
 
-    [ModelType("model-a")]
-    public class ModelA
-    {
-        [JsonProperty("v")]
-        public string Value { get; set; }
-    }
+```C#
+[ModelType("model-a")]
+public class ModelA
+{
+    [JsonProperty("v")]
+    public string Value { get; set; }
+}
+```
 
 ## Thanks
 
