@@ -88,7 +88,10 @@ namespace Horse.WebSocket.Models
             if (serializer == null)
                 serializer = new NewtonsoftJsonModelSerializer();
 
-            _handler.Observer = new WebSocketMessageObserver(new PipeModelProvider(serializer), _handler.Observer.ErrorAction);
+            if (_handler.Observer.HandlersRegistered)
+                throw new InvalidOperationException("You must use Use...Provider methods before Add..Handler(s) methods. Change method call order.");
+
+            _handler.Observer.Provider = new PipeModelProvider(serializer);
             return this;
         }
 
@@ -100,7 +103,10 @@ namespace Horse.WebSocket.Models
             if (serializer == null)
                 serializer = new NewtonsoftJsonModelSerializer();
 
-            _handler.Observer = new WebSocketMessageObserver(new PayloadModelProvider(serializer), _handler.Observer.ErrorAction);
+            if (_handler.Observer.HandlersRegistered)
+                throw new InvalidOperationException("You must use Use...Provider methods before Add..Handler(s) methods. Change method call order.");
+
+            _handler.Observer.Provider = new PayloadModelProvider(serializer);
             return this;
         }
 
@@ -109,7 +115,10 @@ namespace Horse.WebSocket.Models
         /// </summary>
         public WebSocketServerBuilder UseModelProvider(IWebSocketModelProvider provider)
         {
-            _handler.Observer = new WebSocketMessageObserver(provider, _handler.Observer.ErrorAction);
+            if (_handler.Observer.HandlersRegistered)
+                throw new InvalidOperationException("You must use Use...Provider methods before Add..Handler(s) methods. Change method call order.");
+
+            _handler.Observer.Provider = provider;
             return this;
         }
 
@@ -119,7 +128,10 @@ namespace Horse.WebSocket.Models
         public WebSocketServerBuilder UseModelProvider<TWebSocketModelProvider>()
             where TWebSocketModelProvider : IWebSocketModelProvider, new()
         {
-            _handler.Observer = new WebSocketMessageObserver(new TWebSocketModelProvider(), _handler.Observer.ErrorAction);
+            if (_handler.Observer.HandlersRegistered)
+                throw new InvalidOperationException("You must use Use...Provider methods before Add..Handler(s) methods. Change method call order.");
+            
+            _handler.Observer.Provider = new TWebSocketModelProvider();
             return this;
         }
 

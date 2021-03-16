@@ -6,20 +6,17 @@ namespace Horse.WebSocket.Models.Internal
 {
     internal class ObserverExecuter<TModel> : ObserverExecuter
     {
-        private readonly IWebSocketModelProvider _provider;
         private readonly IWebSocketMessageHandler<TModel> _instance;
         private readonly Func<Type, object> _factory;
         private readonly Func<Action<Exception>> _errorFactory;
         private readonly Type _consumerType;
 
         public ObserverExecuter(Type consumerType,
-                                IWebSocketModelProvider provider,
                                 IWebSocketMessageHandler<TModel> instance,
                                 Func<Type, object> factory,
                                 Func<Action<Exception>> errorFactory)
         {
             _consumerType = consumerType;
-            _provider = provider;
             _instance = instance;
             _factory = factory;
             _errorFactory = errorFactory;
@@ -37,7 +34,7 @@ namespace Horse.WebSocket.Models.Internal
                     handler = (IWebSocketMessageHandler<TModel>) _factory(_consumerType);
                 else
                     return;
-                
+
                 await handler.Handle((TModel) model, message, client);
             }
             catch (Exception e)
@@ -53,7 +50,7 @@ namespace Horse.WebSocket.Models.Internal
                     {
                     }
                 }
-                
+
                 if (handler == null)
                 {
                     if (errorAction != null)

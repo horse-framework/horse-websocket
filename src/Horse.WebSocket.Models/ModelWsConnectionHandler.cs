@@ -26,7 +26,7 @@ namespace Horse.WebSocket.Models
         internal Func<WsServerSocket, Task> DisconnectedAction { get; set; }
 
         private Action<Exception> _errorAction;
-        
+
         internal Action<Exception> ErrorAction
         {
             get => _errorAction;
@@ -37,7 +37,7 @@ namespace Horse.WebSocket.Models
                     Observer.ErrorAction = value;
             }
         }
-        
+
         internal IServiceProvider ServiceProvider { get; set; }
 
         #endregion
