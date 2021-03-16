@@ -142,6 +142,16 @@ namespace Horse.WebSocket.Models
             return this;
         }
 
+        /// <summary>
+        /// Uses payload model provider.
+        /// Models are sent in payload property in JSON model { type: "model-type", payload: your_model }
+        /// </summary>
+        public HorseWebSocketBuilder UsePayloadModelProvider()
+        {
+            _modelProvider = new PayloadModelProvider();
+            return this;
+        }
+
         #endregion
 
         #region Handlers
