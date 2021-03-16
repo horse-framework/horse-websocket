@@ -37,6 +37,43 @@ Horse WebSocket includes websocket server and websocket client. Websocket server
          string s = Console.ReadLine();
          client.Send(s);
      }
+     
+#### Model Provider Example
+
+     IServiceCollection services = new ServiceCollection();
+     HorseServer server = new HorseServer();
+
+     server.AddWebSockets(cfg => cfg.AddBus(services)
+                                    .AddTransientHandlers(typeof(Program));
+
+     server.UseWebSockets(services.BuildServiceProvider());
+
+     server.Run(9999);
+     
+Handler
+
+    public class ModelAHandler : IWebSocketMessageHandler<ModelA>
+    {
+        public Task Handle(ModelA model, WebSocketMessage message, IHorseWebSocket client)
+        {
+            Console.WriteLine("Model A received: " + model.Value);
+            return Task.CompletedTask;
+        }
+
+        public Task OnError(Exception exception, ModelA model, WebSocketMessage message, IHorseWebSocket client)
+        {
+            throw new NotImplementedException();
+        }
+    }
+    
+Model
+
+    [ModelType("model-a")]
+    public class ModelA
+    {
+        [JsonProperty("v")]
+        public string Value { get; set; }
+    }
 
 ## Thanks
 
