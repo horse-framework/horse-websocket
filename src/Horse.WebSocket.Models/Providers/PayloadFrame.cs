@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Horse.WebSocket.Models.Internal
+namespace Horse.WebSocket.Models.Providers
 {
     internal class PayloadFrame<TModel>
     {

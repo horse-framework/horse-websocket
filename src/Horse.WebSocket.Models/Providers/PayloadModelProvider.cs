@@ -1,14 +1,13 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Reflection;
-using System.Text;
 using Horse.Protocols.WebSocket;
 
-namespace Horse.WebSocket.Models.Internal
+namespace Horse.WebSocket.Models.Providers
 {
     /// <summary>
-    /// Payload provider by class name
+    /// Payload provider by class name.
+    /// Serialize data seems like; {type:"ModelA",payload:{name:"foo",no:123}}
     /// </summary>
     public class PayloadModelProvider : IWebSocketModelProvider
     {

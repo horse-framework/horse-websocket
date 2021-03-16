@@ -5,12 +5,13 @@ using System.Reflection;
 using System.Text;
 using Horse.Protocols.WebSocket;
 
-namespace Horse.WebSocket.Models.Internal
+namespace Horse.WebSocket.Models.Providers
 {
     /// <summary>
-    /// Code provider by class name
+    /// Code provider by class name.
+    /// Serialize data seems like; ModelA|{name:"foo",no:123}
     /// </summary>
-    public class WebSocketModelProvider : IWebSocketModelProvider
+    public class PipeModelProvider : IWebSocketModelProvider
     {
         private const char COLON_CHAR = '|';
         private const byte COLON = (byte) '|';

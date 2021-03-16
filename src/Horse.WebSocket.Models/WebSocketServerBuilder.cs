@@ -5,6 +5,7 @@ using System.Linq;
 using Horse.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Horse.Protocols.WebSocket;
+using Horse.WebSocket.Models.Providers;
 
 namespace Horse.WebSocket.Models
 {
@@ -79,11 +80,38 @@ namespace Horse.WebSocket.Models
         #region Register
 
         /// <summary>
+        /// Uses pipe model provider
+        /// </summary>
+        public WebSocketServerBuilder UsePipeModelProvider()
+        {
+            _handler.Observer = new WebSocketMessageObserver(new PipeModelProvider(), _handler.Observer.ErrorAction);
+            return this;
+        }
+
+        /// <summary>
+        /// Uses payload model provider
+        /// </summary>
+        public WebSocketServerBuilder UsePayloadModelProvider()
+        {
+            _handler.Observer = new WebSocketMessageObserver(new PayloadModelProvider(), _handler.Observer.ErrorAction);
+            return this;
+        }
+
+        /// <summary>
         /// Uses custom model provider
         /// </summary>
         public WebSocketServerBuilder UseModelProvider(IWebSocketModelProvider provider)
         {
             _handler.Observer = new WebSocketMessageObserver(provider, _handler.Observer.ErrorAction);
+            return this;
+        }
+
+        /// <summary>
+        /// Uses custom model provider
+        /// </summary>
+        public WebSocketServerBuilder UseModelProvider<TWebSocketModelProvider>() where TWebSocketModelProvider : IWebSocketModelProvider, new()
+        {
+            _handler.Observer = new WebSocketMessageObserver(new TWebSocketModelProvider(), _handler.Observer.ErrorAction);
             return this;
         }
 
@@ -157,7 +185,7 @@ namespace Horse.WebSocket.Models
 
             _handler.Observer.RegisterWebSocketHandler(handlerType, t => _handler.ServiceProvider.GetService(t));
             RegisterHandler(lifetime, handlerType);
-            
+
             return this;
         }
 
@@ -184,11 +212,11 @@ namespace Horse.WebSocket.Models
                 case ServiceLifetime.Transient:
                     _services.AddTransient(serviceType);
                     break;
-                
+
                 case ServiceLifetime.Singleton:
                     _services.AddSingleton(serviceType);
                     break;
-                
+
                 case ServiceLifetime.Scoped:
                     _services.AddScoped(serviceType);
                     break;

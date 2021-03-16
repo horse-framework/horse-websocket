@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Horse.WebSocket.Models.Internal;
+using Horse.WebSocket.Models.Providers;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Horse.WebSocket.Models
@@ -143,6 +144,16 @@ namespace Horse.WebSocket.Models
         }
 
         /// <summary>
+        /// Uses pipe model provider.
+        /// Models are sent in payload property in JSON model model-type|{ name: "foo" }
+        /// </summary>
+        public HorseWebSocketBuilder UsePipeModelProvider()
+        {
+            _modelProvider = new PayloadModelProvider();
+            return this;
+        }
+
+        /// <summary>
         /// Uses payload model provider.
         /// Models are sent in payload property in JSON model { type: "model-type", payload: your_model }
         /// </summary>
@@ -256,7 +267,7 @@ namespace Horse.WebSocket.Models
             if (_error != null)
                 connector.ExceptionThrown += new ExceptionEventMapper(connector, _error).Action;
 
-            connector.ModelProvider = _modelProvider ?? new WebSocketModelProvider();
+            connector.ModelProvider = _modelProvider ?? new PipeModelProvider();
             connector.Observer = new WebSocketMessageObserver(connector.ModelProvider, _error);
         }
 

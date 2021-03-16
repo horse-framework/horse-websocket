@@ -4,6 +4,7 @@ using Horse.Core;
 using Horse.Core.Protocols;
 using Horse.Protocols.WebSocket;
 using Horse.WebSocket.Models.Internal;
+using Horse.WebSocket.Models.Providers;
 
 namespace Horse.WebSocket.Models
 {
@@ -43,7 +44,7 @@ namespace Horse.WebSocket.Models
 
         internal ModelWsConnectionHandler()
         {
-            Observer = new WebSocketMessageObserver(new WebSocketModelProvider(), ErrorAction);
+            Observer = new WebSocketMessageObserver(new PipeModelProvider(), ErrorAction);
         }
 
         #region Events
