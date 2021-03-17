@@ -17,7 +17,8 @@ namespace Sample.ModelServer
             HorseServer server = new HorseServer();
 
             server.AddWebSockets(cfg => cfg.AddBus(services)
-                                           .UsePipeModelProvider(new NewtonsoftJsonModelSerializer())
+                                           //.UsePipeModelProvider(new NewtonsoftJsonModelSerializer())
+                                           .UseModelProvider<CustomModelProvider>()
                                            .AddTransientHandlers(typeof(Program))
                                            .OnError(exception => { Console.WriteLine("Error: " + exception); }));
 
@@ -25,7 +26,15 @@ namespace Sample.ModelServer
 
             server.UseHttp((request, response) =>
             {
-                response.StatusCode = HttpStatusCode.Accepted;
+                if (request.Path.Equals("/status", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    response.SetToText();
+                    response.StatusCode = HttpStatusCode.OK;
+                    response.Write("OK");
+                }
+                else
+                    response.StatusCode = HttpStatusCode.NotFound;
+
                 return Task.CompletedTask;
             });
 
