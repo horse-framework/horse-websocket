@@ -2,6 +2,7 @@
 using System.Net;
 using System.Threading.Tasks;
 using Horse.Protocols.Http;
+using Horse.Protocols.WebSocket;
 using Horse.Server;
 using Horse.WebSocket.Models;
 using Horse.WebSocket.Models.Serialization;
@@ -18,9 +19,27 @@ namespace Sample.ModelServer
 
             server.AddWebSockets(cfg => cfg.AddBus(services)
                                            //.UsePipeModelProvider(new NewtonsoftJsonModelSerializer())
+                                           //.UsePayloadModelProvider(new NewtonsoftJsonModelSerializer())
                                            .UseModelProvider<CustomModelProvider>()
                                            .AddTransientHandlers(typeof(Program))
-                                           .OnError(exception => { Console.WriteLine("Error: " + exception); }));
+                                           /*
+                                           .OnClientConnected((info, data) =>
+                                           {
+                                               WsServerSocket socket = new YourDerivedCustomSocket(info, data);
+                                               Task.FromResult(socket);
+                                           })
+                                           */
+                                           .OnClientReady(client =>
+                                           {
+                                               Console.WriteLine("Client connected");
+                                               return Task.CompletedTask;
+                                           })
+                                           .OnClientDisconnected(client =>
+                                           {
+                                               Console.WriteLine("Client disconnected");
+                                               return Task.CompletedTask;
+                                           })
+                                           .OnError(exception => Console.WriteLine("Error: " + exception)));
 
             server.UseWebSockets(services.BuildServiceProvider());
 
