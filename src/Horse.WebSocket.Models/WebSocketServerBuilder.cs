@@ -92,6 +92,10 @@ namespace Horse.WebSocket.Models
                 throw new InvalidOperationException("You must use Use...Provider methods before Add..Handler(s) methods. Change method call order.");
 
             _handler.Observer.Provider = new PipeModelProvider(serializer);
+
+            if (_services != null)
+                _services.AddSingleton(_handler.Observer.Provider);
+            
             return this;
         }
 
@@ -107,6 +111,10 @@ namespace Horse.WebSocket.Models
                 throw new InvalidOperationException("You must use Use...Provider methods before Add..Handler(s) methods. Change method call order.");
 
             _handler.Observer.Provider = new PayloadModelProvider(serializer);
+            
+            if (_services != null)
+                _services.AddSingleton(_handler.Observer.Provider);
+            
             return this;
         }
 
@@ -119,6 +127,10 @@ namespace Horse.WebSocket.Models
                 throw new InvalidOperationException("You must use Use...Provider methods before Add..Handler(s) methods. Change method call order.");
 
             _handler.Observer.Provider = provider;
+            
+            if (_services != null)
+                _services.AddSingleton(_handler.Observer.Provider);
+            
             return this;
         }
 
@@ -132,6 +144,10 @@ namespace Horse.WebSocket.Models
                 throw new InvalidOperationException("You must use Use...Provider methods before Add..Handler(s) methods. Change method call order.");
             
             _handler.Observer.Provider = new TWebSocketModelProvider();
+            
+            if (_services != null)
+                _services.AddSingleton(_handler.Observer.Provider);
+            
             return this;
         }
 
