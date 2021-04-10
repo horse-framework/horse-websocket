@@ -11,5 +11,10 @@ namespace Horse.Protocols.WebSocket
         /// Sends a websocket message
         /// </summary>
         Task<bool> SendAsync(WebSocketMessage message);
+
+        /// <summary>
+        /// Closes client connection
+        /// </summary>
+        void Disconnect();
     }
 }

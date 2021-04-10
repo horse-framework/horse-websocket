@@ -100,7 +100,7 @@ namespace Horse.WebSocket.Models
         /// <summary>
         /// Sends a model to a receiver client
         /// </summary>
-        public Task<bool> SendAsync<TModel>(WsServerSocket target, TModel model)
+        public Task<bool> SendAsync<TModel>(IHorseWebSocket target, TModel model)
         {
             WebSocketMessage message = Observer.Provider.Write(model);
             return target.SendAsync(message);
@@ -109,7 +109,7 @@ namespace Horse.WebSocket.Models
         /// <summary>
         /// Removes client from server
         /// </summary>
-        public void Disconnect(WsServerSocket client)
+        public void Disconnect(IHorseWebSocket client)
         {
             client.Disconnect();
         }
