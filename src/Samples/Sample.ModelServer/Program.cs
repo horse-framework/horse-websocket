@@ -5,8 +5,10 @@ using Horse.Protocols.Http;
 using Horse.Protocols.WebSocket;
 using Horse.Server;
 using Horse.WebSocket.Models;
+using Horse.WebSocket.Models.Providers;
 using Horse.WebSocket.Models.Serialization;
 using Microsoft.Extensions.DependencyInjection;
+using Sample.ModelServer.Models;
 
 namespace Sample.ModelServer
 {
@@ -19,9 +21,8 @@ namespace Sample.ModelServer
 
             server.AddWebSockets(cfg => cfg.AddBus(services)
                                            //.UsePipeModelProvider(new NewtonsoftJsonModelSerializer())
-                                           //.UsePayloadModelProvider(new NewtonsoftJsonModelSerializer())
-                                           .UseModelProvider<CustomModelProvider>()
-                                           .AddTransientHandlers(typeof(Program))
+                                           .UsePayloadModelProvider(new SystemJsonModelSerializer())
+                                           .AddSingletonHandlers(typeof(Program))
                                            /*
                                            .OnClientConnected((info, data) =>
                                            {
@@ -57,7 +58,7 @@ namespace Sample.ModelServer
                 return Task.CompletedTask;
             });
 
-            server.Run(9999);
+            server.Run(26111);
         }
     }
 }

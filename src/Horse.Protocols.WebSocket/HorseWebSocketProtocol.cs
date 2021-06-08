@@ -75,11 +75,11 @@ namespace Horse.Protocols.WebSocket
 
             info.State = ConnectionStates.Pipe;
             result.Socket = socket;
-            _server.HeartbeatManager.Add(socket);
+            _server.HeartbeatManager?.Add(socket);
 
             socket.SetCleanupAction(s =>
             {
-                _server.HeartbeatManager.Remove(socket);
+                _server.HeartbeatManager?.Remove(socket);
                 _handler.Disconnected(_server, s);
             });
 
