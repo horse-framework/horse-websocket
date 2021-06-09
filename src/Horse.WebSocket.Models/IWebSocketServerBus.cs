@@ -11,11 +11,11 @@ namespace Horse.WebSocket.Models
         /// <summary>
         /// Sends a message over websocket
         /// </summary>
-        Task<bool> SendAsync<TModel>(WsServerSocket target, TModel model);
+        Task<bool> SendAsync<TModel>(IHorseWebSocket target, TModel model);
 
         /// <summary>
         /// Removes client from server
         /// </summary>
-        void Disconnect(WsServerSocket client);
+        void Disconnect(IHorseWebSocket client);
     }
 }

@@ -13,8 +13,8 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Horse.Core" Version="5.0.1" />
-        <PackageReference Include="Horse.Server" Version="5.0.1" />
+        <PackageReference Include="Horse.Core" Version="5.0.2" />
+        <PackageReference Include="Horse.Server" Version="5.0.2" />
     </ItemGroup>
 
     <ItemGroup>

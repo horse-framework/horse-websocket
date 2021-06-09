@@ -7,8 +7,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Horse.Server" Version="5.0.1" />
-        <PackageReference Include="Horse.Mvc" Version="5.0.1" />
+        <PackageReference Include="Horse.Server" Version="5.0.2" />
+        <PackageReference Include="Horse.Mvc" Version="5.0.2" />
     </ItemGroup>
 
     <ItemGroup>

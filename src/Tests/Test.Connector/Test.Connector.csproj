@@ -15,8 +15,8 @@
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Horse.Server" Version="5.0.1" />
-        <PackageReference Include="Horse.Client.Connectors" Version="5.0.1" />
+        <PackageReference Include="Horse.Server" Version="5.0.2" />
+        <PackageReference Include="Horse.Client.Connectors" Version="5.0.2" />
     </ItemGroup>
     
     <ItemGroup>

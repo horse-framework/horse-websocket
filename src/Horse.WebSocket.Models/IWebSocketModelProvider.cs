@@ -15,16 +15,6 @@ namespace Horse.WebSocket.Models
         Type Resolve(WebSocketMessage message);
 
         /// <summary>
-        /// Gets code of the type
-        /// </summary>
-        string GetCode(Type type);
-
-        /// <summary>
-        /// Gets registered type
-        /// </summary>
-        Type GetType(string code);
-        
-        /// <summary>
         /// Registers new type to resolver with a code
         /// </summary>
         void Register(Type type);

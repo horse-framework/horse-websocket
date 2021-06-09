@@ -67,8 +67,8 @@ namespace Horse.WebSocket.Models.Providers
             Type openGeneric = typeof(PayloadFrame<>);
             Type genericType = openGeneric.MakeGenericType(modelType);
 
-            object model = Serializer.Deserialize(message.ToString(), genericType);
-            return model;
+            dynamic model = Serializer.Deserialize(message.ToString(), genericType);
+            return model.Payload;
         }
 
         /// <summary>
