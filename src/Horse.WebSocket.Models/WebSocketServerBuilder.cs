@@ -262,7 +262,7 @@ namespace Horse.WebSocket.Models
         /// Gets message bus of websocket server
         /// </summary>
         /// <returns></returns>
-        public WebSocketServerBuilder AddBus(IServiceCollection services)
+        public WebSocketServerBuilder UseMSDI(IServiceCollection services)
         {
             if (!services.Any(x => x.ServiceType == typeof(IWebSocketServerBus)))
                 services.AddSingleton<IWebSocketServerBus>(_handler);

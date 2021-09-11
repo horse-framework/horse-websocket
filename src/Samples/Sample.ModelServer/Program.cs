@@ -19,7 +19,7 @@ namespace Sample.ModelServer
             IServiceCollection services = new ServiceCollection();
             HorseServer server = new HorseServer();
 
-            server.AddWebSockets(cfg => cfg.AddBus(services)
+            server.AddWebSockets(cfg => cfg.UseMSDI(services)
                                            //.UsePipeModelProvider(new NewtonsoftJsonModelSerializer())
                                            .UsePayloadModelProvider(new SystemJsonModelSerializer())
                                            .AddSingletonHandlers(typeof(Program))
