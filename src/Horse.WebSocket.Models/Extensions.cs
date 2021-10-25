@@ -85,10 +85,10 @@ namespace Horse.WebSocket.Models
             connector.ServiceProvider = provider;
             
             foreach (Tuple<ServiceLifetime, Type> pair in connector.Builder.AssembyConsumers)
-                connector.Observer.RegisterWebSocketHandlers(type => connector.ServiceProvider.GetService(type), pair.Item2);
+                connector.Observer.RegisterWebSocketHandlers(() => connector.ServiceProvider, pair.Item2);
 
             foreach (Tuple<ServiceLifetime, Type, Type> tuple in connector.Builder.IndividualConsumers)
-                connector.Observer.RegisterWebSocketHandler(tuple.Item2, tuple.Item3, null, type => connector.ServiceProvider.GetService(type));
+                connector.Observer.RegisterWebSocketHandler(tuple.Item2, tuple.Item3, null, () => connector.ServiceProvider);
 
             connector.Builder = null;
             
@@ -106,10 +106,10 @@ namespace Horse.WebSocket.Models
             connector.ServiceProvider = provider;
             
             foreach (Tuple<ServiceLifetime, Type> pair in connector.Builder.AssembyConsumers)
-                connector.Observer.RegisterWebSocketHandlers(type => connector.ServiceProvider.GetService(type), pair.Item2);
+                connector.Observer.RegisterWebSocketHandlers(() => connector.ServiceProvider, pair.Item2);
 
             foreach (Tuple<ServiceLifetime, Type, Type> tuple in connector.Builder.IndividualConsumers)
-                connector.Observer.RegisterWebSocketHandler(tuple.Item2, tuple.Item3, null, type => connector.ServiceProvider.GetService(type));
+                connector.Observer.RegisterWebSocketHandler(tuple.Item2, tuple.Item3, null, () => connector.ServiceProvider);
 
             connector.Builder = null;
             

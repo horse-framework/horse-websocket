@@ -1,24 +1,25 @@
 using System;
 using System.Threading.Tasks;
 using Horse.Protocols.WebSocket;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Horse.WebSocket.Models.Internal
 {
     internal class ObserverExecuter<TModel> : ObserverExecuter
     {
         private readonly IWebSocketMessageHandler<TModel> _instance;
-        private readonly Func<Type, object> _factory;
+        private readonly Func<IServiceProvider> _providerFactory;
         private readonly Func<Action<Exception>> _errorFactory;
         private readonly Type _consumerType;
 
         public ObserverExecuter(Type consumerType,
                                 IWebSocketMessageHandler<TModel> instance,
-                                Func<Type, object> factory,
+                                Func<IServiceProvider> providerFactory,
                                 Func<Action<Exception>> errorFactory)
         {
             _consumerType = consumerType;
             _instance = instance;
-            _factory = factory;
+            _providerFactory = providerFactory;
             _errorFactory = errorFactory;
         }
 
@@ -29,13 +30,19 @@ namespace Horse.WebSocket.Models.Internal
             try
             {
                 if (_instance != null)
+                {
                     handler = _instance;
-                else if (_factory != null)
-                    handler = (IWebSocketMessageHandler<TModel>) _factory(_consumerType);
-                else
-                    return;
+                    
+                    await handler.Handle((TModel) model, message, client);
+                }
+                else if (_providerFactory != null)
+                {
+                    IServiceProvider provider = _providerFactory();
+                    using IServiceScope scope = provider.CreateScope();
+                    handler = (IWebSocketMessageHandler<TModel>) scope.ServiceProvider.GetService(_consumerType);
 
-                await handler.Handle((TModel) model, message, client);
+                    await handler.Handle((TModel) model, message, client);
+                }
             }
             catch (Exception e)
             {
