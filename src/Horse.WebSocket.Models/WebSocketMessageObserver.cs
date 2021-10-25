@@ -89,7 +89,7 @@ namespace Horse.WebSocket.Models
         /// <summary>
         /// Registers all handlers in assemblies of the types
         /// </summary>
-        public List<Type> RegisterWebSocketHandlers(Func<Type, object> observerFactory, params Type[] assemblyTypes)
+        public List<Type> RegisterWebSocketHandlers(Func<IServiceProvider> providerFactory, params Type[] assemblyTypes)
         {
             List<Type> items = new List<Type>();
             Type openQueueGeneric = typeof(IWebSocketMessageHandler<>);
@@ -110,10 +110,10 @@ namespace Horse.WebSocket.Models
                             Type[] genericArgs = interfaceType.GetGenericArguments();
 
                             object instance = null;
-                            if (observerFactory == null)
+                            if (providerFactory == null)
                                 instance = Activator.CreateInstance(type);
 
-                            RegisterWebSocketHandler(type, genericArgs[0], instance, observerFactory);
+                            RegisterWebSocketHandler(type, genericArgs[0], instance, providerFactory);
                             items.Add(type);
                         }
                     }
@@ -143,22 +143,22 @@ namespace Horse.WebSocket.Models
         /// <summary>
         /// Registers a websocket message handler
         /// </summary>
-        public void RegisterWebSocketHandler(Type observerType, Func<Type, object> observerFactory)
+        public void RegisterWebSocketHandler(Type observerType, Func<IServiceProvider> providerFactory)
         {
-            RegisterWebSocketHandler(observerType, observerType, null, observerFactory);
+            RegisterWebSocketHandler(observerType, observerType, null, providerFactory);
         }
 
         /// <summary>
         /// Registers a websocket message handler
         /// </summary>
-        internal void RegisterWebSocketHandler(Type observerType, Type modelType, object instance, Func<Type, object> observerFactory)
+        internal void RegisterWebSocketHandler(Type observerType, Type modelType, object instance, Func<IServiceProvider> providerFactory)
         {
             Func<Action<Exception>> errorFactory = () => ErrorAction;
             Type executerType = typeof(ObserverExecuter<>).MakeGenericType(modelType);
             ObserverExecuter executer = (ObserverExecuter) Activator.CreateInstance(executerType,
                                                                                     observerType,
                                                                                     instance,
-                                                                                    observerFactory,
+                                                                                    providerFactory,
                                                                                     errorFactory);
             Provider.Register(modelType);
             _executers.Add(modelType, executer);
