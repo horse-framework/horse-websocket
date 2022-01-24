@@ -88,5 +88,14 @@ namespace Sample.ModelServer
 
             return WebSocketMessage.FromString(JsonConvert.SerializeObject(frame));
         }
+
+        public WebSocketMessage Write(string customCode, object model)
+        {
+            dynamic frame = Activator.CreateInstance(model.GetType());
+            frame.Data = model;
+            frame.Type = customCode;
+
+            return WebSocketMessage.FromString(JsonConvert.SerializeObject(frame));
+        }
     }
 }

@@ -18,17 +18,25 @@ namespace Horse.WebSocket.Models
         /// Registers new type to resolver with a code
         /// </summary>
         void Register(Type type);
-        
+
         /// <summary>
         /// Gets a model from websocket message
         /// </summary>
         object Get(WebSocketMessage message, Type modelType);
-        
+
         /// <summary>
         /// Writes a model to websocket message
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
         WebSocketMessage Write(object model);
+
+        /// <summary>
+        /// Writes a model with customized code to websocket message
+        /// </summary>
+        /// <param name="customCode">Customized code. This value overrides default code for specified type</param>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        WebSocketMessage Write(string customCode, object model);
     }
 }

@@ -100,6 +100,21 @@ namespace Horse.WebSocket.Models.Providers
         }
 
         /// <summary>
+        /// Creates new websocket message and writes the model 
+        /// </summary>
+        public WebSocketMessage Write(string customCode, object model)
+        {
+            var obj = new
+            {
+                type = customCode,
+                payload = model
+            };
+
+            string content = Serializer.Serialize(obj);
+            return WebSocketMessage.FromString(content);
+        }
+
+        /// <summary>
         /// Resolves model type from websocket message
         /// </summary>
         public Type Resolve(WebSocketMessage message)
