@@ -4,8 +4,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Horse.Core;
 using Horse.Core.Protocols;
-using Horse.Protocols.WebSocket;
 using Horse.Server;
+using Horse.WebSocket.Protocol;
+using Horse.WebSocket.Server;
 
 namespace Sample.WebSocket.Server
 {
@@ -51,16 +52,16 @@ namespace Sample.WebSocket.Server
         {
             ServerWsHandler handler = new ServerWsHandler();
             HorseServer server = new HorseServer(new ServerOptions
-                                                 {
-                                                     PingInterval = 15,
-                                                     Hosts = new List<HostOptions>
-                                                             {
-                                                                 new HostOptions
-                                                                 {
-                                                                     Port = 4083
-                                                                 }
-                                                             }
-                                                 });
+            {
+                PingInterval = 15,
+                Hosts = new List<HostOptions>
+                {
+                    new HostOptions
+                    {
+                        Port = 4083
+                    }
+                }
+            });
             server.UseWebSockets(handler);
             server.Start();
 

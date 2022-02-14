@@ -2,8 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Horse.Protocols.WebSocket;
-using Horse.WebSocket.Models;
+using Horse.WebSocket.Protocol;
 using Newtonsoft.Json;
 
 namespace Sample.ModelServer

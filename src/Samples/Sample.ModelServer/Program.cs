@@ -2,13 +2,10 @@
 using System.Net;
 using System.Threading.Tasks;
 using Horse.Protocols.Http;
-using Horse.Protocols.WebSocket;
 using Horse.Server;
-using Horse.WebSocket.Models;
-using Horse.WebSocket.Models.Providers;
-using Horse.WebSocket.Models.Serialization;
+using Horse.WebSocket.Protocol.Serialization;
+using Horse.WebSocket.Server;
 using Microsoft.Extensions.DependencyInjection;
-using Sample.ModelServer.Models;
 
 namespace Sample.ModelServer
 {
@@ -20,27 +17,27 @@ namespace Sample.ModelServer
             HorseServer server = new HorseServer();
 
             server.AddWebSockets(cfg => cfg.UseMSDI(services)
-                                           //.UsePipeModelProvider(new NewtonsoftJsonModelSerializer())
-                                           .UsePayloadModelProvider(new SystemJsonModelSerializer())
-                                           .AddSingletonHandlers(typeof(Program))
-                                           /*
-                                           .OnClientConnected((info, data) =>
-                                           {
-                                               WsServerSocket socket = new YourDerivedCustomSocket(info, data);
-                                               Task.FromResult(socket);
-                                           })
-                                           */
-                                           .OnClientReady(client =>
-                                           {
-                                               Console.WriteLine("Client connected");
-                                               return Task.CompletedTask;
-                                           })
-                                           .OnClientDisconnected(client =>
-                                           {
-                                               Console.WriteLine("Client disconnected");
-                                               return Task.CompletedTask;
-                                           })
-                                           .OnError(exception => Console.WriteLine("Error: " + exception)));
+                //.UsePipeModelProvider(new NewtonsoftJsonModelSerializer())
+                .UsePayloadModelProvider(new SystemJsonModelSerializer())
+                .AddSingletonHandlers(typeof(Program))
+                /*
+                .OnClientConnected((info, data) =>
+                {
+                    WsServerSocket socket = new YourDerivedCustomSocket(info, data);
+                    Task.FromResult(socket);
+                })
+                */
+                .OnClientReady(client =>
+                {
+                    Console.WriteLine("Client connected");
+                    return Task.CompletedTask;
+                })
+                .OnClientDisconnected(client =>
+                {
+                    Console.WriteLine("Client disconnected");
+                    return Task.CompletedTask;
+                })
+                .OnError(exception => Console.WriteLine("Error: " + exception)));
 
             server.UseWebSockets(services.BuildServiceProvider());
 

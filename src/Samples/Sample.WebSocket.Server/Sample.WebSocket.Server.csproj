@@ -2,8 +2,8 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>net5.0</TargetFramework>
-        <LangVersion>8</LangVersion>
+        <TargetFramework>net6.0</TargetFramework>
+        <LangVersion>10</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
@@ -13,12 +13,14 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Horse.Core" Version="5.0.2" />
-        <PackageReference Include="Horse.Server" Version="5.0.2" />
+        <PackageReference Include="Horse.Core" Version="6.0.1" />
+        <PackageReference Include="Horse.Server" Version="6.0.1" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\Horse.Protocols.WebSocket\Horse.Protocols.WebSocket.csproj" />
+      <ProjectReference Include="..\..\Horse.WebSocket.Client\Horse.WebSocket.Client.csproj" />
+      <ProjectReference Include="..\..\Horse.WebSocket.Protocol\Horse.WebSocket.Protocol.csproj" />
+      <ProjectReference Include="..\..\Horse.WebSocket.Server\Horse.WebSocket.Server.csproj" />
     </ItemGroup>
 
 </Project>

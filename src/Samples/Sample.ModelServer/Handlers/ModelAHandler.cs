@@ -1,8 +1,7 @@
 using System;
 using System.Threading.Tasks;
-using Horse.Protocols.WebSocket;
+using Horse.WebSocket.Protocol;
 using Sample.ModelServer.Models;
-using Horse.WebSocket.Models;
 
 namespace Sample.ModelServer.Handlers
 {
