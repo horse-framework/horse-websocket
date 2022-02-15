@@ -42,18 +42,18 @@ namespace Sample.WebSocket.Client
 
         static void ConnectWithHorse()
         {
-            HorseWebSocketConnection client = new HorseWebSocketConnection();
+            HorseWebSocket client = new HorseWebSocket();
+            //HorseWebSocketConnection client = new HorseWebSocketConnection();
             client.MessageReceived += (c, m) => Console.WriteLine("# " + m);
             client.Connected += c => Console.WriteLine("Connected");
             client.Disconnected += c => Console.WriteLine("Disconnected");
-            client.Connect("ws://127.0.0.1:4083");
-            //client.Connect("wss://echo.websocket.org");
-            client.PingInterval = TimeSpan.FromSeconds(5);
-
+            client.ConnectAsync("ws://127.0.0.1:4083");
+            //client.ConnectAsync("wss://echo.websocket.org");
+            
             while (true)
             {
                 string s = Console.ReadLine();
-                client.Send(s);
+                client.Connection.Send(s);
             }
         }
 

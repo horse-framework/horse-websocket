@@ -4,11 +4,11 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Horse.Core;
 using Horse.WebSocket.Protocol;
 using Horse.WebSocket.Protocol.Providers;
 using Horse.WebSocket.Protocol.Serialization;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Horse.WebSocket.Client;
 
@@ -27,19 +27,35 @@ public delegate void ClientConnectionHandler(HorseWebSocket client);
 /// </summary>
 public delegate void ClientErrorHandler(HorseWebSocket client, Exception exception, WebSocketMessage message = null);
 
+/// <summary>
+/// Horse WebSocket Client.
+/// TIdentifier is for multiple implementation on dependency injection libraries 
+/// </summary>
 public class HorseWebSocket<TIdentifier> : HorseWebSocket
 {
 }
 
+/// <summary>
+/// Horse WebSocket Client
+/// </summary>
 public class HorseWebSocket : IDisposable
 {
     #region Properties - Fields
 
+    /// <summary>
+    /// Remote Host with protocol name
+    /// </summary>
     public string RemoteHost { get; set; }
 
+    /// <summary>
+    /// Base connection object for websocket protocol
+    /// </summary>
     public HorseWebSocketConnection Connection { get; private set; }
 
-    public WebSocketMessageObserver Observer { get; private set; }
+    /// <summary>
+    /// Observer object for model implementations
+    /// </summary>
+    public WebSocketMessageObserver Observer { get; }
 
     /// <summary>
     /// The waiting time before reconnecting, after disconnection.
@@ -58,6 +74,9 @@ public class HorseWebSocket : IDisposable
         }
     }
 
+    /// <summary>
+    /// If true, client tries reconnect to the sever if disconnected.
+    /// </summary>
     public bool AutoReconnect => _autoReconnect;
 
     private IServiceCollection _services;
@@ -75,26 +94,6 @@ public class HorseWebSocket : IDisposable
     /// Returns true if connected
     /// </summary>
     public bool IsConnected => Connection != null && Connection.IsConnected;
-
-    /// <summary>
-    /// Internal connected event
-    /// </summary>
-    internal Action<HorseWebSocket> ConnectedAction { get; set; }
-
-    /// <summary>
-    /// Internal disconnected event
-    /// </summary>
-    internal Action<HorseWebSocket> DisconnectedAction { get; set; }
-
-    /// <summary>
-    /// Internal message received event
-    /// </summary>
-    internal Action<WebSocketMessage> MessageReceivedAction { get; set; }
-
-    /// <summary>
-    /// Internal error event
-    /// </summary>
-    internal Action<Exception> ErrorAction { get; set; }
 
     /// <summary>
     /// Triggered when client receives a message
@@ -120,11 +119,18 @@ public class HorseWebSocket : IDisposable
 
     #region Init - Connect - Destroy
 
+    /// <summary>
+    /// Creates new Horse WebSocket Client
+    /// </summary>
     public HorseWebSocket()
     {
         Observer = new WebSocketMessageObserver(new PipeModelProvider(new SystemJsonModelSerializer()), OnErrorOccured);
     }
 
+    /// <summary>
+    /// Disposes all resources of WebSocket Client.
+    /// If client is still connected, disconnects from the server.
+    /// </summary>
     public void Dispose()
     {
         _autoReconnect = false;
@@ -136,8 +142,23 @@ public class HorseWebSocket : IDisposable
 
     private void OnErrorOccured(Exception exception)
     {
-        ErrorAction?.Invoke(exception);
         Error?.Invoke(this, exception);
+    }
+
+    private void OnConnected(SocketBase socket)
+    {
+        Connected?.Invoke(this);
+    }
+
+    private void OnDisconnected(SocketBase socket)
+    {
+        Disconnected?.Invoke(this);
+    }
+
+    private void OnMessageReceived(ClientSocketBase<WebSocketMessage> socket, WebSocketMessage message)
+    {
+        _ = Observer.Read(message, Connection);
+        MessageReceived?.Invoke(this, message);
     }
 
     private void UpdateReconnectTimer()
@@ -180,6 +201,9 @@ public class HorseWebSocket : IDisposable
         }
     }
 
+    /// <summary>
+    /// Connects to specified remote host
+    /// </summary>
     public Task ConnectAsync(string host)
     {
         RemoteHost = host;
@@ -187,27 +211,45 @@ public class HorseWebSocket : IDisposable
         return ConnectAsync();
     }
 
+    /// <summary>
+    /// Connects to predefined remote host
+    /// </summary>
     public async Task<bool> ConnectAsync()
     {
         try
         {
             Connection = new HorseWebSocketConnection();
+            foreach (KeyValuePair<string, string> pair in _headers)
+                Connection.Data.Properties.Add(pair.Key, pair.Value);
+            
+            Connection.Connected += OnConnected;
+            Connection.Disconnected += OnDisconnected;
+            Connection.MessageReceived += OnMessageReceived;
             await Connection.ConnectAsync(RemoteHost);
             return true;
         }
         catch (Exception e)
         {
             OnErrorOccured(e);
+            Connection.Connected -= OnConnected;
+            Connection.Disconnected -= OnDisconnected;
+            Connection.MessageReceived -= OnMessageReceived;
             return false;
         }
     }
 
+    /// <summary>
+    /// Disconnects from the server and disabled auto reconnection if it's enabled.
+    /// </summary>
     public void Disconnect()
     {
         SetAutoReconnect(false);
 
         if (Connection != null)
         {
+            Connection.Connected -= OnConnected;
+            Connection.Disconnected -= OnDisconnected;
+            Connection.MessageReceived -= OnMessageReceived;
             Connection.Disconnect();
             Connection = null;
         }
@@ -283,6 +325,9 @@ public class HorseWebSocket : IDisposable
 
     #region Add Handlers
 
+    /// <summary>
+    /// Adds model handler with transient lifetime
+    /// </summary>
     public void AddHandlerTransient<TMessageHandler, TModel>() where TMessageHandler : IWebSocketMessageHandler<TModel>
     {
         if (_services == null)
@@ -294,6 +339,9 @@ public class HorseWebSocket : IDisposable
         _services.AddTransient(typeof(TMessageHandler));
     }
 
+    /// <summary>
+    /// Adds model handler with scoped lifetime
+    /// </summary>
     public void AddHandlerScoped<TMessageHandler, TModel>() where TMessageHandler : IWebSocketMessageHandler<TModel>
     {
         if (_services == null)
@@ -303,6 +351,9 @@ public class HorseWebSocket : IDisposable
         _services.AddScoped(typeof(TMessageHandler));
     }
 
+    /// <summary>
+    /// Adds model handler with singleton lifetime
+    /// </summary>
     public void AddHandlerSingleton<TMessageHandler, TModel>() where TMessageHandler : class, IWebSocketMessageHandler<TModel>
     {
         if (_services == null)
@@ -326,6 +377,9 @@ public class HorseWebSocket : IDisposable
         _services.AddSingleton(typeof(TMessageHandler));
     }
 
+    /// <summary>
+    /// Adds model handler with singleton lifetime
+    /// </summary>
     public void AddHandlerSingleton<TMessageHandler, TModel>(TMessageHandler instance) where TMessageHandler : class, IWebSocketMessageHandler<TModel>
     {
         if (_services == null)
@@ -338,6 +392,9 @@ public class HorseWebSocket : IDisposable
         _services.AddSingleton(instance);
     }
 
+    /// <summary>
+    /// Adds model handlers with transient lifetime in specified assemblies
+    /// </summary>
     public void AddHandlersTransient(params Type[] assemblyTypes)
     {
         if (_services == null)
@@ -350,6 +407,9 @@ public class HorseWebSocket : IDisposable
             _services.AddTransient(type);
     }
 
+    /// <summary>
+    /// Adds model handlers with scoped lifetime in specified assemblies
+    /// </summary>
     public void AddHandlersScoped(params Type[] assemblyTypes)
     {
         if (_services == null)
@@ -361,6 +421,9 @@ public class HorseWebSocket : IDisposable
             _services.AddScoped(type);
     }
 
+    /// <summary>
+    /// Adds model handlers with singleton lifetime in specified assemblies
+    /// </summary>
     public void AddHandlersSingleton(params Type[] assemblyTypes)
     {
         if (_services == null)

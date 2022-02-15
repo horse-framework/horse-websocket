@@ -34,6 +34,7 @@ namespace Sample.WebSocket.Server
         public async Task Received(IHorseServer server, IConnectionInfo info, WsServerSocket client, WebSocketMessage message)
         {
             Console.WriteLine(message);
+            await client.SendAsync("Response: " + message);
             await Task.CompletedTask;
         }
 
