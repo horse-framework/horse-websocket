@@ -1,5 +1,5 @@
 using System.Text.Json.Serialization;
-using Horse.WebSocket.Models;
+using Horse.WebSocket.Protocol;
 using Newtonsoft.Json;
 
 namespace Sample.ModelServer.Models

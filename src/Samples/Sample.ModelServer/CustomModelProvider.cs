@@ -2,8 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Horse.Protocols.WebSocket;
-using Horse.WebSocket.Models;
+using Horse.WebSocket.Protocol;
 using Newtonsoft.Json;
 
 namespace Sample.ModelServer
@@ -85,6 +84,15 @@ namespace Sample.ModelServer
             dynamic frame = Activator.CreateInstance(genericType);
             frame.Data = model;
             frame.Type = typeCode;
+
+            return WebSocketMessage.FromString(JsonConvert.SerializeObject(frame));
+        }
+
+        public WebSocketMessage Write(string customCode, object model)
+        {
+            dynamic frame = Activator.CreateInstance(model.GetType());
+            frame.Data = model;
+            frame.Type = customCode;
 
             return WebSocketMessage.FromString(JsonConvert.SerializeObject(frame));
         }
