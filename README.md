@@ -1,8 +1,7 @@
 # Horse WebSocket
 
-[![NuGet](https://img.shields.io/nuget/v/Horse.Client.WebSocket?label=client%20nuget)](https://www.nuget.org/packages/Horse.Client.WebSocket)
-[![NuGet](https://img.shields.io/nuget/v/Horse.Protocols.WebSocket?label=server%20nuget)](https://www.nuget.org/packages/Horse.Protocols.WebSocket)
-[![NuGet](https://img.shields.io/nuget/v/Horse.WebSocket.Models?label=extensions%20nuget)](https://www.nuget.org/packages/Horse.WebSocket.Models)
+[![NuGet](https://img.shields.io/nuget/v/Horse.WebSocket.Client?label=client%20nuget)](https://www.nuget.org/packages/Horse.WebSocket.Client)
+[![NuGet](https://img.shields.io/nuget/v/Horse.WebSocket.Server?label=server%20nuget)](https://www.nuget.org/packages/Horse.WebSocket.Server)
 
 Horse WebSocket includes websocket server and websocket client. Websocket servers runs on Horse Server. You can implement websocket server with Horse MVC and/or Horse MQ, or alone.
 
