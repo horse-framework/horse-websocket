@@ -477,7 +477,7 @@ public class HorseWebSocket : IDisposable
         if (serializer == null)
             serializer = new NewtonsoftJsonModelSerializer();
 
-        Observer.Provider = new PayloadModelProvider(serializer);
+        Observer.Provider = new PipeModelProvider(serializer);
     }
 
     /// <summary>
