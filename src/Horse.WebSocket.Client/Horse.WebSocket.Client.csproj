@@ -1,15 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net7.0</TargetFramework>
+        <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
         <LangVersion>10</LangVersion>
         <Title>Horse.WebSocket.Client</Title>
         <Product>Horse.WebSocket.Client</Product>
         <Description>Horse WebSocket Client to connect all WebSocket servers</Description>
         <PackageTags>horse,websocket,client</PackageTags>
-        <AssemblyVersion>6.4.0</AssemblyVersion>
-        <FileVersion>6.4.0</FileVersion>
-        <PackageVersion>6.4.0</PackageVersion>
+        <AssemblyVersion>6.4.1</AssemblyVersion>
+        <FileVersion>6.4.1</FileVersion>
+        <PackageVersion>6.4.1</PackageVersion>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Authors>Mehmet Helvacıköylü;Emre Hızlı</Authors>
         <PackageProjectUrl>https://github.com/horse-framework/horse-websocket</PackageProjectUrl>
@@ -27,7 +27,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Horse.Protocols.Http" Version="6.4.0" />
+        <PackageReference Include="Horse.Protocols.Http" Version="6.4.1" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
     </ItemGroup>
 
