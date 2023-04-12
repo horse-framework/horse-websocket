@@ -22,26 +22,27 @@ public class BinaryModelProvider : ISerializableProvider
     /// <summary>
     /// For getting codes by type
     /// </summary>
-    private readonly Dictionary<Type, int> _typeCodes = new Dictionary<Type, int>();
+    private readonly Dictionary<Type, short> _typeCodes = new Dictionary<Type, short>();
 
     /// <summary>
     /// For getting type by code
     /// </summary>
-    private readonly Dictionary<int, Type> _codeTypes = new Dictionary<int, Type>();
+    private readonly Dictionary<short, Type> _codeTypes = new Dictionary<short, Type>();
 
     public Type Resolve(WebSocketMessage message)
     {
         if (message.OpCode != SocketOpCode.Binary)
             return null;
             
-        if (message.Content.Length < 4)
+        if (message.Content.Length < 2)
             return null;
 
-        byte[] bytes = new byte[4];
-        message.Content.Read(bytes, 0, bytes.Length);
         message.Content.Position = 0;
 
-        int code = BitConverter.ToInt32(bytes, 0);
+        byte[] bytes = new byte[2];
+        message.Content.Read(bytes, 0, bytes.Length);
+
+        short code = BitConverter.ToInt16(bytes, 0);
 
         Type type;
         _codeTypes.TryGetValue(code, out type);
@@ -53,9 +54,9 @@ public class BinaryModelProvider : ISerializableProvider
         ModelTypeAttribute attribute = type.GetCustomAttribute<ModelTypeAttribute>(false);
         string code = attribute != null ? attribute.TypeCode : type.Name;
 
-        bool parse = int.TryParse(code, out int codeNumber);
+        bool parse = short.TryParse(code, out short codeNumber);
         if (!parse)
-            throw new InvalidOperationException("BinaryModelProvider supports only numeric Type Codes");
+            throw new InvalidOperationException("BinaryModelProvider supports only Int16 Type Codes");
 
         _typeCodes.Add(type, codeNumber);
         _codeTypes.Add(codeNumber, type);
@@ -65,7 +66,7 @@ public class BinaryModelProvider : ISerializableProvider
     {
         IBinaryWebSocketModel model = (IBinaryWebSocketModel) Activator.CreateInstance(modelType);
             
-        message.Content.Position = 4;
+        message.Content.Position = 2;
             
         using BinaryReader reader = new BinaryReader(message.Content, Encoding.UTF8, true);
         model.Deserialize(reader);
@@ -80,15 +81,15 @@ public class BinaryModelProvider : ISerializableProvider
             throw new InvalidCastException("Model must have IBinaryWebSocketModel implementation");
 
         Type type = model.GetType();
-        int code;
-        if (_typeCodes.ContainsKey(type))
-            code = _typeCodes[type];
+        short code;
+        if (_typeCodes.TryGetValue(type, out var typeCode))
+            code = typeCode;
         else
         {
             ModelTypeAttribute attr = type.GetCustomAttribute<ModelTypeAttribute>();
             string codeString = attr == null ? type.Name : attr.TypeCode;
 
-            bool parse = int.TryParse(codeString, out int codeNumber);
+            bool parse = short.TryParse(codeString, out short codeNumber);
             if (!parse)
                 throw new InvalidOperationException("BinaryModelProvider supports only numeric Type Codes");
 
@@ -112,7 +113,7 @@ public class BinaryModelProvider : ISerializableProvider
     {
         bool parse = int.TryParse(customCode, out int codeNumber);
         if (!parse)
-            throw new InvalidOperationException("BinaryModelProvider supports only numeric Type Codes");
+            throw new InvalidOperationException("BinaryModelProvider supports only Int16 Type Codes");
 
         IBinaryWebSocketModel binaryModel = model as IBinaryWebSocketModel;
         if (binaryModel == null)
