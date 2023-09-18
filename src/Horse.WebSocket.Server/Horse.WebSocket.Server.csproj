@@ -1,20 +1,19 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
-        <LangVersion>10</LangVersion>
         <Title>Horse.WebSocket.Server</Title>
         <Product>Horse.WebSocket.Server</Product>
         <Description>WebSocket Protocol Server extension for Horse Server</Description>
         <PackageTags>horse,tcp,server,http,websocket,protocol,ws</PackageTags>
-        <AssemblyVersion>6.2.1</AssemblyVersion>
-        <FileVersion>6.2.1</FileVersion>
-        <PackageVersion>6.2.1</PackageVersion>
+        <AssemblyVersion>6.4.2</AssemblyVersion>
+        <FileVersion>6.4.2</FileVersion>
+        <PackageVersion>6.4.2</PackageVersion>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Authors>Mehmet Helvacıköylü;Emre Hızlı</Authors>
         <PackageProjectUrl>https://github.com/horse-framework/horse-websocket</PackageProjectUrl>
         <PackageLicenseUrl>https://github.com/horse-framework/horse-websocket/blob/master/LICENSE</PackageLicenseUrl>
         <RepositoryUrl>https://github.com/horse-framework/horse-websocket</RepositoryUrl>
+        <TargetFrameworks>net7.0;net6.0</TargetFrameworks>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">

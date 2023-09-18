@@ -119,6 +119,22 @@ public class WebSocketServerBuilder
     }
 
     /// <summary>
+    /// Uses binary model provider. Models must implement IBinaryWebSocketModel interface.
+    /// </summary>
+    public WebSocketServerBuilder UseBinaryModelProvider()
+    {
+        if (_handler.Observer.HandlersRegistered)
+            throw new InvalidOperationException("You must use Use...Provider methods before Add..Handler(s) methods. Change method call order.");
+
+        _handler.Observer.Provider = new BinaryModelProvider();
+
+        if (_services != null)
+            _services.AddSingleton(_handler.Observer.Provider);
+
+        return this;
+    }
+
+    /// <summary>
     /// Uses custom model provider
     /// </summary>
     public WebSocketServerBuilder UseModelProvider(IWebSocketModelProvider provider)
