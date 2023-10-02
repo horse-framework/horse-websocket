@@ -3,24 +3,21 @@
 [![NuGet](https://img.shields.io/nuget/v/Horse.WebSocket.Client?label=client%20nuget)](https://www.nuget.org/packages/Horse.WebSocket.Client)
 [![NuGet](https://img.shields.io/nuget/v/Horse.WebSocket.Server?label=server%20nuget)](https://www.nuget.org/packages/Horse.WebSocket.Server)
 
-Horse WebSocket includes websocket server and websocket client. Websocket servers runs on Horse Server. You can implement websocket server with Horse MVC and/or Horse MQ, or alone.
+Horse WebSocket includes websocket server and websocket client. Websocket servers runs on Horse Server.
 
 #### Basic WebSocket Server Example
 
 ```C#
-class Program
-{
-    static void Main(string[] args)
+IHost host = Host.CreateDefaultBuilder(args)
+    .UseHorseWebSocketServer((context, builder) =>
     {
-        HorseServer server = new HorseServer();
-        server.UseWebSockets((socket, message) => { Console.WriteLine($"Received: {message}"); });
-    
-          //or advanced with IProtocolConnectionHandler<WebSocketMessage> implementation
-        
-        //server.UseWebSockets(new ServerWsHandler());
-        server.Run(80);
-    }
-}
+        builder.UseModelProvider<BinaryModelProvider>();
+        builder.AddTransientHandlers(typeof(Program));
+        builder.UsePort(888);
+    })
+    .Build();
+
+host.Run();
 ```
 
 #### Basic WebSocket Client Example
@@ -37,20 +34,6 @@ while (true)
     string s = Console.ReadLine();
     client.Send(s);
 }
-```
-     
-### Model Provider Example
-
-```C#
-IServiceCollection services = new ServiceCollection();
-HorseServer server = new HorseServer();
-
-server.AddWebSockets(cfg => cfg.AddBus(services)
-                               .AddTransientHandlers(typeof(Program));
-
-server.UseWebSockets(services.BuildServiceProvider());
-
-server.Run(9999);
 ```
      
 **Handler Implementation**
