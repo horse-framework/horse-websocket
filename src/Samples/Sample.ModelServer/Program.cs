@@ -3,9 +3,11 @@ using System.Net;
 using System.Threading.Tasks;
 using Horse.Protocols.Http;
 using Horse.Server;
+using Horse.WebSocket.Protocol.Providers;
 using Horse.WebSocket.Protocol.Serialization;
 using Horse.WebSocket.Server;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace Sample.ModelServer
 {
@@ -13,34 +15,28 @@ namespace Sample.ModelServer
     {
         static void Main(string[] args)
         {
-            IServiceCollection services = new ServiceCollection();
-            HorseServer server = new HorseServer();
-
-            server.AddWebSockets(cfg => cfg.UseMSDI(services)
-                //.UsePipeModelProvider(new NewtonsoftJsonModelSerializer())
-                .UsePayloadModelProvider(new SystemJsonModelSerializer())
-                .AddSingletonHandlers(typeof(Program))
-                /*
-                .OnClientConnected((info, data) =>
+            IHost host = Host.CreateDefaultBuilder(args)
+                .UseHorseWebSocketServer((context, builder) =>
                 {
-                    WsServerSocket socket = new YourDerivedCustomSocket(info, data);
-                    Task.FromResult(socket);
-                })
-                */
-                .OnClientReady(client =>
-                {
-                    Console.WriteLine("Client connected");
-                    return Task.CompletedTask;
-                })
-                .OnClientDisconnected(client =>
-                {
-                    Console.WriteLine("Client disconnected");
-                    return Task.CompletedTask;
-                })
-                .OnError(exception => Console.WriteLine("Error: " + exception)));
+                    builder.UsePayloadModelProvider(new SystemJsonModelSerializer());
+                    builder.AddSingletonHandlers(typeof(Program));
+                    builder.OnClientReady(client =>
+                        {
+                            Console.WriteLine("Client connected");
+                            return Task.CompletedTask;
+                        })
+                        .OnClientDisconnected(client =>
+                        {
+                            Console.WriteLine("Client disconnected");
+                            return Task.CompletedTask;
+                        })
+                        .OnError(exception => Console.WriteLine("Error: " + exception));
 
-            server.UseWebSockets(services.BuildServiceProvider());
+                    builder.UsePort(888);
+                })
+                .Build();
 
+            HorseServer server = host.Services.GetService<HorseServer>();
             server.UseHttp((request, response) =>
             {
                 if (request.Path.Equals("/status", StringComparison.InvariantCultureIgnoreCase))
@@ -54,8 +50,8 @@ namespace Sample.ModelServer
 
                 return Task.CompletedTask;
             });
-
-            server.Run(26111);
+            
+            host.Run();
         }
     }
 }

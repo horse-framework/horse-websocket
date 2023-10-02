@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Horse.Core;
 using Horse.Core.Protocols;
+using Horse.WebSocket.Protocol.Security;
 
 namespace Horse.WebSocket.Protocol;
 
@@ -27,6 +28,8 @@ public class HorseWebSocketProtocol : IHorseProtocol
     /// Horse server
     /// </summary>
     private readonly IHorseServer _server;
+
+    internal IMessageEncryptor Encryptor { get; set; }
 
     /// <summary>
     /// Creates new Websocket protocol handler
@@ -73,6 +76,8 @@ public class HorseWebSocketProtocol : IHorseProtocol
         if (socket == null)
             return await Task.FromResult(new ProtocolHandshakeResult());
 
+        socket.Encryptor = Encryptor;
+
         info.State = ConnectionStates.Pipe;
         result.Socket = socket;
         _server.HeartbeatManager?.Add(socket);
@@ -115,6 +120,8 @@ public class HorseWebSocketProtocol : IHorseProtocol
 
             if (handshakeResult.Socket.SmartHealthCheck)
                 handshakeResult.Socket.KeepAlive();
+
+            Encryptor?.DecryptMessage(message);
 
             await ProcessMessage(info, handshakeResult.Socket, message);
         }
@@ -163,8 +170,7 @@ public class HorseWebSocketProtocol : IHorseProtocol
                 }
                 catch (Exception e)
                 {
-                    if (_server.Logger != null)
-                        _server.Logger.LogException("Unhandled Exception", e);
+                    _server.Logger?.LogException("Unhandled Exception", e);
                 }
 
                 break;

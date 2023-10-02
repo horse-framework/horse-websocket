@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using Horse.Core;
+using Horse.WebSocket.Protocol.Security;
 
 namespace Horse.WebSocket.Protocol;
 
@@ -24,6 +25,8 @@ public class WsServerSocket : SocketBase, IHorseWebSocket
     /// Socket's connection information
     /// </summary>
     public IConnectionInfo Info { get; }
+
+    internal IMessageEncryptor Encryptor { get; set; }
 
     private Action<WsServerSocket> _cleanupAction;
 
@@ -89,7 +92,7 @@ public class WsServerSocket : SocketBase, IHorseWebSocket
         if (ping.Length > 0)
             pong.Content = new MemoryStream(ping.Content.ToArray());
 
-        byte[] data = _writer.Create(pong).Result;
+        byte[] data = _writer.Create(pong, null);
         Send(data);
     }
 
@@ -98,7 +101,7 @@ public class WsServerSocket : SocketBase, IHorseWebSocket
     /// </summary>
     public bool Send(WebSocketMessage message)
     {
-        byte[] data = _writer.Create(message).Result;
+        byte[] data = _writer.Create(message, Encryptor);
         return Send(data);
     }
 
@@ -107,7 +110,7 @@ public class WsServerSocket : SocketBase, IHorseWebSocket
     /// </summary>
     public async Task<bool> SendAsync(WebSocketMessage message)
     {
-        byte[] data = await _writer.Create(message);
+        byte[] data = await _writer.CreateAsync(message, Encryptor);
         return Send(data);
     }
 
@@ -116,7 +119,7 @@ public class WsServerSocket : SocketBase, IHorseWebSocket
     /// </summary>
     public bool Send(string message)
     {
-        byte[] data = _writer.Create(WebSocketMessage.FromString(message)).Result;
+        byte[] data = _writer.Create(WebSocketMessage.FromString(message), Encryptor);
         return Send(data);
     }
 
@@ -125,7 +128,7 @@ public class WsServerSocket : SocketBase, IHorseWebSocket
     /// </summary>
     public async Task SendAsync(string message)
     {
-        byte[] data = await _writer.Create(WebSocketMessage.FromString(message));
+        byte[] data = await _writer.CreateAsync(WebSocketMessage.FromString(message), Encryptor);
         Send(data);
     }
 }

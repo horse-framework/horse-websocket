@@ -1,140 +1,37 @@
-using System;
+﻿using System;
 using Horse.Core;
-using Horse.Core.Protocols;
-using Horse.Protocols.Http;
-using Horse.WebSocket.Protocol;
+using Horse.Server;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Horse.WebSocket.Server;
 
 /// <summary>
-/// WebSocket extensions for server
+/// Server Implementations
 /// </summary>
 public static class ServerExtensions
 {
     /// <summary>
-    /// Uses websocket protocol
+    /// Initializes Horse WebSocket Server on HorseServer
     /// </summary>
-    public static IHorseServer AddWebSockets(this IHorseServer server, Action<WebSocketServerBuilder> cfg)
+    public static void AddWebSockets(this HorseServer server, IServiceCollection services, Action<WebSocketServerBuilder> configureDelegate)
     {
-        return AddWebSockets(server, HttpOptions.CreateDefault(), cfg);
+        WebSocketServerBuilder socketBuilder = new WebSocketServerBuilder();
+
+        configureDelegate(socketBuilder);
+        HorseServer builtServer = server == null ? socketBuilder.Build() : socketBuilder.Build(server);
+        socketBuilder.UseMSDI(services);
+
+        services.AddSingleton<IHorseServer>(builtServer);
+        services.AddSingleton(builtServer);
+        services.AddSingleton(socketBuilder.Handler);
     }
 
     /// <summary>
-    /// Uses websocket protocol
+    /// Initializes and starts websocket server handlers
     /// </summary>
-    public static IHorseServer AddWebSockets(this IHorseServer server, HttpOptions options, Action<WebSocketServerBuilder> cfg)
+    public static void UseWebSockets(this HorseServer server, IServiceProvider provider)
     {
-        //we need http protocol is added
-        IHorseProtocol http = server.FindProtocol("http");
-        if (http == null)
-        {
-            HorseHttpProtocol httpProtocol = new HorseHttpProtocol(server, new WebSocketHttpHandler(), options);
-            server.UseProtocol(httpProtocol);
-        }
-
-        WebSocketServerBuilder builder = new WebSocketServerBuilder();
-        cfg(builder);
-        ModelWsConnectionHandler handler = builder.Build();
-
-        HorseWebSocketProtocol protocol = new HorseWebSocketProtocol(server, handler);
-        server.UseProtocol(protocol);
-        return server;
-    }
-
-
-    /// <summary>
-    /// Uses websockets with service provider
-    /// </summary>
-    public static IHorseServer UseWebSockets(this IHorseServer server, IServiceProvider provider)
-    {
-        ModelWsConnectionHandler bus = (ModelWsConnectionHandler) provider.GetService<IWebSocketServerBus>();
-        bus.ServiceProvider = provider;
-        return server;
-    }
-
-    /// <summary>
-    /// Uses WebSocket Protocol and accepts HTTP connections which comes with "Upgrade: websocket" header data
-    /// </summary>
-    public static IHorseServer UseWebSockets(this IHorseServer server,
-        IProtocolConnectionHandler<WsServerSocket, WebSocketMessage> handler)
-    {
-        return UseWebSockets(server, handler, HttpOptions.CreateDefault());
-    }
-
-    /// <summary>
-    /// Uses WebSocket Protocol and accepts HTTP connections which comes with "Upgrade: websocket" header data
-    /// </summary>
-    public static IHorseServer UseWebSockets(this IHorseServer server,
-        WebSocketMessageRecievedHandler handlerAction)
-    {
-        return UseWebSockets(server, new MethodWebSocketConnectionHandler(handlerAction), HttpOptions.CreateDefault());
-    }
-
-    /// <summary>
-    /// Uses WebSocket Protocol and accepts HTTP connections which comes with "Upgrade: websocket" header data
-    /// </summary>
-    public static IHorseServer UseWebSockets(this IHorseServer server,
-        WebSocketMessageRecievedHandler handlerAction,
-        HttpOptions options)
-    {
-        return UseWebSockets(server, new MethodWebSocketConnectionHandler(handlerAction), options);
-    }
-
-    /// <summary>
-    /// Uses WebSocket Protocol and accepts HTTP connections which comes with "Upgrade: websocket" header data
-    /// </summary>
-    public static IHorseServer UseWebSockets(this IHorseServer server,
-        IProtocolConnectionHandler<WsServerSocket, WebSocketMessage> handler,
-        HttpOptions options)
-    {
-        //we need http protocol is added
-        IHorseProtocol http = server.FindProtocol("http");
-        if (http == null)
-        {
-            HorseHttpProtocol httpProtocol = new HorseHttpProtocol(server, new WebSocketHttpHandler(), options);
-            server.UseProtocol(httpProtocol);
-        }
-
-        HorseWebSocketProtocol protocol = new HorseWebSocketProtocol(server, handler);
-        server.UseProtocol(protocol);
-        return server;
-    }
-
-    /// <summary>
-    /// Uses WebSocket Protocol and accepts HTTP connections which comes with "Upgrade: websocket" header data
-    /// </summary>
-    public static IHorseServer UseWebSockets(this IHorseServer server,
-        WebSocketConnectedHandler connectedAction,
-        WebSocketMessageRecievedHandler messageAction)
-    {
-        return UseWebSockets(server,
-            new MethodWebSocketConnectionHandler(connectedAction, null, messageAction),
-            HttpOptions.CreateDefault());
-    }
-
-    /// <summary>
-    /// Uses WebSocket Protocol and accepts HTTP connections which comes with "Upgrade: websocket" header data
-    /// </summary>
-    public static IHorseServer UseWebSockets(this IHorseServer server,
-        WebSocketConnectedHandler connectedAction,
-        WebSocketReadyHandler readyAction,
-        WebSocketMessageRecievedHandler messageAction)
-    {
-        return UseWebSockets(server,
-            new MethodWebSocketConnectionHandler(connectedAction, readyAction, messageAction),
-            HttpOptions.CreateDefault());
-    }
-
-    /// <summary>
-    /// Uses WebSocket Protocol and accepts HTTP connections which comes with "Upgrade: websocket" header data
-    /// </summary>
-    public static IHorseServer UseWebSockets(this IHorseServer server,
-        WebSocketReadyHandler readyAction,
-        WebSocketMessageRecievedHandler messageAction)
-    {
-        return UseWebSockets(server,
-            new MethodWebSocketConnectionHandler(null, readyAction, messageAction),
-            HttpOptions.CreateDefault());
+        var handler = provider.GetService<ModelWsConnectionHandler>();
+        handler.ServiceProvider = provider;
     }
 }

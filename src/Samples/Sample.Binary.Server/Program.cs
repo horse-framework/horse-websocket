@@ -1,20 +1,14 @@
-﻿using Horse.Server;
-using Horse.WebSocket.Protocol.Providers;
+﻿using Horse.WebSocket.Protocol.Providers;
 using Horse.WebSocket.Server;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
-IServiceCollection services = new ServiceCollection();
+IHost host = Host.CreateDefaultBuilder(args)
+    .UseHorseWebSocketServer((context, builder) =>
+    {
+        builder.UseModelProvider<BinaryModelProvider>();
+        builder.AddTransientHandlers(typeof(Program));
+        builder.UsePort(888);
+    })
+    .Build();
 
-HorseServer server = new HorseServer();
-
-server.AddWebSockets(cfg =>
-{
-    cfg.UseMSDI(services);
-    cfg.UseModelProvider<BinaryModelProvider>();
-    cfg.AddTransientHandlers(typeof(Program));
-});
-
-var provider = services.BuildServiceProvider();
-server.UseWebSockets(provider);
-
-server.Run(888);
+host.Run();
