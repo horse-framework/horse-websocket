@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Horse.Core;
 using Horse.WebSocket.Protocol;
 using Horse.WebSocket.Protocol.Providers;
+using Horse.WebSocket.Protocol.Security;
 using Horse.WebSocket.Protocol.Serialization;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -56,6 +57,11 @@ public class HorseWebSocket : IDisposable
     /// Observer object for model implementations
     /// </summary>
     public WebSocketMessageObserver Observer { get; }
+
+    /// <summary>
+    /// Message Encryptor implementation
+    /// </summary>
+    public IMessageEncryptor Encryptor { get; set; }
 
     /// <summary>
     /// The waiting time before reconnecting, after disconnection.
@@ -157,6 +163,9 @@ public class HorseWebSocket : IDisposable
 
     private void OnMessageReceived(ClientSocketBase<WebSocketMessage> socket, WebSocketMessage message)
     {
+        if (Encryptor != null)
+            Encryptor.DecryptMessage(message);
+
         _ = Observer.Read(message, Connection);
         MessageReceived?.Invoke(this, message);
     }
@@ -219,9 +228,10 @@ public class HorseWebSocket : IDisposable
         try
         {
             Connection = new HorseWebSocketConnection();
+            Connection.Encryptor = Encryptor;
             foreach (KeyValuePair<string, string> pair in _headers)
                 Connection.Data.Properties.Add(pair.Key, pair.Value);
-            
+
             Connection.Connected += OnConnected;
             Connection.Disconnected += OnDisconnected;
             Connection.MessageReceived += OnMessageReceived;

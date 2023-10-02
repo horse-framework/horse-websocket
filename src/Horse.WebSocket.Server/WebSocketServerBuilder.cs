@@ -3,8 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Horse.Core;
+using Horse.Core.Protocols;
+using Horse.Protocols.Http;
+using Horse.Server;
 using Horse.WebSocket.Protocol;
 using Horse.WebSocket.Protocol.Providers;
+using Horse.WebSocket.Protocol.Security;
 using Horse.WebSocket.Protocol.Serialization;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -15,19 +19,83 @@ namespace Horse.WebSocket.Server;
 /// </summary>
 public class WebSocketServerBuilder
 {
-    private readonly ModelWsConnectionHandler _handler;
-
+    private IMessageEncryptor _encryptor;
     private IServiceCollection _services;
+    private ServerOptions _serverOptions = new ServerOptions();
+
+    internal ModelWsConnectionHandler Handler { get; private set; }
+    internal int Port { get; set; } = 80;
 
     internal WebSocketServerBuilder()
     {
-        _handler = new ModelWsConnectionHandler();
+        Handler = new ModelWsConnectionHandler();
     }
 
-    internal ModelWsConnectionHandler Build()
+    internal HorseServer Build()
     {
-        return _handler;
+        return Build(new HorseServer(_serverOptions));
     }
+
+    internal HorseServer Build(HorseServer server)
+    {
+        //we need http protocol is added
+        IHorseProtocol http = server.FindProtocol("http");
+        if (http == null)
+        {
+            HttpOptions httpOptions = HttpOptions.CreateDefault();
+            HorseHttpProtocol httpProtocol = new HorseHttpProtocol(server, new WebSocketHttpHandler(), httpOptions);
+            server.UseProtocol(httpProtocol);
+        }
+
+        HorseWebSocketProtocol protocol = new HorseWebSocketProtocol(server, Handler);
+        protocol.Encryptor = _encryptor;
+
+        server.UseProtocol(protocol);
+        return server;
+    }
+
+    #region Server Options
+
+    /// <summary>
+    /// Implement custom server options
+    /// </summary>
+    public WebSocketServerBuilder UseServerOptions(ServerOptions options)
+    {
+        _serverOptions = options;
+        return this;
+    }
+
+    /// <summary>
+    /// Configure server options
+    /// </summary>
+    public WebSocketServerBuilder ConfigureServerOptions(Action<ServerOptions> configure)
+    {
+        _serverOptions = new ServerOptions();
+        configure(_serverOptions);
+        return this;
+    }
+
+    /// <summary>
+    /// Changes Web Socket Server port. Default is 80.
+    /// </summary>
+    public WebSocketServerBuilder UsePort(int port)
+    {
+        Port = port;
+        return this;
+    }
+
+    /// <summary>
+    /// Uses message encryptor
+    /// </summary>
+    public WebSocketServerBuilder UseEncryption<TMessageEncryptor>(Action<TMessageEncryptor> config) where TMessageEncryptor : class, IMessageEncryptor, new()
+    {
+        TMessageEncryptor encryptor = new TMessageEncryptor();
+        _encryptor = encryptor;
+        config(encryptor);
+        return this;
+    }
+
+    #endregion
 
     #region Events
 
@@ -36,7 +104,7 @@ public class WebSocketServerBuilder
     /// </summary>
     public WebSocketServerBuilder OnClientConnected(Func<IConnectionInfo, ConnectionData, Task<WsServerSocket>> func)
     {
-        _handler.ConnectedFunc = func;
+        Handler.ConnectedFunc = func;
         return this;
     }
 
@@ -45,7 +113,7 @@ public class WebSocketServerBuilder
     /// </summary>
     public WebSocketServerBuilder OnClientReady(Func<WsServerSocket, Task> action)
     {
-        _handler.ReadyAction = action;
+        Handler.ReadyAction = action;
         return this;
     }
 
@@ -54,7 +122,7 @@ public class WebSocketServerBuilder
     /// </summary>
     public WebSocketServerBuilder OnClientDisconnected(Func<WsServerSocket, Task> action)
     {
-        _handler.DisconnectedAction = action;
+        Handler.DisconnectedAction = action;
         return this;
     }
 
@@ -63,7 +131,7 @@ public class WebSocketServerBuilder
     /// </summary>
     public WebSocketServerBuilder OnMessageReceived(Func<WebSocketMessage, WsServerSocket, Task> action)
     {
-        _handler.MessageReceivedAction = action;
+        Handler.MessageReceivedAction = action;
         return this;
     }
 
@@ -72,7 +140,7 @@ public class WebSocketServerBuilder
     /// </summary>
     public WebSocketServerBuilder OnError(Action<Exception> action)
     {
-        _handler.ErrorAction = action;
+        Handler.ErrorAction = action;
         return this;
     }
 
@@ -88,13 +156,13 @@ public class WebSocketServerBuilder
         if (serializer == null)
             serializer = new NewtonsoftJsonModelSerializer();
 
-        if (_handler.Observer.HandlersRegistered)
+        if (Handler.Observer.HandlersRegistered)
             throw new InvalidOperationException("You must use Use...Provider methods before Add..Handler(s) methods. Change method call order.");
 
-        _handler.Observer.Provider = new PipeModelProvider(serializer);
+        Handler.Observer.Provider = new PipeModelProvider(serializer);
 
         if (_services != null)
-            _services.AddSingleton(_handler.Observer.Provider);
+            _services.AddSingleton(Handler.Observer.Provider);
 
         return this;
     }
@@ -107,13 +175,13 @@ public class WebSocketServerBuilder
         if (serializer == null)
             serializer = new NewtonsoftJsonModelSerializer();
 
-        if (_handler.Observer.HandlersRegistered)
+        if (Handler.Observer.HandlersRegistered)
             throw new InvalidOperationException("You must use Use...Provider methods before Add..Handler(s) methods. Change method call order.");
 
-        _handler.Observer.Provider = new PayloadModelProvider(serializer);
+        Handler.Observer.Provider = new PayloadModelProvider(serializer);
 
         if (_services != null)
-            _services.AddSingleton(_handler.Observer.Provider);
+            _services.AddSingleton(Handler.Observer.Provider);
 
         return this;
     }
@@ -123,13 +191,13 @@ public class WebSocketServerBuilder
     /// </summary>
     public WebSocketServerBuilder UseBinaryModelProvider()
     {
-        if (_handler.Observer.HandlersRegistered)
+        if (Handler.Observer.HandlersRegistered)
             throw new InvalidOperationException("You must use Use...Provider methods before Add..Handler(s) methods. Change method call order.");
 
-        _handler.Observer.Provider = new BinaryModelProvider();
+        Handler.Observer.Provider = new BinaryModelProvider();
 
         if (_services != null)
-            _services.AddSingleton(_handler.Observer.Provider);
+            _services.AddSingleton(Handler.Observer.Provider);
 
         return this;
     }
@@ -139,13 +207,13 @@ public class WebSocketServerBuilder
     /// </summary>
     public WebSocketServerBuilder UseModelProvider(IWebSocketModelProvider provider)
     {
-        if (_handler.Observer.HandlersRegistered)
+        if (Handler.Observer.HandlersRegistered)
             throw new InvalidOperationException("You must use Use...Provider methods before Add..Handler(s) methods. Change method call order.");
 
-        _handler.Observer.Provider = provider;
+        Handler.Observer.Provider = provider;
 
         if (_services != null)
-            _services.AddSingleton(_handler.Observer.Provider);
+            _services.AddSingleton(Handler.Observer.Provider);
 
         return this;
     }
@@ -156,13 +224,13 @@ public class WebSocketServerBuilder
     public WebSocketServerBuilder UseModelProvider<TWebSocketModelProvider>()
         where TWebSocketModelProvider : IWebSocketModelProvider, new()
     {
-        if (_handler.Observer.HandlersRegistered)
+        if (Handler.Observer.HandlersRegistered)
             throw new InvalidOperationException("You must use Use...Provider methods before Add..Handler(s) methods. Change method call order.");
 
-        _handler.Observer.Provider = new TWebSocketModelProvider();
+        Handler.Observer.Provider = new TWebSocketModelProvider();
 
         if (_services != null)
-            _services.AddSingleton(_handler.Observer.Provider);
+            _services.AddSingleton(Handler.Observer.Provider);
 
         return this;
     }
@@ -174,7 +242,7 @@ public class WebSocketServerBuilder
     /// </summary>
     public WebSocketServerBuilder AddHandlers(params Type[] assemblyTypes)
     {
-        _handler.Observer.RegisterWebSocketHandlers(null, assemblyTypes);
+        Handler.Observer.RegisterWebSocketHandlers(null, assemblyTypes);
         return this;
     }
 
@@ -235,7 +303,7 @@ public class WebSocketServerBuilder
         if (_services == null)
             throw new ArgumentNullException("ServiceCollection is not attached yet. Use AddBus method before adding handlers.");
 
-        _handler.Observer.RegisterWebSocketHandler(handlerType, () => _handler.ServiceProvider);
+        Handler.Observer.RegisterWebSocketHandler(handlerType, () => Handler.ServiceProvider);
         RegisterHandler(lifetime, handlerType);
 
         return this;
@@ -249,7 +317,7 @@ public class WebSocketServerBuilder
         if (_services == null)
             throw new ArgumentNullException("ServiceCollection is not attached yet. Use AddBus method before adding handlers.");
 
-        List<Type> types = _handler.Observer.RegisterWebSocketHandlers(() => _handler.ServiceProvider, assemblyTypes);
+        List<Type> types = Handler.Observer.RegisterWebSocketHandlers(() => Handler.ServiceProvider, assemblyTypes);
         foreach (Type type in types)
             RegisterHandler(lifetime, type);
 
@@ -280,8 +348,8 @@ public class WebSocketServerBuilder
     /// <returns></returns>
     public WebSocketServerBuilder UseMSDI(IServiceCollection services)
     {
-        if (!services.Any(x => x.ServiceType == typeof(IWebSocketServerBus)))
-            services.AddSingleton<IWebSocketServerBus>(_handler);
+        if (services.All(x => x.ServiceType != typeof(IWebSocketServerBus)))
+            services.AddSingleton<IWebSocketServerBus>(Handler);
 
         _services = services;
 
@@ -294,7 +362,7 @@ public class WebSocketServerBuilder
     /// <returns></returns>
     public IWebSocketServerBus GetBus()
     {
-        return _handler;
+        return Handler;
     }
 
     #endregion

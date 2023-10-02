@@ -6,7 +6,10 @@ using Horse.Core;
 using Horse.Core.Protocols;
 using Horse.Server;
 using Horse.WebSocket.Protocol;
+using Horse.WebSocket.Protocol.Security;
 using Horse.WebSocket.Server;
+using Microsoft.Extensions.Hosting;
+using HostOptions = Horse.Server.HostOptions;
 
 namespace Sample.WebSocket.Server
 {
@@ -63,8 +66,23 @@ namespace Sample.WebSocket.Server
                     }
                 }
             });
-            server.UseWebSockets(handler);
-            server.Start();
+
+            AesMessageEncryptor encryptor = new AesMessageEncryptor();
+            byte[] key = new byte[16];
+            byte[] iv = new byte[16];
+            for (int i = 0; i < 16; i++)
+            {
+                key[i] = (byte) (i + 100);
+                iv[i] = (byte) (i + 50);
+            }
+
+            encryptor.SetKeys(key, iv);
+            
+            IHost host = Host.CreateDefaultBuilder()
+                .UseHorseWebSocketServer(server, 4083, handler)
+                .Build();
+
+            host.Run();
 
             while (true)
             {

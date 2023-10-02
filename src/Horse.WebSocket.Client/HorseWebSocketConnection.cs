@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Horse.Core;
 using Horse.Protocols.Http;
 using Horse.WebSocket.Protocol;
+using Horse.WebSocket.Protocol.Security;
 using PredefinedMessages = Horse.WebSocket.Protocol.PredefinedMessages;
 
 namespace Horse.WebSocket.Client;
@@ -29,6 +30,11 @@ public class HorseWebSocketConnection : ClientSocketBase<WebSocketMessage>, IHor
     /// Key value for the websocket connection
     /// </summary>
     public string WebSocketKey { get; private set; }
+
+    /// <summary>
+    /// Message Encryptor implementation
+    /// </summary>
+    internal IMessageEncryptor Encryptor { get; set; }
 
     #endregion
 
@@ -298,7 +304,7 @@ public class HorseWebSocketConnection : ClientSocketBase<WebSocketMessage>, IHor
         if (ping.Length > 0)
             pong.Content = new MemoryStream(ping.Content.ToArray());
 
-        byte[] data = _writer.Create(pong).Result;
+        byte[] data = _writer.Create(pong, null);
         Send(data);
     }
 
@@ -307,7 +313,7 @@ public class HorseWebSocketConnection : ClientSocketBase<WebSocketMessage>, IHor
     /// </summary>
     public bool Send(string message)
     {
-        byte[] data = _writer.Create(message).Result;
+        byte[] data = _writer.Create(message, Encryptor);
         return Send(data);
     }
 
@@ -316,7 +322,7 @@ public class HorseWebSocketConnection : ClientSocketBase<WebSocketMessage>, IHor
     /// </summary>
     public async Task<bool> SendAsync(string message)
     {
-        byte[] data = await _writer.Create(message);
+        byte[] data = await _writer.CreateAsync(message, Encryptor);
         return await SendAsync(data);
     }
 
@@ -325,7 +331,7 @@ public class HorseWebSocketConnection : ClientSocketBase<WebSocketMessage>, IHor
     /// </summary>
     public async Task<bool> SendAsync(WebSocketMessage message)
     {
-        byte[] data = await _writer.Create(message);
+        byte[] data = await _writer.CreateAsync(message, Encryptor);
         return await SendAsync(data);
     }
 

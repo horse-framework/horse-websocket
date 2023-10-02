@@ -52,12 +52,16 @@ internal sealed class ModelWsConnectionHandler : IWebSocketServerBus, IProtocolC
     /// <summary>
     /// Connected event
     /// </summary>
-    public Task<WsServerSocket> Connected(IHorseServer server, IConnectionInfo connection, ConnectionData data)
+    public async Task<WsServerSocket> Connected(IHorseServer server, IConnectionInfo connection, ConnectionData data)
     {
-        if (ConnectedFunc != null)
-            return ConnectedFunc(connection, data);
+        WsServerSocket socket;
 
-        return Task.FromResult(new WsServerSocket(server, connection));
+        if (ConnectedFunc != null)
+            socket = await ConnectedFunc(connection, data);
+        else
+            socket = new WsServerSocket(server, connection);
+
+        return socket;
     }
 
     /// <summary>
