@@ -82,10 +82,7 @@ public class PipeModelProvider : ISerializableProvider
     public WebSocketMessage Write(object model)
     {
         Type type = model.GetType();
-        string code;
-        if (_typeCodes.ContainsKey(type))
-            code = _typeCodes[type];
-        else
+        if (!_typeCodes.TryGetValue(type, out string code))
         {
             ModelTypeAttribute attr = type.GetCustomAttribute<ModelTypeAttribute>();
             code = attr == null ? type.Name : attr.TypeCode;
@@ -114,7 +111,7 @@ public class PipeModelProvider : ISerializableProvider
     {
         if (message.OpCode != SocketOpCode.UTF8)
             return null;
-            
+
         message.Content.Position = 0;
         byte[] buffer = new byte[256];
         int count = message.Content.Read(buffer, 0, buffer.Length);
