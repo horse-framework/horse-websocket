@@ -26,7 +26,7 @@ public class WebSocketMessage
     /// <summary>
     /// Message length
     /// </summary>
-    public long Length => Content != null ? Content.Length : 0;
+    public long Length => Content?.Length ?? 0;
 
     /// <summary>
     /// Message content stream

@@ -59,8 +59,7 @@ public class WebSocketWriter
 
         await WriteLengthAsync(ms, length);
 
-        if (value.Content != null)
-            value.Content.WriteTo(ms);
+        value.Content?.WriteTo(ms);
 
         return ms.ToArray();
     }
@@ -130,8 +129,8 @@ public class WebSocketWriter
         {
             stream.WriteByte(126);
             ushort len = (ushort) length;
-            Memory<byte> lenbytes = BitConverter.GetBytes(len);
-            await stream.WriteAsync(lenbytes);
+            byte[] lenbytes = BitConverter.GetBytes(len);
+            await stream.WriteAsync(new[] {lenbytes[1], lenbytes[0]}, 0, 2);
         }
 
         //9 (1 + ulong) bytes length
@@ -139,8 +138,8 @@ public class WebSocketWriter
         {
             stream.WriteByte(127);
             ulong len = length;
-            Memory<byte> lb = BitConverter.GetBytes(len);
-            await stream.WriteAsync(lb);
+            byte[] lb = BitConverter.GetBytes(len);
+            await stream.WriteAsync(new[] {lb[7], lb[6], lb[5], lb[4], lb[3], lb[2], lb[1], lb[0]}, 0, 8);
         }
     }
 
@@ -266,8 +265,8 @@ public class WebSocketWriter
         {
             stream.WriteByte(126);
             ushort len = (ushort) length;
-            ReadOnlySpan<byte> lenbytes = BitConverter.GetBytes(len);
-            stream.Write(lenbytes);
+            byte[] lenbytes = BitConverter.GetBytes(len);
+            stream.Write(new[] {lenbytes[1], lenbytes[0]}, 0, 2);
         }
 
         //9 (1 + ulong) bytes length
@@ -275,8 +274,8 @@ public class WebSocketWriter
         {
             stream.WriteByte(127);
             ulong len = length;
-            ReadOnlySpan<byte> lb = BitConverter.GetBytes(len);
-            stream.Write(lb);
+            byte[] lb = BitConverter.GetBytes(len);
+            stream.Write(new[] {lb[7], lb[6], lb[5], lb[4], lb[3], lb[2], lb[1], lb[0]}, 0, 8);
         }
     }
 
