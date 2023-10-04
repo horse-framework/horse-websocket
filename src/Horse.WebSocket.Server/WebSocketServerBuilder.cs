@@ -26,6 +26,11 @@ public class WebSocketServerBuilder
     internal ModelWsConnectionHandler Handler { get; private set; }
     internal int Port { get; set; } = 80;
 
+    /// <summary>
+    /// Microsoft Dependency Injection Service Collection
+    /// </summary>
+    public IServiceCollection Services => _services;
+
     internal WebSocketServerBuilder()
     {
         Handler = new ModelWsConnectionHandler();

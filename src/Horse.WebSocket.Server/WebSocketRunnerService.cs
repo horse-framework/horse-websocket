@@ -21,12 +21,17 @@ internal class WebSocketRunnerService : IHostedService
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        _server.Start(_port);
+        if (!_server.IsRunning)
+            _server.Start(_port);
+
         return Task.CompletedTask;
     }
 
     public Task StopAsync(CancellationToken cancellationToken)
     {
+        if (_server.IsRunning)
+            _server.Stop();
+        
         return Task.CompletedTask;
     }
 }

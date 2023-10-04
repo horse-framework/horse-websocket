@@ -11,7 +11,8 @@ namespace Horse.WebSocket.Server;
 public static class ServerExtensions
 {
     /// <summary>
-    /// Initializes Horse WebSocket Server on HorseServer
+    /// Initializes Horse WebSocket Server on HorseServer.
+    /// This implementation requires second UseWebSockets call with IServiceProvider parameter.
     /// </summary>
     public static void AddWebSockets(this HorseServer server, IServiceCollection services, Action<WebSocketServerBuilder> configureDelegate)
     {
