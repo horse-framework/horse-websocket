@@ -26,7 +26,6 @@ public static class HostingExtensions
         return UseHorseWebSocketServer(builder, null, configureDelegate);
     }
 
-
     /// <summary>
     /// Creates new Horse WebSocket Server
     /// </summary>
@@ -43,6 +42,72 @@ public static class HostingExtensions
         {
             socketBuilder.UseMSDI(services);
             configureDelegate(context, socketBuilder);
+
+            builtServer = server == null ? socketBuilder.Build() : socketBuilder.Build(server);
+
+            services.AddSingleton<IHorseServer>(builtServer);
+            services.AddSingleton(builtServer);
+
+            services.AddHostedService(provider =>
+            {
+                socketBuilder.Handler.ServiceProvider = provider;
+                WebSocketRunnerService hostedService = new WebSocketRunnerService(builtServer, provider, socketBuilder.Port);
+                return hostedService;
+            });
+        });
+
+        return builder;
+    }
+
+    /// <summary>
+    /// Creates new Horse WebSocket Server
+    /// </summary>
+    /// <param name="builder">Host Builder</param>
+    /// <param name="server">Custom server implementation</param>
+    /// <param name="configureDelegate">Configuration delegate</param>
+    /// <returns></returns>
+    public static IHostBuilder UseHorseWebSocketServer(this IHostBuilder builder, HorseServer server, Action<IServiceCollection, WebSocketServerBuilder> configureDelegate)
+    {
+        HorseServer builtServer;
+        WebSocketServerBuilder socketBuilder = new WebSocketServerBuilder();
+
+        builder.ConfigureServices((context, services) =>
+        {
+            socketBuilder.UseMSDI(services);
+            configureDelegate(services, socketBuilder);
+
+            builtServer = server == null ? socketBuilder.Build() : socketBuilder.Build(server);
+
+            services.AddSingleton<IHorseServer>(builtServer);
+            services.AddSingleton(builtServer);
+
+            services.AddHostedService(provider =>
+            {
+                socketBuilder.Handler.ServiceProvider = provider;
+                WebSocketRunnerService hostedService = new WebSocketRunnerService(builtServer, provider, socketBuilder.Port);
+                return hostedService;
+            });
+        });
+
+        return builder;
+    }
+
+    /// <summary>
+    /// Creates new Horse WebSocket Server
+    /// </summary>
+    /// <param name="builder">Host Builder</param>
+    /// <param name="server">Custom server implementation</param>
+    /// <param name="configureDelegate">Configuration delegate</param>
+    /// <returns></returns>
+    public static IHostBuilder UseHorseWebSocketServer(this IHostBuilder builder, HorseServer server, Action<HostBuilderContext, IServiceCollection, WebSocketServerBuilder> configureDelegate)
+    {
+        HorseServer builtServer;
+        WebSocketServerBuilder socketBuilder = new WebSocketServerBuilder();
+
+        builder.ConfigureServices((context, services) =>
+        {
+            socketBuilder.UseMSDI(services);
+            configureDelegate(context, services, socketBuilder);
 
             builtServer = server == null ? socketBuilder.Build() : socketBuilder.Build(server);
 
