@@ -8,13 +8,13 @@ internal class ObserverExecuter<TModel> : ObserverExecuter
 {
     private readonly IWebSocketMessageHandler<TModel> _instance;
     private readonly Func<IServiceProvider> _providerFactory;
-    private readonly Func<Action<Exception>> _errorFactory;
+    private readonly Func<Action<Exception, WebSocketMessage>> _errorFactory;
     private readonly Type _consumerType;
 
     public ObserverExecuter(Type consumerType,
         IWebSocketMessageHandler<TModel> instance,
         Func<IServiceProvider> providerFactory,
-        Func<Action<Exception>> errorFactory)
+        Func<Action<Exception, WebSocketMessage>> errorFactory)
     {
         _consumerType = consumerType;
         _instance = instance;
@@ -31,7 +31,6 @@ internal class ObserverExecuter<TModel> : ObserverExecuter
             if (_instance != null)
             {
                 handler = _instance;
-
                 await handler.Handle((TModel) model, message, client);
             }
             else if (_providerFactory != null)
@@ -39,13 +38,12 @@ internal class ObserverExecuter<TModel> : ObserverExecuter
                 IServiceProvider provider = _providerFactory();
                 using IServiceScope scope = provider.CreateScope();
                 handler = (IWebSocketMessageHandler<TModel>) scope.ServiceProvider.GetService(_consumerType);
-
                 await handler.Handle((TModel) model, message, client);
             }
         }
         catch (Exception e)
         {
-            Action<Exception> errorAction = null;
+            Action<Exception, WebSocketMessage> errorAction = null;
             if (_errorFactory != null)
             {
                 try
@@ -59,23 +57,18 @@ internal class ObserverExecuter<TModel> : ObserverExecuter
 
             if (handler == null)
             {
-                if (errorAction != null)
-                    errorAction(e);
-
+                errorAction?.Invoke(e, message);
                 return;
             }
 
             try
             {
                 await handler.OnError(e, (TModel) model, message, client);
-
-                if (errorAction != null)
-                    errorAction(e);
+                errorAction?.Invoke(e, message);
             }
             catch (Exception e2)
             {
-                if (errorAction != null)
-                    errorAction(e2);
+                errorAction?.Invoke(e2, message);
             }
         }
     }

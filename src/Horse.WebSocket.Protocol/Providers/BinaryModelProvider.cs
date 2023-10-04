@@ -29,6 +29,7 @@ public class BinaryModelProvider : ISerializableProvider
     /// </summary>
     private readonly Dictionary<short, Type> _codeTypes = new Dictionary<short, Type>();
 
+    /// <inheritdoc />
     public Type Resolve(WebSocketMessage message)
     {
         if (message.OpCode != SocketOpCode.Binary)
@@ -49,6 +50,7 @@ public class BinaryModelProvider : ISerializableProvider
         return type;
     }
 
+    /// <inheritdoc />
     public void Register(Type type)
     {
         ModelTypeAttribute attribute = type.GetCustomAttribute<ModelTypeAttribute>(false);
@@ -62,6 +64,7 @@ public class BinaryModelProvider : ISerializableProvider
         _codeTypes.Add(codeNumber, type);
     }
 
+    /// <inheritdoc />
     public object Get(WebSocketMessage message, Type modelType)
     {
         IBinaryWebSocketModel model = (IBinaryWebSocketModel) Activator.CreateInstance(modelType);
@@ -74,6 +77,7 @@ public class BinaryModelProvider : ISerializableProvider
         return model;
     }
 
+    /// <inheritdoc />
     public WebSocketMessage Write(object model)
     {
         IBinaryWebSocketModel binaryModel = model as IBinaryWebSocketModel;
@@ -109,6 +113,7 @@ public class BinaryModelProvider : ISerializableProvider
         return message;
     }
 
+    /// <inheritdoc />
     public WebSocketMessage Write(string customCode, object model)
     {
         bool parse = int.TryParse(customCode, out int codeNumber);

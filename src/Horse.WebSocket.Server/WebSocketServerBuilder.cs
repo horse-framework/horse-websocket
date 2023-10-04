@@ -143,7 +143,7 @@ public class WebSocketServerBuilder
     /// <summary>
     /// Action to handle errors
     /// </summary>
-    public WebSocketServerBuilder OnError(Action<Exception> action)
+    public WebSocketServerBuilder OnError(WebSocketErrorHandler action)
     {
         Handler.ErrorAction = action;
         return this;

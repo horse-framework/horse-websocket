@@ -25,9 +25,8 @@ internal sealed class ModelWsConnectionHandler : IWebSocketServerBus, IProtocolC
     internal Func<WebSocketMessage, WsServerSocket, Task> MessageReceivedAction { get; set; }
     internal Func<WsServerSocket, Task> DisconnectedAction { get; set; }
 
-    private Action<Exception> _errorAction;
-
-    internal Action<Exception> ErrorAction
+    private WebSocketErrorHandler _errorAction;
+    internal WebSocketErrorHandler ErrorAction
     {
         get => _errorAction;
         set

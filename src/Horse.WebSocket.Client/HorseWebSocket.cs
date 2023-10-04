@@ -146,7 +146,7 @@ public class HorseWebSocket : IDisposable
         Connection = null;
     }
 
-    private void OnErrorOccured(Exception exception)
+    private void OnErrorOccured(Exception exception, WebSocketMessage message, IHorseWebSocket client)
     {
         Error?.Invoke(this, exception);
     }
@@ -240,7 +240,7 @@ public class HorseWebSocket : IDisposable
         }
         catch (Exception e)
         {
-            OnErrorOccured(e);
+            OnErrorOccured(e, null, null);
             Connection.Connected -= OnConnected;
             Connection.Disconnected -= OnDisconnected;
             Connection.MessageReceived -= OnMessageReceived;

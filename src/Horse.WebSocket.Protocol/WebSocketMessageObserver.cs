@@ -9,13 +9,18 @@ using System.Threading.Tasks;
 namespace Horse.WebSocket.Protocol;
 
 /// <summary>
+/// Error handler for websocket messages
+/// </summary>
+public delegate void WebSocketErrorHandler(Exception exception, WebSocketMessage message, IHorseWebSocket client);
+
+/// <summary>
 /// Observer reads all received messages over websocket.
 /// Executes handler methods if models are registered.
 /// </summary>
 public class WebSocketMessageObserver
 {
     private readonly Dictionary<Type, ObserverExecuter> _executers = new();
-    internal Action<Exception> ErrorAction { get; set; }
+    internal WebSocketErrorHandler ErrorAction { get; set; }
 
     /// <summary>
     /// Returns true if at least one handler is registered
@@ -30,7 +35,7 @@ public class WebSocketMessageObserver
     /// <summary>
     /// Creates new websocket message observer
     /// </summary>
-    public WebSocketMessageObserver(IWebSocketModelProvider provider, Action<Exception> errorAction)
+    public WebSocketMessageObserver(IWebSocketModelProvider provider, WebSocketErrorHandler errorAction)
     {
         Provider = provider;
         ErrorAction = errorAction;
@@ -53,9 +58,7 @@ public class WebSocketMessageObserver
         }
         catch (Exception e)
         {
-            if (ErrorAction != null)
-                ErrorAction(e);
-
+            ErrorAction?.Invoke(e, message, client);
             return Task.CompletedTask;
         }
     }
@@ -155,7 +158,7 @@ public class WebSocketMessageObserver
     /// </summary>
     internal void RegisterWebSocketHandler(Type observerType, Type modelType, object instance, Func<IServiceProvider> providerFactory)
     {
-        Func<Action<Exception>> errorFactory = () => ErrorAction;
+        Func<WebSocketErrorHandler> errorFactory = () => ErrorAction;
         Type executerType = typeof(ObserverExecuter<>).MakeGenericType(modelType);
         ObserverExecuter executer = (ObserverExecuter) Activator.CreateInstance(executerType,
             observerType,
