@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Security.Cryptography;
 
 namespace Horse.WebSocket.Protocol.Security;
@@ -22,6 +23,9 @@ public class AesMessageEncryptor : IMessageEncryptor
     {
         _key = key1;
         _iv = key2;
+
+        if (key2.Length != 16)
+            throw new InvalidOperationException("AES IV Vector size must be 128 bits");
 
         if (_encryptor == null && _iv != null)
         {
@@ -49,10 +53,10 @@ public class AesMessageEncryptor : IMessageEncryptor
     {
         using MemoryStream ms = new MemoryStream();
         using CryptoStream cs = new CryptoStream(ms, _encryptor, CryptoStreamMode.Write);
-        
+
         cs.Write(plain, 0, plain.Length);
         cs.FlushFinalBlock();
-        
+
         return ms.ToArray();
     }
 
@@ -61,7 +65,7 @@ public class AesMessageEncryptor : IMessageEncryptor
     {
         using MemoryStream ms = new MemoryStream();
         using CryptoStream cs = new CryptoStream(ms, _decryptor, CryptoStreamMode.Write);
-        
+
         cs.Write(cipher);
         cs.FlushFinalBlock();
 

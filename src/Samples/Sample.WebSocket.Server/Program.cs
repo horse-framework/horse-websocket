@@ -77,7 +77,7 @@ namespace Sample.WebSocket.Server
             }
 
             encryptor.SetKeys(key, iv);
-            
+
             IHost host = Host.CreateDefaultBuilder()
                 .UseHorseWebSocketServer(server, 4083, handler)
                 .Build();

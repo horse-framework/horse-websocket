@@ -3,7 +3,6 @@ using System.Net;
 using System.Threading.Tasks;
 using Horse.Protocols.Http;
 using Horse.Server;
-using Horse.WebSocket.Protocol.Providers;
 using Horse.WebSocket.Protocol.Serialization;
 using Horse.WebSocket.Server;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,7 +29,7 @@ namespace Sample.ModelServer
                             Console.WriteLine("Client disconnected");
                             return Task.CompletedTask;
                         })
-                        .OnError(exception => Console.WriteLine("Error: " + exception));
+                        .OnError((exception, message, client) => Console.WriteLine("Error: " + exception));
 
                     builder.UsePort(888);
                 })

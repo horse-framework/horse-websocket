@@ -26,6 +26,11 @@ public class WebSocketServerBuilder
     internal ModelWsConnectionHandler Handler { get; private set; }
     internal int Port { get; set; } = 80;
 
+    /// <summary>
+    /// Microsoft Dependency Injection Service Collection
+    /// </summary>
+    public IServiceCollection Services => _services;
+
     internal WebSocketServerBuilder()
     {
         Handler = new ModelWsConnectionHandler();
@@ -138,7 +143,7 @@ public class WebSocketServerBuilder
     /// <summary>
     /// Action to handle errors
     /// </summary>
-    public WebSocketServerBuilder OnError(Action<Exception> action)
+    public WebSocketServerBuilder OnError(WebSocketErrorHandler action)
     {
         Handler.ErrorAction = action;
         return this;

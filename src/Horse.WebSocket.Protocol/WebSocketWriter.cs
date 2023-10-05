@@ -16,7 +16,7 @@ public class WebSocketWriter
     /// <summary>
     /// Writes message to specified stream.
     /// </summary>
-    public async Task WriteAsync(WebSocketMessage value, Stream stream, IMessageEncryptor encryptor)
+    public async Task WriteAsync(WebSocketMessage value, Stream stream, IMessageEncryptor encryptor = null)
     {
         encryptor?.EncryptMessage(value);
 
@@ -41,7 +41,7 @@ public class WebSocketWriter
     /// <summary>
     /// Creates byte array data of the message
     /// </summary>
-    public async Task<byte[]> CreateAsync(WebSocketMessage value, IMessageEncryptor encryptor)
+    public async Task<byte[]> CreateAsync(WebSocketMessage value, IMessageEncryptor encryptor = null)
     {
         encryptor?.EncryptMessage(value);
         await using MemoryStream ms = new MemoryStream();
@@ -67,7 +67,7 @@ public class WebSocketWriter
     /// <summary>
     /// Creates byte array data of the message
     /// </summary>
-    public async Task<byte[]> CreateAsync(string message, IMessageEncryptor encryptor)
+    public async Task<byte[]> CreateAsync(string message, IMessageEncryptor encryptor = null)
     {
         byte[] bytes = Encoding.UTF8.GetBytes(message);
 
@@ -150,7 +150,7 @@ public class WebSocketWriter
     /// <summary>
     /// Writes message to specified stream.
     /// </summary>
-    public void Write(WebSocketMessage value, Stream stream, IMessageEncryptor encryptor)
+    public void Write(WebSocketMessage value, Stream stream, IMessageEncryptor encryptor = null)
     {
         encryptor?.EncryptMessage(value);
 
@@ -175,7 +175,7 @@ public class WebSocketWriter
     /// <summary>
     /// Creates byte array data of the message
     /// </summary>
-    public byte[] Create(WebSocketMessage value, IMessageEncryptor encryptor)
+    public byte[] Create(WebSocketMessage value, IMessageEncryptor encryptor = null)
     {
         encryptor?.EncryptMessage(value);
 
@@ -193,17 +193,14 @@ public class WebSocketWriter
             length = (ulong) value.Content.Length;
 
         WriteLength(ms, length);
-
-        if (value.Content != null)
-            value.Content.WriteTo(ms);
-
+        value.Content?.WriteTo(ms);
         return ms.ToArray();
     }
 
     /// <summary>
     /// Creates byte array data of the message
     /// </summary>
-    public byte[] Create(string message, IMessageEncryptor encryptor)
+    public byte[] Create(string message, IMessageEncryptor encryptor = null)
     {
         byte[] bytes = Encoding.UTF8.GetBytes(message);
 
@@ -273,8 +270,7 @@ public class WebSocketWriter
         else
         {
             stream.WriteByte(127);
-            ulong len = length;
-            byte[] lb = BitConverter.GetBytes(len);
+            byte[] lb = BitConverter.GetBytes(length);
             stream.Write(new[] {lb[7], lb[6], lb[5], lb[4], lb[3], lb[2], lb[1], lb[0]}, 0, 8);
         }
     }
