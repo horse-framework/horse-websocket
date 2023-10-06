@@ -21,7 +21,7 @@ public class ChaCha20Poly1305Encryptor : IMessageEncryptor
 
         _defaultNonce = nonce;
     }
-    
+
     /// <summary>
     /// Key1 is AES RGB Key. Key2 is AES IV (Initialization vector). Key3 in unused.
     /// </summary>
@@ -58,38 +58,36 @@ public class ChaCha20Poly1305Encryptor : IMessageEncryptor
     }
 
     /// <inheritdoc/>
-    public void EncryptMessage(WebSocketMessage plainMessage)
+    public void EncryptMessage(WebSocketMessage plainMessage, byte[] nonce = null)
     {
         byte[] plain = plainMessage.Content.ToArray();
-        ReadOnlySpan<byte> nonce = _defaultNonce;
         byte[] cipher = new byte[plain.Length];
-        _cc20.Encrypt(nonce, plain, cipher, _tag);
+        _cc20.Encrypt(nonce ?? _defaultNonce, plain, cipher, _tag);
         plainMessage.Content = new MemoryStream(cipher);
     }
 
     /// <inheritdoc/>
-    public void DecryptMessage(WebSocketMessage cipherMessage)
+    public void DecryptMessage(WebSocketMessage cipherMessage, byte[] nonce = null)
     {
         byte[] cipher = cipherMessage.Content.ToArray();
-        ReadOnlySpan<byte> nonce = _defaultNonce;
         byte[] plaintext = new byte[cipher.Length];
-        _cc20.Decrypt(nonce, cipher, _tag, plaintext);
+        _cc20.Decrypt(nonce ?? _defaultNonce, cipher, _tag, plaintext);
         cipherMessage.Content = new MemoryStream(plaintext);
     }
 
     /// <inheritdoc/>
-    public byte[] EncryptData(byte[] plain)
+    public byte[] EncryptData(byte[] plain, byte[] nonce = null)
     {
         byte[] cipher = new byte[plain.Length];
-        _cc20.Encrypt(_defaultNonce, plain, cipher, _tag);
+        _cc20.Encrypt(nonce ?? _defaultNonce, plain, cipher, _tag);
         return cipher;
     }
 
     /// <inheritdoc/>
-    public byte[] DecryptData(byte[] cipher)
+    public byte[] DecryptData(byte[] cipher, byte[] nonce = null)
     {
         byte[] plaintext = new byte[cipher.Length];
-        _cc20.Decrypt(_defaultNonce, cipher, _tag, plaintext);
+        _cc20.Decrypt(nonce ?? _defaultNonce, cipher, _tag, plaintext);
         return plaintext;
     }
 }

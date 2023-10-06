@@ -35,21 +35,21 @@ public class AesMessageEncryptor : IMessageEncryptor
     }
 
     /// <inheritdoc/>
-    public void EncryptMessage(WebSocketMessage plainMessage)
+    public void EncryptMessage(WebSocketMessage plainMessage, byte[] nonce = null)
     {
         byte[] plain = plainMessage.Content.ToArray();
         plainMessage.Content = new MemoryStream(EncryptData(plain));
     }
 
     /// <inheritdoc/>
-    public void DecryptMessage(WebSocketMessage cipherMessage)
+    public void DecryptMessage(WebSocketMessage cipherMessage, byte[] nonce = null)
     {
         byte[] plain = cipherMessage.Content.ToArray();
         cipherMessage.Content = new MemoryStream(DecryptData(plain));
     }
 
     /// <inheritdoc/>
-    public byte[] EncryptData(byte[] plain)
+    public byte[] EncryptData(byte[] plain, byte[] nonce = null)
     {
         using MemoryStream ms = new MemoryStream();
         using CryptoStream cs = new CryptoStream(ms, _encryptor, CryptoStreamMode.Write);
@@ -61,7 +61,7 @@ public class AesMessageEncryptor : IMessageEncryptor
     }
 
     /// <inheritdoc/>
-    public byte[] DecryptData(byte[] cipher)
+    public byte[] DecryptData(byte[] cipher, byte[] nonce = null)
     {
         using MemoryStream ms = new MemoryStream();
         using CryptoStream cs = new CryptoStream(ms, _decryptor, CryptoStreamMode.Write);
