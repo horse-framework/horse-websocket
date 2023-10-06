@@ -19,7 +19,7 @@ public delegate void WebSocketErrorHandler(Exception exception, WebSocketMessage
 /// </summary>
 public class WebSocketMessageObserver
 {
-    private readonly Dictionary<Type, ObserverExecuter> _executers = new();
+    private readonly SortedDictionary<Type, ObserverExecuter> _executers = new();
     internal WebSocketErrorHandler ErrorAction { get; set; }
 
     /// <summary>
@@ -49,6 +49,7 @@ public class WebSocketMessageObserver
         try
         {
             Type type = Provider.Resolve(message);
+            
             if (type == null)
                 return Task.CompletedTask;
 
