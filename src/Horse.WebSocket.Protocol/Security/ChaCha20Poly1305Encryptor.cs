@@ -47,7 +47,7 @@ public class ChaCha20Poly1305Encryptor : IMessageEncryptor
 
         _cc20 = new ChaCha20Poly1305(key1);
 
-        if (key2.Length != 12)
+        if (key2 != null && key2.Length != 12)
             throw new InvalidOperationException("ChaCha20-Poly1305 Nonce length must be 96 bits");
 
         if (key3.Length != 16)
