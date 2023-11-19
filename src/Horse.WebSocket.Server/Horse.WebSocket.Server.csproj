@@ -5,9 +5,9 @@
         <Product>Horse.WebSocket.Server</Product>
         <Description>WebSocket Protocol Server extension for Horse Server</Description>
         <PackageTags>horse,tcp,server,http,websocket,protocol,ws</PackageTags>
-        <AssemblyVersion>6.5.12</AssemblyVersion>
-        <FileVersion>6.5.12</FileVersion>
-        <PackageVersion>6.5.12</PackageVersion>
+        <AssemblyVersion>6.5.13</AssemblyVersion>
+        <FileVersion>6.5.13</FileVersion>
+        <PackageVersion>6.5.13</PackageVersion>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Authors>Mehmet Helvacıköylü;Emre Hızlı</Authors>
         <PackageProjectUrl>https://github.com/horse-framework/horse-websocket</PackageProjectUrl>

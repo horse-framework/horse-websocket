@@ -20,6 +20,7 @@ public class WebSocketServerBuilder
     private IMessageEncryptor _encryptor;
     private IServiceCollection _services;
     private ServerOptions _serverOptions = new ServerOptions();
+    private bool _statusCodeResponsesDisabled = false;
 
     internal ModelWsConnectionHandler Handler { get; private set; }
     internal int Port { get; set; } = 80;
@@ -46,6 +47,7 @@ public class WebSocketServerBuilder
         if (http == null)
         {
             HttpOptions httpOptions = HttpOptions.CreateDefault();
+            httpOptions.UseDefaultStatusCodeResponse = !_statusCodeResponsesDisabled;
             HorseHttpProtocol httpProtocol = new HorseHttpProtocol(server, new WebSocketHttpHandler(), httpOptions);
             server.UseProtocol(httpProtocol);
         }
@@ -58,6 +60,14 @@ public class WebSocketServerBuilder
     }
 
     #region Server Options
+
+    /// <summary>
+    /// Disables default status code response pages
+    /// </summary>
+    public void DisableDefaultStatusCodePages()
+    {
+        _statusCodeResponsesDisabled = true;
+    }
 
     /// <summary>
     /// Implement custom server options
