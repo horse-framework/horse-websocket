@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Horse.Core;
@@ -54,6 +56,45 @@ namespace Sample.WebSocket.Server
 
         static void Main(string[] args)
         {
+            AesGcmMessageEncryptor gcm = new AesGcmMessageEncryptor();
+            ChaCha20Poly1305Encryptor cc = new ChaCha20Poly1305Encryptor();
+            gcm.SetKeys(Encoding.UTF8.GetBytes("12345123451234512345123451234512"), Encoding.UTF8.GetBytes("123451234512"), Encoding.UTF8.GetBytes("1234512345123451"));
+            cc.SetKeys(Encoding.UTF8.GetBytes("12345123451234512345123451234512"), Encoding.UTF8.GetBytes("123451234512"), Encoding.UTF8.GetBytes("1234512345123451"));
+            var msg = WebSocketMessage.FromString("Hello, world!");
+
+            gcm.EncryptMessage(msg);
+            gcm.DecryptMessage(msg);
+            cc.EncryptMessage(msg);
+            cc.DecryptMessage(msg);
+            Console.ReadLine();
+
+            while (true)
+            {
+                Stopwatch sw = Stopwatch.StartNew();
+                for (int i = 0; i < 1000000; i++)
+                {
+                    gcm.EncryptMessage(msg);
+                    gcm.DecryptMessage(msg);
+                }
+
+                sw.Stop();
+                Console.Write("Elapsed GCM " + sw.ElapsedMilliseconds);
+                Console.ReadLine();
+
+                sw = Stopwatch.StartNew();
+                for (int i = 0; i < 1000000; i++)
+                {
+                    cc.EncryptMessage(msg);
+                    cc.DecryptMessage(msg);
+                }
+
+                sw.Stop();
+                Console.Write("CC GCM " + sw.ElapsedMilliseconds);
+                Console.ReadLine();
+            }
+
+            return;
+
             ServerWsHandler handler = new ServerWsHandler();
             HorseServer server = new HorseServer(new ServerOptions
             {

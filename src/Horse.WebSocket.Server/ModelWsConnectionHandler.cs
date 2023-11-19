@@ -139,5 +139,8 @@ internal sealed class ModelWsConnectionHandler : IWebSocketServerBus, IProtocolC
         client.Disconnect();
     }
 
+    /// <inheritdoc />
+    public IWebSocketModelProvider GetModelProvider() => Observer.Provider;
+
     #endregion
 }
