@@ -9,6 +9,27 @@ using Horse.WebSocket.Protocol.Serialization;
 namespace Horse.WebSocket.Server;
 
 /// <summary>
+/// Executed when a client is connected to the server.
+/// The client class should be decided, instantiated in this method.
+/// </summary>
+public delegate Task<WsServerSocket> ConnectedHandler(IServiceProvider services, IConnectionInfo info, ConnectionData data);
+
+/// <summary>
+/// Executed after client is connected and completed all handshaking operations.
+/// </summary>
+public delegate Task ClientReadyHandler(IServiceProvider services, WsServerSocket client);
+
+/// <summary>
+/// Executed when a client sends a message to the server
+/// </summary>
+public delegate Task MessageReceivedHandler(IServiceProvider services, WebSocketMessage message, WsServerSocket socket);
+
+/// <summary>
+/// Executed when a client is disconnected from the server
+/// </summary>
+public delegate Task DisconnectedHandler(IServiceProvider services, WsServerSocket socket);
+
+/// <summary>
 /// Model based websocket connection handler
 /// </summary>
 internal sealed class ModelWsConnectionHandler : IWebSocketServerBus, IProtocolConnectionHandler<WsServerSocket, WebSocketMessage>
@@ -20,12 +41,13 @@ internal sealed class ModelWsConnectionHandler : IWebSocketServerBus, IProtocolC
     /// </summary>
     public WebSocketMessageObserver Observer { get; internal set; }
 
-    internal Func<IConnectionInfo, ConnectionData, Task<WsServerSocket>> ConnectedFunc { get; set; }
-    internal Func<WsServerSocket, Task> ReadyAction { get; set; }
-    internal Func<WebSocketMessage, WsServerSocket, Task> MessageReceivedAction { get; set; }
-    internal Func<WsServerSocket, Task> DisconnectedAction { get; set; }
+    internal ConnectedHandler ConnectedFunc { get; set; }
+    internal ClientReadyHandler ReadyAction { get; set; }
+    internal MessageReceivedHandler MessageReceivedAction { get; set; }
+    internal DisconnectedHandler DisconnectedAction { get; set; }
 
     private WebSocketErrorHandler _errorAction;
+
     internal WebSocketErrorHandler ErrorAction
     {
         get => _errorAction;
@@ -56,7 +78,7 @@ internal sealed class ModelWsConnectionHandler : IWebSocketServerBus, IProtocolC
         WsServerSocket socket;
 
         if (ConnectedFunc != null)
-            socket = await ConnectedFunc(connection, data);
+            socket = await ConnectedFunc(ServiceProvider, connection, data);
         else
             socket = new WsServerSocket(server, connection);
 
@@ -69,7 +91,7 @@ internal sealed class ModelWsConnectionHandler : IWebSocketServerBus, IProtocolC
     public Task Ready(IHorseServer server, WsServerSocket client)
     {
         if (ReadyAction != null)
-            return ReadyAction(client);
+            return ReadyAction(ServiceProvider, client);
 
         return Task.CompletedTask;
     }
@@ -82,7 +104,7 @@ internal sealed class ModelWsConnectionHandler : IWebSocketServerBus, IProtocolC
         await Observer.Read(message, client);
 
         if (MessageReceivedAction != null)
-            await MessageReceivedAction(message, client);
+            await MessageReceivedAction(ServiceProvider, message, client);
     }
 
     /// <summary>
@@ -91,7 +113,7 @@ internal sealed class ModelWsConnectionHandler : IWebSocketServerBus, IProtocolC
     public Task Disconnected(IHorseServer server, WsServerSocket client)
     {
         if (DisconnectedAction != null)
-            return DisconnectedAction(client);
+            return DisconnectedAction(ServiceProvider, client);
 
         return Task.CompletedTask;
     }
@@ -116,6 +138,9 @@ internal sealed class ModelWsConnectionHandler : IWebSocketServerBus, IProtocolC
     {
         client.Disconnect();
     }
+
+    /// <inheritdoc />
+    public IWebSocketModelProvider GetModelProvider() => Observer.Provider;
 
     #endregion
 }

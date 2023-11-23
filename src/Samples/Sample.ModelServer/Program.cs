@@ -19,12 +19,12 @@ namespace Sample.ModelServer
                 {
                     builder.UsePayloadModelProvider(new SystemJsonModelSerializer());
                     builder.AddSingletonHandlers(typeof(Program));
-                    builder.OnClientReady(client =>
+                    builder.OnClientReady((provider, client) =>
                         {
                             Console.WriteLine("Client connected");
                             return Task.CompletedTask;
                         })
-                        .OnClientDisconnected(client =>
+                        .OnClientDisconnected((provider, client) =>
                         {
                             Console.WriteLine("Client disconnected");
                             return Task.CompletedTask;
@@ -49,7 +49,7 @@ namespace Sample.ModelServer
 
                 return Task.CompletedTask;
             });
-            
+
             host.Run();
         }
     }

@@ -17,4 +17,9 @@ public interface IWebSocketServerBus
     /// Removes client from server
     /// </summary>
     void Disconnect(IHorseWebSocket client);
+
+    /// <summary>
+    /// Returns currently used model provider by the buss
+    /// </summary>
+    IWebSocketModelProvider GetModelProvider();
 }

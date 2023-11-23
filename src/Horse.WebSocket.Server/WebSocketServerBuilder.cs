@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using Horse.Core;
 using Horse.Core.Protocols;
 using Horse.Protocols.Http;
 using Horse.Server;
@@ -22,6 +20,7 @@ public class WebSocketServerBuilder
     private IMessageEncryptor _encryptor;
     private IServiceCollection _services;
     private ServerOptions _serverOptions = new ServerOptions();
+    private bool _statusCodeResponsesDisabled = false;
 
     internal ModelWsConnectionHandler Handler { get; private set; }
     internal int Port { get; set; } = 80;
@@ -48,6 +47,7 @@ public class WebSocketServerBuilder
         if (http == null)
         {
             HttpOptions httpOptions = HttpOptions.CreateDefault();
+            httpOptions.UseDefaultStatusCodeResponse = !_statusCodeResponsesDisabled;
             HorseHttpProtocol httpProtocol = new HorseHttpProtocol(server, new WebSocketHttpHandler(), httpOptions);
             server.UseProtocol(httpProtocol);
         }
@@ -60,6 +60,14 @@ public class WebSocketServerBuilder
     }
 
     #region Server Options
+
+    /// <summary>
+    /// Disables default status code response pages
+    /// </summary>
+    public void DisableDefaultStatusCodePages()
+    {
+        _statusCodeResponsesDisabled = true;
+    }
 
     /// <summary>
     /// Implement custom server options
@@ -107,7 +115,7 @@ public class WebSocketServerBuilder
     /// <summary>
     /// Action to handle client connections and decide client type
     /// </summary>
-    public WebSocketServerBuilder OnClientConnected(Func<IConnectionInfo, ConnectionData, Task<WsServerSocket>> func)
+    public WebSocketServerBuilder OnClientConnected(ConnectedHandler func)
     {
         Handler.ConnectedFunc = func;
         return this;
@@ -116,7 +124,7 @@ public class WebSocketServerBuilder
     /// <summary>
     /// Action to handle client ready status
     /// </summary>
-    public WebSocketServerBuilder OnClientReady(Func<WsServerSocket, Task> action)
+    public WebSocketServerBuilder OnClientReady(ClientReadyHandler action)
     {
         Handler.ReadyAction = action;
         return this;
@@ -125,7 +133,7 @@ public class WebSocketServerBuilder
     /// <summary>
     /// Action to handle client disconnections
     /// </summary>
-    public WebSocketServerBuilder OnClientDisconnected(Func<WsServerSocket, Task> action)
+    public WebSocketServerBuilder OnClientDisconnected(DisconnectedHandler action)
     {
         Handler.DisconnectedAction = action;
         return this;
@@ -134,7 +142,7 @@ public class WebSocketServerBuilder
     /// <summary>
     /// Action to handle received messages
     /// </summary>
-    public WebSocketServerBuilder OnMessageReceived(Func<WebSocketMessage, WsServerSocket, Task> action)
+    public WebSocketServerBuilder OnMessageReceived(MessageReceivedHandler action)
     {
         Handler.MessageReceivedAction = action;
         return this;

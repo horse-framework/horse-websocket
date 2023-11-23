@@ -49,6 +49,7 @@ public class WebSocketMessageObserver
         try
         {
             Type type = Provider.Resolve(message);
+            
             if (type == null)
                 return Task.CompletedTask;
 

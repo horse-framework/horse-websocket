@@ -151,7 +151,7 @@ public class HorseWebSocketProtocol : IHorseProtocol
     private static string CreateWebSocketGuid(string key)
     {
         byte[] keybytes = Encoding.UTF8.GetBytes(key + PredefinedMessages.WEBSOCKET_GUID);
-        return Convert.ToBase64String(SHA1.Create().ComputeHash(keybytes));
+        return Convert.ToBase64String(SHA1.HashData(keybytes));
     }
 
     /// <summary>
