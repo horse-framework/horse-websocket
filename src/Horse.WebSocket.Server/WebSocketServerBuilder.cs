@@ -108,6 +108,15 @@ public class WebSocketServerBuilder
         return this;
     }
 
+    /// <summary>
+    /// Adds authenticator for IWebSocketMessageHandler requests
+    /// </summary>
+    public WebSocketServerBuilder AddAuthenticator(IWebSocketAuthenticator authenticator)
+    {
+        Handler.Observer.Authenticators.Add(authenticator);
+        return this;
+    }
+
     #endregion
 
     #region Events

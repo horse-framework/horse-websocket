@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Horse.WebSocket.Protocol.Security;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Horse.WebSocket.Protocol;
@@ -22,23 +23,56 @@ internal class ObserverExecuter<TModel> : ObserverExecuter
         _errorFactory = errorFactory;
     }
 
+    private async Task<bool> CheckAuthentication(IHorseWebSocket client, WebSocketMessage message, Type modelType, Type handlerType)
+    {
+        if (!IsAuthenticationRequired)
+            return true;
+
+        WsServerSocket socket = (WsServerSocket) client;
+        if (!socket.IsAuthenticated)
+            return false;
+
+        foreach (IWebSocketAuthenticator authenticator in Observer.Authenticators)
+        {
+            if (!await authenticator.Authenticate(socket, message, modelType, handlerType))
+                return false;
+        }
+
+        return true;
+    }
+
     public override async Task Execute(object model, WebSocketMessage message, IHorseWebSocket client)
     {
         IWebSocketMessageHandler<TModel> handler = null;
 
         try
         {
+            TModel typedModel = (TModel) model;
             if (_instance != null)
             {
                 handler = _instance;
-                await handler.Handle((TModel) model, message, client);
+
+                if (!await CheckAuthentication(client, message, typeof(TModel), _instance.GetType()))
+                {
+                    await handler.OnUnauthenticated(typedModel, message, client);
+                    return;
+                }
+
+                await handler.Handle(typedModel, message, client);
             }
             else if (_providerFactory != null)
             {
                 IServiceProvider provider = _providerFactory();
                 using IServiceScope scope = provider.CreateScope();
                 handler = (IWebSocketMessageHandler<TModel>) scope.ServiceProvider.GetService(_consumerType);
-                await handler.Handle((TModel) model, message, client);
+
+                if (!await CheckAuthentication(client, message, typeof(TModel), _instance.GetType()))
+                {
+                    await handler.OnUnauthenticated(typedModel, message, client);
+                    return;
+                }
+
+                await handler.Handle(typedModel, message, client);
             }
         }
         catch (Exception e)
@@ -76,5 +110,8 @@ internal class ObserverExecuter<TModel> : ObserverExecuter
 
 internal abstract class ObserverExecuter
 {
+    internal WebSocketMessageObserver Observer { get; set; }
+    internal bool IsAuthenticationRequired { get; set; }
+
     public abstract Task Execute(object model, WebSocketMessage message, IHorseWebSocket client);
 }

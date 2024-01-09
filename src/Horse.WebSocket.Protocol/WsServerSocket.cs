@@ -26,6 +26,11 @@ public class WsServerSocket : SocketBase, IHorseWebSocket
     /// </summary>
     public IConnectionInfo Info { get; }
 
+    /// <summary>
+    /// True, if user is authenticated
+    /// </summary>
+    public bool IsAuthenticated { get; set; }
+
     internal IMessageEncryptor Encryptor { get; set; }
 
     private Action<WsServerSocket> _cleanupAction;

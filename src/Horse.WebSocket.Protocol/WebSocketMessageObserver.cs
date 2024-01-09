@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Horse.WebSocket.Protocol.Security;
 
 [assembly: InternalsVisibleTo("Horse.WebSocket.Client")]
 [assembly: InternalsVisibleTo("Horse.WebSocket.Server")]
@@ -32,6 +34,8 @@ public class WebSocketMessageObserver
     /// </summary>
     public IWebSocketModelProvider Provider { get; internal set; }
 
+    internal List<IWebSocketAuthenticator> Authenticators { get; } = new List<IWebSocketAuthenticator>();
+
     /// <summary>
     /// Creates new websocket message observer
     /// </summary>
@@ -49,7 +53,7 @@ public class WebSocketMessageObserver
         try
         {
             Type type = Provider.Resolve(message);
-            
+
             if (type == null)
                 return Task.CompletedTask;
 
@@ -167,6 +171,11 @@ public class WebSocketMessageObserver
             providerFactory,
             errorFactory);
         Provider.Register(modelType);
+
+        AuthenticateAttribute attribute = executerType.GetCustomAttribute<AuthenticateAttribute>();
+        executer.IsAuthenticationRequired = attribute != null;
+        executer.Observer = this;
+        
         _executers.Add(modelType, executer);
         HandlersRegistered = true;
     }
