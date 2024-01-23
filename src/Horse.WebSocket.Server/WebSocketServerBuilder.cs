@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Horse.Core.Protocols;
 using Horse.Protocols.Http;
 using Horse.Server;
@@ -15,12 +14,12 @@ namespace Horse.WebSocket.Server;
 /// <summary>
 /// WebSocket Server builder
 /// </summary>
-public class WebSocketServerBuilder
+public class WebSocketServerBuilder<TClient> where TClient : IHorseWebSocket
 {
     private IMessageEncryptor _encryptor;
     private IServiceCollection _services;
     private ServerOptions _serverOptions = new ServerOptions();
-    private bool _statusCodeResponsesDisabled = false;
+    private bool _statusCodeResponsesDisabled;
 
     internal ModelWsConnectionHandler Handler { get; private set; }
     internal int Port { get; set; } = 80;
@@ -30,8 +29,9 @@ public class WebSocketServerBuilder
     /// </summary>
     public IServiceCollection Services => _services;
 
-    internal WebSocketServerBuilder()
+    internal WebSocketServerBuilder(IServiceCollection services)
     {
+        _services = services;
         Handler = new ModelWsConnectionHandler();
     }
 
@@ -72,7 +72,7 @@ public class WebSocketServerBuilder
     /// <summary>
     /// Implement custom server options
     /// </summary>
-    public WebSocketServerBuilder UseServerOptions(ServerOptions options)
+    public WebSocketServerBuilder<TClient> UseServerOptions(ServerOptions options)
     {
         _serverOptions = options;
         return this;
@@ -81,7 +81,7 @@ public class WebSocketServerBuilder
     /// <summary>
     /// Configure server options
     /// </summary>
-    public WebSocketServerBuilder ConfigureServerOptions(Action<ServerOptions> configure)
+    public WebSocketServerBuilder<TClient> ConfigureServerOptions(Action<ServerOptions> configure)
     {
         _serverOptions = new ServerOptions();
         configure(_serverOptions);
@@ -91,7 +91,7 @@ public class WebSocketServerBuilder
     /// <summary>
     /// Changes Web Socket Server port. Default is 80.
     /// </summary>
-    public WebSocketServerBuilder UsePort(int port)
+    public WebSocketServerBuilder<TClient> UsePort(int port)
     {
         Port = port;
         return this;
@@ -100,7 +100,7 @@ public class WebSocketServerBuilder
     /// <summary>
     /// Uses message encryptor
     /// </summary>
-    public WebSocketServerBuilder UseEncryption<TMessageEncryptor>(Action<TMessageEncryptor> config) where TMessageEncryptor : class, IMessageEncryptor, new()
+    public WebSocketServerBuilder<TClient> UseEncryption<TMessageEncryptor>(Action<TMessageEncryptor> config) where TMessageEncryptor : class, IMessageEncryptor, new()
     {
         TMessageEncryptor encryptor = new TMessageEncryptor();
         _encryptor = encryptor;
@@ -111,7 +111,7 @@ public class WebSocketServerBuilder
     /// <summary>
     /// Adds authenticator for IWebSocketMessageHandler requests
     /// </summary>
-    public WebSocketServerBuilder AddAuthenticator(IWebSocketAuthenticator authenticator)
+    public WebSocketServerBuilder<TClient> AddAuthenticator(IWebSocketAuthenticator authenticator)
     {
         Handler.Observer.Authenticators.Add(authenticator);
         return this;
@@ -124,7 +124,7 @@ public class WebSocketServerBuilder
     /// <summary>
     /// Action to handle client connections and decide client type
     /// </summary>
-    public WebSocketServerBuilder OnClientConnected(ConnectedHandler func)
+    public WebSocketServerBuilder<TClient> OnClientConnected(ConnectedHandler func)
     {
         Handler.ConnectedFunc = func;
         return this;
@@ -133,7 +133,7 @@ public class WebSocketServerBuilder
     /// <summary>
     /// Action to handle client ready status
     /// </summary>
-    public WebSocketServerBuilder OnClientReady(ClientReadyHandler action)
+    public WebSocketServerBuilder<TClient> OnClientReady(ClientReadyHandler action)
     {
         Handler.ReadyAction = action;
         return this;
@@ -142,7 +142,7 @@ public class WebSocketServerBuilder
     /// <summary>
     /// Action to handle client disconnections
     /// </summary>
-    public WebSocketServerBuilder OnClientDisconnected(DisconnectedHandler action)
+    public WebSocketServerBuilder<TClient> OnClientDisconnected(DisconnectedHandler action)
     {
         Handler.DisconnectedAction = action;
         return this;
@@ -151,7 +151,7 @@ public class WebSocketServerBuilder
     /// <summary>
     /// Action to handle received messages
     /// </summary>
-    public WebSocketServerBuilder OnMessageReceived(MessageReceivedHandler action)
+    public WebSocketServerBuilder<TClient> OnMessageReceived(MessageReceivedHandler action)
     {
         Handler.MessageReceivedAction = action;
         return this;
@@ -160,7 +160,7 @@ public class WebSocketServerBuilder
     /// <summary>
     /// Action to handle errors
     /// </summary>
-    public WebSocketServerBuilder OnError(WebSocketErrorHandler action)
+    public WebSocketServerBuilder<TClient> OnError(WebSocketErrorHandler action)
     {
         Handler.ErrorAction = action;
         return this;
@@ -173,7 +173,7 @@ public class WebSocketServerBuilder
     /// <summary>
     /// Uses pipe model provider
     /// </summary>
-    public WebSocketServerBuilder UsePipeModelProvider(IJsonModelSerializer serializer = null)
+    public WebSocketServerBuilder<TClient> UsePipeModelProvider(IJsonModelSerializer serializer = null)
     {
         if (serializer == null)
             serializer = new NewtonsoftJsonModelSerializer();
@@ -192,7 +192,7 @@ public class WebSocketServerBuilder
     /// <summary>
     /// Uses payload model provider
     /// </summary>
-    public WebSocketServerBuilder UsePayloadModelProvider(IJsonModelSerializer serializer = null)
+    public WebSocketServerBuilder<TClient> UsePayloadModelProvider(IJsonModelSerializer serializer = null)
     {
         if (serializer == null)
             serializer = new NewtonsoftJsonModelSerializer();
@@ -211,7 +211,7 @@ public class WebSocketServerBuilder
     /// <summary>
     /// Uses binary model provider. Models must implement IBinaryWebSocketModel interface.
     /// </summary>
-    public WebSocketServerBuilder UseBinaryModelProvider()
+    public WebSocketServerBuilder<TClient> UseBinaryModelProvider()
     {
         if (Handler.Observer.HandlersRegistered)
             throw new InvalidOperationException("You must use Use...Provider methods before Add..Handler(s) methods. Change method call order.");
@@ -227,7 +227,7 @@ public class WebSocketServerBuilder
     /// <summary>
     /// Uses custom model provider
     /// </summary>
-    public WebSocketServerBuilder UseModelProvider(IWebSocketModelProvider provider)
+    public WebSocketServerBuilder<TClient> UseModelProvider(IWebSocketModelProvider provider)
     {
         if (Handler.Observer.HandlersRegistered)
             throw new InvalidOperationException("You must use Use...Provider methods before Add..Handler(s) methods. Change method call order.");
@@ -243,7 +243,7 @@ public class WebSocketServerBuilder
     /// <summary>
     /// Uses custom model provider
     /// </summary>
-    public WebSocketServerBuilder UseModelProvider<TWebSocketModelProvider>()
+    public WebSocketServerBuilder<TClient> UseModelProvider<TWebSocketModelProvider>()
         where TWebSocketModelProvider : IWebSocketModelProvider, new()
     {
         if (Handler.Observer.HandlersRegistered)
@@ -262,16 +262,16 @@ public class WebSocketServerBuilder
     /// All handlers must have parameterless constructor.
     /// If you need to inject services, use overloads.
     /// </summary>
-    public WebSocketServerBuilder AddHandlers(params Type[] assemblyTypes)
+    public WebSocketServerBuilder<TClient> AddHandlers(params Type[] assemblyTypes)
     {
-        Handler.Observer.RegisterWebSocketHandlers(null, assemblyTypes);
+        Handler.Observer.RegisterWebSocketHandlers<TClient>(null, assemblyTypes);
         return this;
     }
 
     /// <summary>
     /// Registers a handler as transient
     /// </summary>
-    public WebSocketServerBuilder AddTransientHandler(Type handlerType)
+    public WebSocketServerBuilder<TClient> AddTransientHandler(Type handlerType)
     {
         return AddHandler(ServiceLifetime.Transient, handlerType);
     }
@@ -279,7 +279,7 @@ public class WebSocketServerBuilder
     /// <summary>
     /// Registers a handler as scoped
     /// </summary>
-    public WebSocketServerBuilder AddScopedHandler(Type handlerType)
+    public WebSocketServerBuilder<TClient> AddScopedHandler(Type handlerType)
     {
         return AddHandler(ServiceLifetime.Scoped, handlerType);
     }
@@ -287,7 +287,7 @@ public class WebSocketServerBuilder
     /// <summary>
     /// Registers a handler as singleton
     /// </summary>
-    public WebSocketServerBuilder AddSingletonHandler(Type handlerType)
+    public WebSocketServerBuilder<TClient> AddSingletonHandler(Type handlerType)
     {
         return AddHandler(ServiceLifetime.Singleton, handlerType);
     }
@@ -296,7 +296,7 @@ public class WebSocketServerBuilder
     /// <summary>
     /// Registers handlers as transient
     /// </summary>
-    public WebSocketServerBuilder AddTransientHandlers(params Type[] assemblyTypes)
+    public WebSocketServerBuilder<TClient> AddTransientHandlers(params Type[] assemblyTypes)
     {
         return AddHandlers(ServiceLifetime.Transient, assemblyTypes);
     }
@@ -304,7 +304,7 @@ public class WebSocketServerBuilder
     /// <summary>
     /// Registers handlers as scoped
     /// </summary>
-    public WebSocketServerBuilder AddScopedHandlers(params Type[] assemblyTypes)
+    public WebSocketServerBuilder<TClient> AddScopedHandlers(params Type[] assemblyTypes)
     {
         return AddHandlers(ServiceLifetime.Scoped, assemblyTypes);
     }
@@ -312,7 +312,7 @@ public class WebSocketServerBuilder
     /// <summary>
     /// Registers handlers as singleton
     /// </summary>
-    public WebSocketServerBuilder AddSingletonHandlers(params Type[] assemblyTypes)
+    public WebSocketServerBuilder<TClient> AddSingletonHandlers(params Type[] assemblyTypes)
     {
         return AddHandlers(ServiceLifetime.Singleton, assemblyTypes);
     }
@@ -320,12 +320,12 @@ public class WebSocketServerBuilder
     /// <summary>
     /// Registers handlers
     /// </summary>
-    private WebSocketServerBuilder AddHandler(ServiceLifetime lifetime, Type handlerType)
+    private WebSocketServerBuilder<TClient> AddHandler(ServiceLifetime lifetime, Type handlerType)
     {
         if (_services == null)
             throw new ArgumentNullException("ServiceCollection is not attached yet. Use AddBus method before adding handlers.");
 
-        Handler.Observer.RegisterWebSocketHandler(handlerType, () => Handler.ServiceProvider);
+        Handler.Observer.RegisterWebSocketHandler(handlerType, typeof(TClient), () => Handler.ServiceProvider);
         RegisterHandler(lifetime, handlerType);
 
         return this;
@@ -334,12 +334,12 @@ public class WebSocketServerBuilder
     /// <summary>
     /// Registers handlers
     /// </summary>
-    private WebSocketServerBuilder AddHandlers(ServiceLifetime lifetime, params Type[] assemblyTypes)
+    private WebSocketServerBuilder<TClient> AddHandlers(ServiceLifetime lifetime, params Type[] assemblyTypes)
     {
         if (_services == null)
             throw new ArgumentNullException("ServiceCollection is not attached yet. Use AddBus method before adding handlers.");
 
-        List<Type> types = Handler.Observer.RegisterWebSocketHandlers(() => Handler.ServiceProvider, assemblyTypes);
+        List<Type> types = Handler.Observer.RegisterWebSocketHandlers<TClient>(() => Handler.ServiceProvider, assemblyTypes);
         foreach (Type type in types)
             RegisterHandler(lifetime, type);
 
@@ -362,20 +362,6 @@ public class WebSocketServerBuilder
                 _services.AddScoped(serviceType);
                 break;
         }
-    }
-
-    /// <summary>
-    /// Gets message bus of websocket server
-    /// </summary>
-    /// <returns></returns>
-    public WebSocketServerBuilder UseMSDI(IServiceCollection services)
-    {
-        if (services.All(x => x.ServiceType != typeof(IWebSocketServerBus)))
-            services.AddSingleton<IWebSocketServerBus>(Handler);
-
-        _services = services;
-
-        return this;
     }
 
     /// <summary>

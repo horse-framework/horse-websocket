@@ -1,6 +1,7 @@
 ﻿using System;
 using Horse.Core;
 using Horse.Server;
+using Horse.WebSocket.Protocol;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Horse.WebSocket.Server;
@@ -14,13 +15,23 @@ public static class ServerExtensions
     /// Initializes Horse WebSocket Server on HorseServer.
     /// This implementation requires second UseWebSockets call with IServiceProvider parameter.
     /// </summary>
-    public static void AddWebSockets(this HorseServer server, IServiceCollection services, Action<WebSocketServerBuilder> configureDelegate)
+    public static void AddWebSockets(this HorseServer server, IServiceCollection services, Action<WebSocketServerBuilder<IHorseWebSocket>> configureDelegate)
     {
-        WebSocketServerBuilder socketBuilder = new WebSocketServerBuilder();
+        AddWebSockets<IHorseWebSocket>(server, services, configureDelegate);
+    }
+
+
+    /// <summary>
+    /// Initializes Horse WebSocket Server on HorseServer.
+    /// This implementation requires second UseWebSockets call with IServiceProvider parameter.
+    /// </summary>
+    public static void AddWebSockets<TClient>(this HorseServer server, IServiceCollection services, Action<WebSocketServerBuilder<TClient>> configureDelegate)
+        where TClient : IHorseWebSocket
+    {
+        WebSocketServerBuilder<TClient> socketBuilder = new WebSocketServerBuilder<TClient>(services);
 
         configureDelegate(socketBuilder);
         HorseServer builtServer = server == null ? socketBuilder.Build() : socketBuilder.Build(server);
-        socketBuilder.UseMSDI(services);
 
         services.AddSingleton<IHorseServer>(builtServer);
         services.AddSingleton(builtServer);

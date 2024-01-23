@@ -1,19 +1,20 @@
 using System;
+using System.Reflection;
 using System.Threading.Tasks;
 using Horse.WebSocket.Protocol.Security;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Horse.WebSocket.Protocol;
 
-internal class ObserverExecuter<TModel> : ObserverExecuter
+internal class ObserverExecuter<TModel, TClient> : ObserverExecuter where TClient : IHorseWebSocket
 {
-    private readonly IWebSocketMessageHandler<TModel> _instance;
+    private readonly IWebSocketMessageHandler<TModel, TClient> _instance;
     private readonly Func<IServiceProvider> _providerFactory;
     private readonly Func<WebSocketErrorHandler> _errorFactory;
     private readonly Type _consumerType;
 
     public ObserverExecuter(Type consumerType,
-        IWebSocketMessageHandler<TModel> instance,
+        IWebSocketMessageHandler<TModel, TClient> instance,
         Func<IServiceProvider> providerFactory,
         Func<WebSocketErrorHandler> errorFactory)
     {
@@ -25,7 +26,13 @@ internal class ObserverExecuter<TModel> : ObserverExecuter
 
     private async Task<bool> CheckAuthentication(IHorseWebSocket client, WebSocketMessage message, Type modelType, Type handlerType)
     {
-        if (!IsAuthenticationRequired)
+        if (!IsAuthenticationRequired.HasValue)
+        {
+            AuthenticateAttribute attribute = handlerType.GetCustomAttribute<AuthenticateAttribute>();
+            IsAuthenticationRequired = attribute != null;
+        }
+
+        if (!IsAuthenticationRequired.Value)
             return true;
 
         WsServerSocket socket = (WsServerSocket) client;
@@ -43,7 +50,7 @@ internal class ObserverExecuter<TModel> : ObserverExecuter
 
     public override async Task Execute(object model, WebSocketMessage message, IHorseWebSocket client)
     {
-        IWebSocketMessageHandler<TModel> handler = null;
+        IWebSocketMessageHandler<TModel, TClient> handler = null;
 
         try
         {
@@ -54,25 +61,25 @@ internal class ObserverExecuter<TModel> : ObserverExecuter
 
                 if (!await CheckAuthentication(client, message, typeof(TModel), _instance.GetType()))
                 {
-                    await handler.OnUnauthenticated(typedModel, message, client);
+                    await handler.OnUnauthenticated(typedModel, message, (TClient) client);
                     return;
                 }
 
-                await handler.Handle(typedModel, message, client);
+                await handler.Handle(typedModel, message, (TClient) client);
             }
             else if (_providerFactory != null)
             {
                 IServiceProvider provider = _providerFactory();
                 using IServiceScope scope = provider.CreateScope();
-                handler = (IWebSocketMessageHandler<TModel>) scope.ServiceProvider.GetService(_consumerType);
+                handler = (IWebSocketMessageHandler<TModel, TClient>) scope.ServiceProvider.GetService(_consumerType);
 
                 if (!await CheckAuthentication(client, message, typeof(TModel), _instance.GetType()))
                 {
-                    await handler.OnUnauthenticated(typedModel, message, client);
+                    await handler.OnUnauthenticated(typedModel, message, (TClient) client);
                     return;
                 }
 
-                await handler.Handle(typedModel, message, client);
+                await handler.Handle(typedModel, message, (TClient) client);
             }
         }
         catch (Exception e)
@@ -97,7 +104,7 @@ internal class ObserverExecuter<TModel> : ObserverExecuter
 
             try
             {
-                await handler.OnError(e, (TModel) model, message, client);
+                await handler.OnError(e, (TModel) model, message, (TClient) client);
                 errorAction?.Invoke(e, message, client);
             }
             catch (Exception e2)
@@ -111,7 +118,7 @@ internal class ObserverExecuter<TModel> : ObserverExecuter
 internal abstract class ObserverExecuter
 {
     internal WebSocketMessageObserver Observer { get; set; }
-    internal bool IsAuthenticationRequired { get; set; }
+    internal bool? IsAuthenticationRequired { get; set; }
 
     public abstract Task Execute(object model, WebSocketMessage message, IHorseWebSocket client);
 }

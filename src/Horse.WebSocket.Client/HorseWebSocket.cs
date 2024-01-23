@@ -338,33 +338,39 @@ public class HorseWebSocket : IDisposable
     /// <summary>
     /// Adds model handler with transient lifetime
     /// </summary>
-    public void AddHandlerTransient<TMessageHandler, TModel>() where TMessageHandler : IWebSocketMessageHandler<TModel>
+    public void AddHandlerTransient<TMessageHandler, TModel, TClient>()
+        where TMessageHandler : IWebSocketMessageHandler<TModel, TClient>
+        where TClient : IHorseWebSocket
     {
         if (_services == null)
         {
             throw new NotSupportedException("Transient handlers are support with Microsoft.Dependency.Injection library. Call UseServices method first");
         }
 
-        Observer.RegisterWebSocketHandler(typeof(TMessageHandler), () => _provider);
+        Observer.RegisterWebSocketHandler(typeof(TMessageHandler), typeof(TClient), () => _provider);
         _services.AddTransient(typeof(TMessageHandler));
     }
 
     /// <summary>
     /// Adds model handler with scoped lifetime
     /// </summary>
-    public void AddHandlerScoped<TMessageHandler, TModel>() where TMessageHandler : IWebSocketMessageHandler<TModel>
+    public void AddHandlerScoped<TMessageHandler, TModel, TClient>()
+        where TMessageHandler : IWebSocketMessageHandler<TModel, TClient>
+        where TClient : IHorseWebSocket
     {
         if (_services == null)
             throw new NotSupportedException("Scoped handlers are support with Microsoft.Dependency.Injection library. Call UseServices method first");
 
-        Observer.RegisterWebSocketHandler(typeof(TMessageHandler), () => _provider);
+        Observer.RegisterWebSocketHandler(typeof(TMessageHandler), typeof(TClient), () => _provider);
         _services.AddScoped(typeof(TMessageHandler));
     }
 
     /// <summary>
     /// Adds model handler with singleton lifetime
     /// </summary>
-    public void AddHandlerSingleton<TMessageHandler, TModel>() where TMessageHandler : class, IWebSocketMessageHandler<TModel>
+    public void AddHandlerSingleton<TMessageHandler, TModel, TClient>()
+        where TMessageHandler : class, IWebSocketMessageHandler<TModel, TClient>
+        where TClient : IHorseWebSocket
     {
         if (_services == null)
         {
@@ -379,26 +385,28 @@ public class HorseWebSocket : IDisposable
             }
 
             TMessageHandler instance = (TMessageHandler) Activator.CreateInstance(handlerType);
-            Observer.RegisterWebSocketHandler(typeof(TMessageHandler), typeof(TModel), instance, null);
+            Observer.RegisterWebSocketHandler(typeof(TMessageHandler), typeof(TModel), typeof(TClient), instance, null);
             return;
         }
 
-        Observer.RegisterWebSocketHandler(typeof(TMessageHandler), () => _provider);
+        Observer.RegisterWebSocketHandler(typeof(TMessageHandler), typeof(TClient), () => _provider);
         _services.AddSingleton(typeof(TMessageHandler));
     }
 
     /// <summary>
     /// Adds model handler with singleton lifetime
     /// </summary>
-    public void AddHandlerSingleton<TMessageHandler, TModel>(TMessageHandler instance) where TMessageHandler : class, IWebSocketMessageHandler<TModel>
+    public void AddHandlerSingleton<TMessageHandler, TModel, TClient>(TMessageHandler instance)
+        where TMessageHandler : class, IWebSocketMessageHandler<TModel, TClient>
+        where TClient : IHorseWebSocket
     {
         if (_services == null)
         {
-            Observer.RegisterWebSocketHandler(typeof(TMessageHandler), typeof(TModel), instance, null);
+            Observer.RegisterWebSocketHandler(typeof(TMessageHandler), typeof(TModel), typeof(TClient), instance, null);
             return;
         }
 
-        Observer.RegisterWebSocketHandler(typeof(TMessageHandler), () => _provider);
+        Observer.RegisterWebSocketHandler(typeof(TMessageHandler), typeof(TClient), () => _provider);
         _services.AddSingleton(instance);
     }
 
@@ -412,7 +420,7 @@ public class HorseWebSocket : IDisposable
             throw new NotSupportedException("Transient handlers are support with Microsoft.Dependency.Injection library. Call UseServices method first");
         }
 
-        List<Type> types = Observer.RegisterWebSocketHandlers(() => _provider, assemblyTypes);
+        List<Type> types = Observer.RegisterWebSocketHandlers<HorseWebSocketConnection>(() => _provider, assemblyTypes);
         foreach (Type type in types)
             _services.AddTransient(type);
     }
@@ -420,12 +428,12 @@ public class HorseWebSocket : IDisposable
     /// <summary>
     /// Adds model handlers with scoped lifetime in specified assemblies
     /// </summary>
-    public void AddHandlersScoped(params Type[] assemblyTypes)
+    public void AddHandlersScoped<TClient>(params Type[] assemblyTypes) where TClient : IHorseWebSocket
     {
         if (_services == null)
             throw new NotSupportedException("Scoped handlers are support with Microsoft.Dependency.Injection library. Call UseServices method first");
 
-        List<Type> types = Observer.RegisterWebSocketHandlers(() => _provider, assemblyTypes);
+        List<Type> types = Observer.RegisterWebSocketHandlers<TClient>(() => _provider, assemblyTypes);
 
         foreach (Type type in types)
             _services.AddScoped(type);
@@ -434,15 +442,15 @@ public class HorseWebSocket : IDisposable
     /// <summary>
     /// Adds model handlers with singleton lifetime in specified assemblies
     /// </summary>
-    public void AddHandlersSingleton(params Type[] assemblyTypes)
+    public void AddHandlersSingleton<TClient>(params Type[] assemblyTypes) where TClient : IHorseWebSocket
     {
         if (_services == null)
         {
-            Observer.RegisterWebSocketHandlers(null, assemblyTypes);
+            Observer.RegisterWebSocketHandlers<TClient>(null, assemblyTypes);
             return;
         }
 
-        List<Type> types = Observer.RegisterWebSocketHandlers(() => _provider, assemblyTypes);
+        List<Type> types = Observer.RegisterWebSocketHandlers<TClient>(() => _provider, assemblyTypes);
 
         foreach (Type type in types)
             _services.AddSingleton(type);
