@@ -66,7 +66,6 @@ public static class HostingExtensions
         builder.ConfigureServices((context, services) =>
         {
             WebSocketServerBuilder<TClient> socketBuilder = new WebSocketServerBuilder<TClient>(services);
-
             configureDelegate(context, socketBuilder);
             builtServer = server == null ? socketBuilder.Build() : socketBuilder.Build(server);
 

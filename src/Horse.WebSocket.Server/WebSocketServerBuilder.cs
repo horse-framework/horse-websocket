@@ -33,6 +33,7 @@ public class WebSocketServerBuilder<TClient> where TClient : IHorseWebSocket
     {
         _services = services;
         Handler = new ModelWsConnectionHandler();
+        services.AddSingleton<IWebSocketServerBus>(Handler);
     }
 
     internal HorseServer Build()

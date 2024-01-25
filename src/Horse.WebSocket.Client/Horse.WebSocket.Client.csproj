@@ -6,9 +6,9 @@
         <Product>Horse.WebSocket.Client</Product>
         <Description>Horse WebSocket Client to connect all WebSocket servers</Description>
         <PackageTags>horse,websocket,client</PackageTags>
-        <AssemblyVersion>6.8.0</AssemblyVersion>
-        <FileVersion>6.8.0</FileVersion>
-        <PackageVersion>6.8.0</PackageVersion>
+        <AssemblyVersion>6.8.1</AssemblyVersion>
+        <FileVersion>6.8.1</FileVersion>
+        <PackageVersion>6.8.1</PackageVersion>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Authors>Mehmet Helvacıköylü;Emre Hızlı</Authors>
         <PackageProjectUrl>https://github.com/horse-framework/horse-websocket</PackageProjectUrl>
