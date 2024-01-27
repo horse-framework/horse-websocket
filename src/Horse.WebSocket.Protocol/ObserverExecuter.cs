@@ -73,7 +73,7 @@ internal class ObserverExecuter<TModel, TClient> : ObserverExecuter where TClien
                 using IServiceScope scope = provider.CreateScope();
                 handler = (IWebSocketMessageHandler<TModel, TClient>) scope.ServiceProvider.GetService(_consumerType);
 
-                if (!await CheckAuthentication(client, message, typeof(TModel), _instance.GetType()))
+                if (!await CheckAuthentication(client, message, typeof(TModel), handler.GetType()))
                 {
                     await handler.OnUnauthenticated(typedModel, message, (TClient) client);
                     return;
