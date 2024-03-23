@@ -66,6 +66,20 @@ public class WsServerSocket : SocketBase, IHorseWebSocket
     }
 
     /// <summary>
+    /// Updates keys of message encryptor
+    /// </summary>
+    /// <param name="key1">Usually primary key</param>
+    /// <param name="key2">Usually nonce</param>
+    /// <param name="key3">Usually tag</param>
+    public void UpdateEncryptorKeys(byte[] key1, byte[] key2, byte[] key3)
+    {
+        if (Encryptor == null)
+            throw new NullReferenceException("Client does not have encryptor");
+
+        Encryptor.SetKeys(key1, key2, key3);
+    }
+
+    /// <summary>
     /// Sends websocket ping message
     /// </summary>
     public override void Ping()
