@@ -13,6 +13,11 @@ public interface IHorseWebSocket
     Task<bool> SendAsync(WebSocketMessage message);
 
     /// <summary>
+    /// Sends a websocket message
+    /// </summary>
+    Task<bool> SendAsync(WebSocketMessage message, byte encryptorNumber);
+    
+    /// <summary>
     /// Closes client connection
     /// </summary>
     void Disconnect();

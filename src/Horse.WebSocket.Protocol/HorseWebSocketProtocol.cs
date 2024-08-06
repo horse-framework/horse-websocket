@@ -29,7 +29,7 @@ public class HorseWebSocketProtocol : IHorseProtocol
     /// </summary>
     private readonly IHorseServer _server;
 
-    internal IMessageEncryptor Encryptor { get; set; }
+    internal EncryptorContainer EncryptorContainer { get; set; } = new EncryptorContainer();
 
     /// <summary>
     /// Creates new Websocket protocol handler
@@ -76,8 +76,7 @@ public class HorseWebSocketProtocol : IHorseProtocol
         if (socket == null)
             return await Task.FromResult(new ProtocolHandshakeResult());
 
-        socket.Encryptor = Encryptor;
-
+        socket.EncryptorContainer = EncryptorContainer.Clone();
         info.State = ConnectionStates.Pipe;
         result.Socket = socket;
         _server.HeartbeatManager?.Add(socket);
@@ -121,7 +120,14 @@ public class HorseWebSocketProtocol : IHorseProtocol
             if (handshakeResult.Socket.SmartHealthCheck)
                 handshakeResult.Socket.KeepAlive();
 
-            Encryptor?.DecryptMessage(message);
+            if (EncryptorContainer.HasAnyEncryptor && message.Content.Length > 0)
+            {
+                byte encryptorKey = (byte) message.Content.ReadByte();
+                IMessageEncryptor encryptor = EncryptorContainer.GetEncryptor(encryptorKey);
+                byte[] array = new byte[message.Content.Length - 1];
+                message.Content.Write(array, 1, array.Length);
+                message.Content = new MemoryStream(encryptor.DecryptData(array));
+            }
 
             await ProcessMessage(info, handshakeResult.Socket, message);
         }

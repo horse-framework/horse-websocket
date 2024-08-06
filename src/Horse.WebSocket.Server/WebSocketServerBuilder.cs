@@ -16,8 +16,8 @@ namespace Horse.WebSocket.Server;
 /// </summary>
 public class WebSocketServerBuilder<TClient> where TClient : IHorseWebSocket
 {
-    private IMessageEncryptor _encryptor;
-    private IServiceCollection _services;
+    private EncryptorContainer _encryptorContainer = new EncryptorContainer();
+    private readonly IServiceCollection _services;
     private ServerOptions _serverOptions = new ServerOptions();
     private bool _statusCodeResponsesDisabled;
 
@@ -54,7 +54,7 @@ public class WebSocketServerBuilder<TClient> where TClient : IHorseWebSocket
         }
 
         HorseWebSocketProtocol protocol = new HorseWebSocketProtocol(server, Handler);
-        protocol.Encryptor = _encryptor;
+        protocol.EncryptorContainer = _encryptorContainer;
 
         server.UseProtocol(protocol);
         return server;
@@ -104,7 +104,7 @@ public class WebSocketServerBuilder<TClient> where TClient : IHorseWebSocket
     public WebSocketServerBuilder<TClient> UseEncryption<TMessageEncryptor>(Action<TMessageEncryptor> config) where TMessageEncryptor : class, IMessageEncryptor, new()
     {
         TMessageEncryptor encryptor = new TMessageEncryptor();
-        _encryptor = encryptor;
+        _encryptorContainer.SetEncryptor(encryptor);
         config(encryptor);
         return this;
     }

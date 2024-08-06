@@ -31,11 +31,17 @@ public class WebSocketWriter
         if (value.Content != null)
             length = (ulong) value.Content.Length;
 
+        bool useEncryption = encryptor != null && length > 0;
+        if (useEncryption)
+            length++;
+
         //length
         await WriteLengthAsync(stream, length);
 
-        if (value.Content != null)
-            value.Content.WriteTo(stream);
+        if (useEncryption)
+            stream.WriteByte(encryptor.Key);
+
+        value.Content?.WriteTo(stream);
     }
 
     /// <summary>
@@ -57,7 +63,14 @@ public class WebSocketWriter
         if (value.Content != null)
             length = (ulong) value.Content.Length;
 
+        bool useEncryption = encryptor != null && length > 0;
+        if (useEncryption)
+            length++;
+
         await WriteLengthAsync(ms, length);
+
+        if (useEncryption)
+            ms.WriteByte(encryptor.Key);
 
         value.Content?.WriteTo(ms);
 
@@ -76,7 +89,18 @@ public class WebSocketWriter
 
         await using MemoryStream ms = new MemoryStream();
         ms.WriteByte(0x81);
-        await WriteLengthAsync(ms, (ulong) bytes.Length);
+
+        ulong length = (ulong) bytes.Length;
+        
+        bool useEncryption = encryptor != null && length > 0;
+        if (useEncryption)
+            length++;
+
+        await WriteLengthAsync(ms, length);
+
+        if (useEncryption)
+            ms.WriteByte(encryptor.Key);
+
         await ms.WriteAsync(bytes);
         return ms.ToArray();
     }
@@ -165,8 +189,15 @@ public class WebSocketWriter
         if (value.Content != null)
             length = (ulong) value.Content.Length;
 
+        bool useEncryption = encryptor != null && length > 0;
+        if (useEncryption)
+            length++;
+
         //length
         WriteLength(stream, length);
+
+        if (useEncryption)
+            stream.WriteByte(encryptor.Key);
 
         if (value.Content != null)
             value.Content.WriteTo(stream);
@@ -192,7 +223,15 @@ public class WebSocketWriter
         if (value.Content != null)
             length = (ulong) value.Content.Length;
 
+        bool useEncryption = encryptor != null && length > 0;
+        if (useEncryption)
+            length++;
+
         WriteLength(ms, length);
+
+        if (useEncryption)
+            ms.WriteByte(encryptor.Key);
+
         value.Content?.WriteTo(ms);
         return ms.ToArray();
     }
@@ -207,9 +246,19 @@ public class WebSocketWriter
         if (encryptor != null)
             bytes = encryptor.EncryptData(Encoding.UTF8.GetBytes(message));
 
+        ulong length = (ulong) bytes.Length;
         using MemoryStream ms = new MemoryStream();
         ms.WriteByte(0x81);
-        WriteLength(ms, (ulong) bytes.Length);
+
+        bool useEncryption = encryptor != null && length > 0;
+        if (useEncryption)
+            length++;
+
+        WriteLength(ms, length);
+
+        if (useEncryption)
+            ms.WriteByte(encryptor.Key);
+
         ms.Write(bytes);
         return ms.ToArray();
     }

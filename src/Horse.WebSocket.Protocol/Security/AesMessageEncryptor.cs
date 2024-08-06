@@ -13,6 +13,8 @@ public class AesMessageEncryptor : IMessageEncryptor
     private ICryptoTransform _encryptor;
     private ICryptoTransform _decryptor;
 
+    public byte Key { get; } = 2;
+
     /// <summary>
     /// Key1 is AES RGB Key. Key2 is AES IV (Initialization vector). Key3 in unused.
     /// </summary>
