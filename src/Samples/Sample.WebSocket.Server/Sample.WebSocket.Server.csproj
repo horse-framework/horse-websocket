@@ -13,15 +13,13 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Horse.Core" Version="6.6.0" />
-        <PackageReference Include="Horse.Server" Version="6.6.0" />
-        <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\..\Horse.WebSocket.Client\Horse.WebSocket.Client.csproj" />
       <ProjectReference Include="..\..\Horse.WebSocket.Protocol\Horse.WebSocket.Protocol.csproj" />
       <ProjectReference Include="..\..\Horse.WebSocket.Server\Horse.WebSocket.Server.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
     </ItemGroup>
 
 </Project>

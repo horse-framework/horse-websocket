@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 using Horse.Core;
 using Horse.Protocols.Http;
 using Horse.WebSocket.Protocol;
-using Horse.WebSocket.Protocol.Security;
 using PredefinedMessages = Horse.WebSocket.Protocol.PredefinedMessages;
 
 namespace Horse.WebSocket.Client;
@@ -24,7 +23,7 @@ public class HorseWebSocketConnection : ClientSocketBase<WebSocketMessage>, IHor
 {
     #region Events - Properties
 
-    private static readonly WebSocketWriter _writer = new WebSocketWriter();
+    private static readonly WebSocketWriter _writer = new WebSocketWriter(true);
 
     /// <summary>
     /// Key value for the websocket connection

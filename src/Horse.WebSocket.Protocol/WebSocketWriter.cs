@@ -11,6 +11,19 @@ namespace Horse.WebSocket.Protocol;
 /// </summary>
 public class WebSocketWriter
 {
+    private readonly bool _masking;
+    private static readonly Random _random = new Random();
+
+    /// <summary>
+    /// RFC-6455 Section 5.1 Rule:
+    /// Client MUST use masking. Server MUST NOT use masking.
+    /// You MUST set useMasking parameter value for this.
+    /// </summary>
+    public WebSocketWriter(bool useMasking)
+    {
+        _masking = useMasking;
+    }
+
     #region Async
 
     /// <summary>
@@ -38,10 +51,8 @@ public class WebSocketWriter
         //length
         await WriteLengthAsync(stream, length);
 
-        if (useEncryption)
-            stream.WriteByte(encryptor.Key);
-
-        value.Content?.WriteTo(stream);
+        if (value.Content != null)
+            await WriteContentAsync(stream, value.Content.ToArray(), useEncryption, encryptor?.Key);
     }
 
     /// <summary>
@@ -69,10 +80,8 @@ public class WebSocketWriter
 
         await WriteLengthAsync(ms, length);
 
-        if (useEncryption)
-            ms.WriteByte(encryptor.Key);
-
-        value.Content?.WriteTo(ms);
+        if (value.Content != null)
+            await WriteContentAsync(ms, value.Content.ToArray(), useEncryption, encryptor?.Key);
 
         return ms.ToArray();
     }
@@ -91,76 +100,38 @@ public class WebSocketWriter
         ms.WriteByte(0x81);
 
         ulong length = (ulong) bytes.Length;
-        
+
         bool useEncryption = encryptor != null && length > 0;
         if (useEncryption)
             length++;
 
         await WriteLengthAsync(ms, length);
-
-        if (useEncryption)
-            ms.WriteByte(encryptor.Key);
-
-        await ms.WriteAsync(bytes);
-        return ms.ToArray();
-    }
-
-    /// <summary>
-    /// Creates byte array data of only message header frame
-    /// </summary>
-    public async Task<byte[]> CreateFrameAsync(WebSocketMessage value)
-    {
-        await using MemoryStream ms = new MemoryStream();
-
-        byte op = (byte) value.OpCode;
-        op += 0x80;
-
-        //fin and op code
-        ms.WriteByte(op);
-
-        //length
-        ulong length = 0;
-        if (value.Content != null)
-            length = (ulong) value.Content.Length;
-
-        //length
-        await WriteLengthAsync(ms, length);
-
-        return ms.ToArray();
-    }
-
-    /// <summary>
-    /// Creates byte array data of only message content
-    /// </summary>
-    public async Task<byte[]> CreateContentAsync(WebSocketMessage value)
-    {
-        await using MemoryStream ms = new MemoryStream();
-        value.Content.WriteTo(ms);
+        await WriteContentAsync(ms, bytes, useEncryption, encryptor?.Key);
         return ms.ToArray();
     }
 
     /// <summary>
     /// Writes length of the message with websocket protocol
     /// </summary>
-    private static async Task WriteLengthAsync(Stream stream, ulong length)
+    private async Task WriteLengthAsync(Stream stream, ulong length)
     {
         //1 byte length
         if (length < 126)
-            stream.WriteByte((byte) length);
+            stream.WriteByte((byte) (length + (_masking ? (ulong) 128 : 0)));
 
         //3 (1 + ushort) bytes length
         else if (length <= ushort.MaxValue)
         {
-            stream.WriteByte(126);
+            stream.WriteByte((byte) (126 + (_masking ? 128 : 0)));
             ushort len = (ushort) length;
-            byte[] lenbytes = BitConverter.GetBytes(len);
-            await stream.WriteAsync(new[] {lenbytes[1], lenbytes[0]}, 0, 2);
+            byte[] lengthBytes = BitConverter.GetBytes(len);
+            await stream.WriteAsync(new[] {lengthBytes[1], lengthBytes[0]}, 0, 2);
         }
 
         //9 (1 + ulong) bytes length
         else
         {
-            stream.WriteByte(127);
+            stream.WriteByte((byte) (127 + (_masking ? 128 : 0)));
             ulong len = length;
             byte[] lb = BitConverter.GetBytes(len);
             await stream.WriteAsync(new[] {lb[7], lb[6], lb[5], lb[4], lb[3], lb[2], lb[1], lb[0]}, 0, 8);
@@ -196,11 +167,8 @@ public class WebSocketWriter
         //length
         WriteLength(stream, length);
 
-        if (useEncryption)
-            stream.WriteByte(encryptor.Key);
-
         if (value.Content != null)
-            value.Content.WriteTo(stream);
+            WriteContent(stream, value.Content.ToArray(), useEncryption, encryptor?.Key);
     }
 
     /// <summary>
@@ -229,10 +197,9 @@ public class WebSocketWriter
 
         WriteLength(ms, length);
 
-        if (useEncryption)
-            ms.WriteByte(encryptor.Key);
+        if (value.Content != null)
+            WriteContent(ms, value.Content.ToArray(), useEncryption, encryptor?.Key);
 
-        value.Content?.WriteTo(ms);
         return ms.ToArray();
     }
 
@@ -255,61 +222,23 @@ public class WebSocketWriter
             length++;
 
         WriteLength(ms, length);
-
-        if (useEncryption)
-            ms.WriteByte(encryptor.Key);
-
-        ms.Write(bytes);
-        return ms.ToArray();
-    }
-
-    /// <summary>
-    /// Creates byte array data of only message header frame
-    /// </summary>
-    public byte[] CreateFrame(WebSocketMessage value)
-    {
-        using MemoryStream ms = new MemoryStream();
-
-        byte op = (byte) value.OpCode;
-        op += 0x80;
-
-        //fin and op code
-        ms.WriteByte(op);
-
-        //length
-        ulong length = 0;
-        if (value.Content != null)
-            length = (ulong) value.Content.Length;
-
-        //length
-        WriteLength(ms, length);
-
-        return ms.ToArray();
-    }
-
-    /// <summary>
-    /// Creates byte array data of only message content
-    /// </summary>
-    public byte[] CreateContent(WebSocketMessage value)
-    {
-        using MemoryStream ms = new MemoryStream();
-        value.Content.WriteTo(ms);
+        WriteContent(ms, bytes, useEncryption, encryptor?.Key);
         return ms.ToArray();
     }
 
     /// <summary>
     /// Writes length of the message with websocket protocol
     /// </summary>
-    private static void WriteLength(Stream stream, ulong length)
+    private void WriteLength(Stream stream, ulong length)
     {
         //1 byte length
         if (length < 126)
-            stream.WriteByte((byte) length);
+            stream.WriteByte((byte) (length + (_masking ? (ulong) 128 : 0)));
 
         //3 (1 + ushort) bytes length
         else if (length <= ushort.MaxValue)
         {
-            stream.WriteByte(126);
+            stream.WriteByte((byte) (126 + (_masking ? 128 : 0)));
             ushort len = (ushort) length;
             byte[] lenbytes = BitConverter.GetBytes(len);
             stream.Write(new[] {lenbytes[1], lenbytes[0]}, 0, 2);
@@ -318,11 +247,69 @@ public class WebSocketWriter
         //9 (1 + ulong) bytes length
         else
         {
-            stream.WriteByte(127);
+            stream.WriteByte((byte) (127 + (_masking ? 128 : 0)));
             byte[] lb = BitConverter.GetBytes(length);
             stream.Write(new[] {lb[7], lb[6], lb[5], lb[4], lb[3], lb[2], lb[1], lb[0]}, 0, 8);
         }
     }
 
     #endregion
+
+    private void WriteContent(Stream destination, byte[] data, bool useEncryption, byte? encryptorKey)
+    {
+        if (_masking)
+        {
+            byte[] mask = BitConverter.GetBytes(_random.Next(int.MaxValue / 2, int.MaxValue));
+            int maskIndexPadding = 0;
+
+            destination.Write(mask);
+
+            if (useEncryption && encryptorKey.HasValue)
+            {
+                destination.WriteByte((byte) (encryptorKey.Value ^ mask[maskIndexPadding]));
+                maskIndexPadding = 1;
+            }
+
+            for (int i = 0; i < data.Length; i++)
+                data[i] = (byte) (data[i] ^ mask[(i + maskIndexPadding) % 4]);
+
+            destination.Write(data);
+        }
+        else
+        {
+            if (useEncryption && encryptorKey.HasValue)
+                destination.WriteByte(encryptorKey.Value);
+
+            destination.Write(data);
+        }
+    }
+
+    private async Task WriteContentAsync(Stream destination, byte[] data, bool useEncryption, byte? encryptorKey)
+    {
+        if (_masking)
+        {
+            byte[] mask = BitConverter.GetBytes(_random.Next(int.MaxValue / 2, int.MaxValue));
+            int maskIndexPadding = 0;
+
+            destination.Write(mask);
+
+            if (useEncryption && encryptorKey.HasValue)
+            {
+                destination.WriteByte((byte) (encryptorKey.Value ^ mask[maskIndexPadding]));
+                maskIndexPadding = 1;
+            }
+
+            for (int i = 0; i < data.Length; i++)
+                data[i] = (byte) (data[i] ^ mask[(i + maskIndexPadding) % 4]);
+
+            await destination.WriteAsync(data);
+        }
+        else
+        {
+            if (useEncryption && encryptorKey.HasValue)
+                destination.WriteByte(encryptorKey.Value);
+
+            await destination.WriteAsync(data);
+        }
+    }
 }

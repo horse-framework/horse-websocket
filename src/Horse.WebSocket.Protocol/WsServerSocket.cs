@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using Horse.Core;
-using Horse.WebSocket.Protocol.Security;
 
 namespace Horse.WebSocket.Protocol;
 
@@ -14,7 +13,7 @@ public class WsServerSocket : SocketBase, IHorseWebSocket
     /// <summary>
     /// WebSocketWriter singleton instance
     /// </summary>
-    private static readonly WebSocketWriter _writer = new WebSocketWriter();
+    private static readonly WebSocketWriter _writer = new WebSocketWriter(false);
 
     /// <summary>
     /// Server of the socket
