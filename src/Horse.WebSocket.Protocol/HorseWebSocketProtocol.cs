@@ -77,9 +77,6 @@ public class HorseWebSocketProtocol : IHorseProtocol
             return await Task.FromResult(new ProtocolHandshakeResult());
 
         socket.EncryptorContainer = EncryptorContainer.Clone();
-        if (Encryptor != null)
-            socket.Encryptor = Encryptor.Clone();
-
         info.State = ConnectionStates.Pipe;
         result.Socket = socket;
         _server.HeartbeatManager?.Add(socket);
