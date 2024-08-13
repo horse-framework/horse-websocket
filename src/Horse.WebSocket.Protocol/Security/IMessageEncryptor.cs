@@ -6,7 +6,12 @@
 public interface IMessageEncryptor
 {
     /// <summary>
-    /// Sets encrption keys.
+    /// Unique Key for Encryptor
+    /// </summary>
+    byte Key { get; }
+    
+    /// <summary>
+    /// Sets encryption keys.
     /// Key1 is usually default key.
     /// Key2 is usually IV or nonce.
     /// Key3 is usually tag.
@@ -14,7 +19,7 @@ public interface IMessageEncryptor
     void SetKeys(byte[] key1, byte[] key2 = null, byte[] key3 = null);
 
     /// <summary>
-    /// Encrpts message and writes cipher data to the same message.
+    /// Encrypts message and writes cipher data to the same message.
     /// </summary>
     void EncryptMessage(WebSocketMessage plainMessage, byte[] nonce = null);
 
@@ -24,12 +29,12 @@ public interface IMessageEncryptor
     void DecryptMessage(WebSocketMessage cipherMessage, byte[] nonce = null);
 
     /// <summary>
-    /// Encrpts the plain data and returns cipher
+    /// Encrypts the plain data and returns cipher
     /// </summary>
     byte[] EncryptData(byte[] plain, byte[] nonce = null);
 
     /// <summary>
-    /// Decrpts the cipher data and returns plain
+    /// Decrypts the cipher data and returns plain
     /// </summary>
     byte[] DecryptData(byte[] cipher, byte[] nonce = null);
 

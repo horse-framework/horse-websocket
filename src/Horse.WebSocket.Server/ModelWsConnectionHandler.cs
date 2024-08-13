@@ -131,6 +131,12 @@ internal sealed class ModelWsConnectionHandler : IWebSocketServerBus, IProtocolC
         return target.SendAsync(message);
     }
 
+    public Task<bool> SendAsync<TModel>(IHorseWebSocket target, TModel model, byte encryptorNumber)
+    {
+        WebSocketMessage message = Observer.Provider.Write(model);
+        return target.SendAsync(message, encryptorNumber);
+    }
+
     /// <summary>
     /// Removes client from server
     /// </summary>

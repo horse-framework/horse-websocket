@@ -4,7 +4,6 @@ using Horse.Core.Protocols;
 using Horse.Protocols.Http;
 using Horse.Server;
 using Horse.WebSocket.Protocol;
-using Horse.WebSocket.Protocol.Security;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -134,12 +133,12 @@ public static class HostingExtensions
     /// <param name="builder">Host Builder</param>
     /// <param name="port">Server Port</param>
     /// <param name="handler"></param>
-    /// <param name="encryptor">Message encryptor (optional)</param>
+    /// <param name="encryptorContainer">Message encryptor container (optional)</param>
     /// <returns></returns>
     public static IHostBuilder UseHorseWebSocketServer(this IHostBuilder builder, int port,
-        IProtocolConnectionHandler<WsServerSocket, WebSocketMessage> handler, IMessageEncryptor encryptor = null)
+        IProtocolConnectionHandler<WsServerSocket, WebSocketMessage> handler,  EncryptorContainer encryptorContainer = null)
     {
-        return UseHorseWebSocketServer(builder, new HorseServer(), port, handler, encryptor);
+        return UseHorseWebSocketServer(builder, new HorseServer(), port, handler, encryptorContainer);
     }
 
     /// <summary>
@@ -149,10 +148,10 @@ public static class HostingExtensions
     /// <param name="server"></param>
     /// <param name="port">Server Port</param>
     /// <param name="handler"></param>
-    /// <param name="encryptor">Message encryptor (optional)</param>
+    /// <param name="encryptorContainer">Message encryptor container (optional)</param>
     /// <returns></returns>
     public static IHostBuilder UseHorseWebSocketServer(this IHostBuilder builder, HorseServer server, int port,
-        IProtocolConnectionHandler<WsServerSocket, WebSocketMessage> handler, IMessageEncryptor encryptor = null)
+        IProtocolConnectionHandler<WsServerSocket, WebSocketMessage> handler, EncryptorContainer encryptorContainer = null)
     {
         IHorseProtocol http = server.FindProtocol("http");
         if (http == null)
@@ -162,7 +161,7 @@ public static class HostingExtensions
         }
 
         HorseWebSocketProtocol protocol = new HorseWebSocketProtocol(server, handler);
-        protocol.Encryptor = encryptor;
+        protocol.EncryptorContainer = encryptorContainer;
         server.UseProtocol(protocol);
 
         builder.ConfigureServices((context, services) =>
@@ -188,15 +187,15 @@ public static class HostingExtensions
     /// <param name="connectedAction">Action to execute when a client connected</param>
     /// <param name="readyAction">Action to execute when a client is ready to send and receive messages</param>
     /// <param name="messageAction">Action to execute when client sends a message to the server</param>
-    /// <param name="encryptor">Message encryptor (optional)</param>
+    /// <param name="encryptorContainer">Message encryptor container (optional)</param>
     /// <returns></returns>
     public static IHostBuilder UseHorseWebSocketServer(this IHostBuilder builder, int port,
         WebSocketConnectedHandler connectedAction,
         WebSocketReadyHandler readyAction,
         WebSocketMessageRecievedHandler messageAction,
-        IMessageEncryptor encryptor = null)
+        EncryptorContainer encryptorContainer = null)
     {
-        return UseHorseWebSocketServer(builder, new HorseServer(), port, connectedAction, readyAction, messageAction, encryptor);
+        return UseHorseWebSocketServer(builder, new HorseServer(), port, connectedAction, readyAction, messageAction, encryptorContainer);
     }
 
     /// <summary>
@@ -208,14 +207,14 @@ public static class HostingExtensions
     /// <param name="connectedAction">Action to execute when a client connected</param>
     /// <param name="readyAction">Action to execute when a client is ready to send and receive messages</param>
     /// <param name="messageAction">Action to execute when client sends a message to the server</param>
-    /// <param name="encryptor">Message encryptor (optional)</param>
+    /// <param name="encryptorContainer">Message encryptor container (optional)</param>
     /// <returns></returns>
     public static IHostBuilder UseHorseWebSocketServer(this IHostBuilder builder,
         HorseServer server, int port,
         WebSocketConnectedHandler connectedAction,
         WebSocketReadyHandler readyAction,
         WebSocketMessageRecievedHandler messageAction,
-        IMessageEncryptor encryptor = null)
+        EncryptorContainer encryptorContainer = null)
     {
         IHorseProtocol http = server.FindProtocol("http");
         if (http == null)
@@ -226,7 +225,7 @@ public static class HostingExtensions
 
         var handler = new MethodWebSocketConnectionHandler(connectedAction, readyAction, messageAction);
         HorseWebSocketProtocol protocol = new HorseWebSocketProtocol(server, handler);
-        protocol.Encryptor = encryptor;
+        protocol.EncryptorContainer = encryptorContainer;
         server.UseProtocol(protocol);
 
         builder.ConfigureServices((context, services) =>

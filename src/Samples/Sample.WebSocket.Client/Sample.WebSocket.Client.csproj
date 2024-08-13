@@ -7,14 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Horse.Server" Version="6.6.0" />
-        <PackageReference Include="Horse.Mvc" Version="6.5.2" />
-        <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\..\Horse.WebSocket.Client\Horse.WebSocket.Client.csproj" />
-      <ProjectReference Include="..\..\Horse.WebSocket.Server\Horse.WebSocket.Server.csproj" />
     </ItemGroup>
 
 </Project>

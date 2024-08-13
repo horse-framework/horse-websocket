@@ -12,6 +12,8 @@ public class ChaCha20Poly1305Encryptor : IMessageEncryptor
     private byte[] _tag;
     private ChaCha20Poly1305 _cc20;
 
+    public byte Key { get; } = 3;
+
     /// <summary>
     /// Sets nonce value for encryptor
     /// </summary>

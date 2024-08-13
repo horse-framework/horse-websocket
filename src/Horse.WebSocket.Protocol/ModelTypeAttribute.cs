@@ -21,4 +21,12 @@ public class ModelTypeAttribute : Attribute
     {
         TypeCode = typeCode;
     }
+    
+    /// <summary>
+    /// Creates new model type attribute
+    /// </summary>
+    public ModelTypeAttribute(int typeCode)
+    {
+        TypeCode = typeCode.ToString();
+    }
 }

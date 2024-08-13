@@ -14,6 +14,11 @@ public interface IWebSocketServerBus
     Task<bool> SendAsync<TModel>(IHorseWebSocket target, TModel model);
 
     /// <summary>
+    /// Sends a message over websocket
+    /// </summary>
+    Task<bool> SendAsync<TModel>(IHorseWebSocket target, TModel model, byte encryptorNumber);
+
+    /// <summary>
     /// Removes client from server
     /// </summary>
     void Disconnect(IHorseWebSocket client);

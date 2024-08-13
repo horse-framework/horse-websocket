@@ -28,7 +28,7 @@
     <ItemGroup>
         <PackageReference Include="Horse.Core" Version="6.6.0" />
         <PackageReference Include="Horse.Server" Version="6.6.0" />
-        <PackageReference Include="Horse.Protocols.Http" Version="6.6.0" />
+        <PackageReference Include="Horse.Protocols.Http" Version="6.6.3" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
     </ItemGroup>
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -61,7 +62,7 @@ public class HorseWebSocket : IDisposable
     /// <summary>
     /// Message Encryptor implementation
     /// </summary>
-    public IMessageEncryptor Encryptor { get; set; }
+    public EncryptorContainer EncryptorContainer { get; set; } = new EncryptorContainer();
 
     /// <summary>
     /// The waiting time before reconnecting, after disconnection.
@@ -163,8 +164,14 @@ public class HorseWebSocket : IDisposable
 
     private void OnMessageReceived(ClientSocketBase<WebSocketMessage> socket, WebSocketMessage message)
     {
-        if (Encryptor != null)
-            Encryptor.DecryptMessage(message);
+        if (EncryptorContainer.HasAnyEncryptor && message.Content.Length > 0)
+        {
+            byte encryptorKey = (byte) message.Content.ReadByte();
+            IMessageEncryptor encryptor = EncryptorContainer.GetEncryptor(encryptorKey);
+            byte[] array = new byte[message.Content.Length - 1];
+            message.Content.Write(array, 1, array.Length);
+            message.Content = new MemoryStream(encryptor.DecryptData(array));
+        }
 
         _ = Observer.Read(message, Connection);
         MessageReceived?.Invoke(this, message);
@@ -228,7 +235,7 @@ public class HorseWebSocket : IDisposable
         try
         {
             Connection = new HorseWebSocketConnection();
-            Connection.Encryptor = Encryptor;
+            Connection.EncryptorContainer = EncryptorContainer;
             foreach (KeyValuePair<string, string> pair in _headers)
                 Connection.Data.Properties.Add(pair.Key, pair.Value);
 
