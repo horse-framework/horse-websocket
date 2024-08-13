@@ -8,6 +8,8 @@ namespace Horse.WebSocket.Protocol.Security;
 public class AesGcmMessageEncryptor : IMessageEncryptor
 {
     private AesGcm _gcm;
+
+    private byte[] _key;
     private byte[] _defaultNonce;
     private byte[] _tag;
 
@@ -23,8 +25,10 @@ public class AesGcmMessageEncryptor : IMessageEncryptor
         if (key3.Length != 16)
             throw new InvalidOperationException("AES GCM Tag length must be 128 bits");
 
+        _key = key1;
         _defaultNonce = key2;
         _tag = key3;
+
         _gcm = new AesGcm(key1);
     }
 
@@ -60,5 +64,13 @@ public class AesGcmMessageEncryptor : IMessageEncryptor
         byte[] plaintext = new byte[cipher.Length];
         _gcm.Decrypt(nonce ?? _defaultNonce, cipher, _tag, plaintext);
         return plaintext;
+    }
+
+    /// <inheritdoc/>
+    public IMessageEncryptor Clone()
+    {
+        AesGcmMessageEncryptor clone = new AesGcmMessageEncryptor();
+        clone.SetKeys(_key, _defaultNonce, _tag);
+        return clone;
     }
 }

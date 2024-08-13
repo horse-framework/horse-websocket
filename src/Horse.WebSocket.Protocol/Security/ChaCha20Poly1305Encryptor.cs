@@ -7,6 +7,7 @@ namespace Horse.WebSocket.Protocol.Security;
 /// <inheritdoc />
 public class ChaCha20Poly1305Encryptor : IMessageEncryptor
 {
+    private byte[] _key;
     private byte[] _defaultNonce;
     private byte[] _tag;
     private ChaCha20Poly1305 _cc20;
@@ -53,6 +54,7 @@ public class ChaCha20Poly1305Encryptor : IMessageEncryptor
         if (key3.Length != 16)
             throw new InvalidOperationException("ChaCha20-Poly1305 Tag length must be 128 bits");
 
+        _key = key1;
         _defaultNonce = key2;
         _tag = key3;
     }
@@ -89,5 +91,13 @@ public class ChaCha20Poly1305Encryptor : IMessageEncryptor
         byte[] plaintext = new byte[cipher.Length];
         _cc20.Decrypt(nonce ?? _defaultNonce, cipher, _tag, plaintext);
         return plaintext;
+    }
+
+    /// <inheritdoc/>
+    public IMessageEncryptor Clone()
+    {
+        ChaCha20Poly1305Encryptor clone = new ChaCha20Poly1305Encryptor();
+        clone.SetKeys(_key, _defaultNonce, _tag);
+        return clone;
     }
 }

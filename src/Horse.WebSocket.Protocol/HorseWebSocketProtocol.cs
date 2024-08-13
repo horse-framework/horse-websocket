@@ -76,7 +76,8 @@ public class HorseWebSocketProtocol : IHorseProtocol
         if (socket == null)
             return await Task.FromResult(new ProtocolHandshakeResult());
 
-        socket.Encryptor = Encryptor;
+        if (Encryptor != null)
+            socket.Encryptor = Encryptor.Clone();
 
         info.State = ConnectionStates.Pipe;
         result.Socket = socket;
@@ -97,9 +98,10 @@ public class HorseWebSocketProtocol : IHorseProtocol
     public async Task HandleConnection(IConnectionInfo info, ProtocolHandshakeResult handshakeResult)
     {
         //if user makes a mistake in ready method, we should not interrupt connection handling
+        WsServerSocket ws = (WsServerSocket) handshakeResult.Socket;
         try
         {
-            await _handler.Ready(_server, (WsServerSocket) handshakeResult.Socket);
+            await _handler.Ready(_server, ws);
         }
         catch (Exception e)
         {
@@ -121,9 +123,10 @@ public class HorseWebSocketProtocol : IHorseProtocol
             if (handshakeResult.Socket.SmartHealthCheck)
                 handshakeResult.Socket.KeepAlive();
 
-            Encryptor?.DecryptMessage(message);
+            if (message.OpCode == SocketOpCode.UTF8 || message.OpCode == SocketOpCode.Binary)
+                ws.Encryptor?.DecryptMessage(message);
 
-            await ProcessMessage(info, handshakeResult.Socket, message);
+            await ProcessMessage(info, ws, message);
         }
     }
 

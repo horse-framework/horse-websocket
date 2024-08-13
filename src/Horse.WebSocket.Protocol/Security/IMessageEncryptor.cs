@@ -32,4 +32,11 @@ public interface IMessageEncryptor
     /// Decrpts the cipher data and returns plain
     /// </summary>
     byte[] DecryptData(byte[] cipher, byte[] nonce = null);
+
+    /// <summary>
+    /// Clones encryptor with it's state.
+    /// It's used for duplicating encryptors for each client.
+    /// After that duplication, each client can has it's own keys.
+    /// </summary>
+    IMessageEncryptor Clone();
 }

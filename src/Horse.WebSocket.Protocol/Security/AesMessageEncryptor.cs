@@ -9,9 +9,7 @@ public class AesMessageEncryptor : IMessageEncryptor
 {
     private byte[] _key;
     private byte[] _iv;
-    private readonly Aes _aes = Aes.Create();
-    private ICryptoTransform _encryptor;
-    private ICryptoTransform _decryptor;
+    private Aes _aes = Aes.Create();
 
     /// <summary>
     /// Key1 is AES RGB Key. Key2 is AES IV (Initialization vector). Key3 in unused.
@@ -27,11 +25,9 @@ public class AesMessageEncryptor : IMessageEncryptor
         if (key2.Length != 16)
             throw new InvalidOperationException("AES IV Vector size must be 128 bits");
 
-        if (_encryptor == null && _iv != null)
-        {
-            _encryptor = _aes.CreateEncryptor(_key, _iv);
-            _decryptor = _aes.CreateDecryptor(_key, _iv);
-        }
+        _aes = Aes.Create();
+        _aes.Key = _key;
+        _aes.IV = _iv;
     }
 
     /// <inheritdoc/>
@@ -52,10 +48,9 @@ public class AesMessageEncryptor : IMessageEncryptor
     public byte[] EncryptData(byte[] plain, byte[] nonce = null)
     {
         using MemoryStream ms = new MemoryStream();
-        using CryptoStream cs = new CryptoStream(ms, _encryptor, CryptoStreamMode.Write);
 
-        cs.Write(plain, 0, plain.Length);
-        cs.FlushFinalBlock();
+        using (CryptoStream cs = new CryptoStream(ms, _aes.CreateEncryptor(), CryptoStreamMode.Write))
+            cs.Write(plain, 0, plain.Length);
 
         return ms.ToArray();
     }
@@ -64,11 +59,18 @@ public class AesMessageEncryptor : IMessageEncryptor
     public byte[] DecryptData(byte[] cipher, byte[] nonce = null)
     {
         using MemoryStream ms = new MemoryStream();
-        using CryptoStream cs = new CryptoStream(ms, _decryptor, CryptoStreamMode.Write);
 
-        cs.Write(cipher);
-        cs.FlushFinalBlock();
+        using (CryptoStream cs = new CryptoStream(ms, _aes.CreateDecryptor(), CryptoStreamMode.Write))
+            cs.Write(cipher);
 
         return ms.ToArray();
+    }
+
+    /// <inheritdoc/>
+    public IMessageEncryptor Clone()
+    {
+        AesMessageEncryptor clone = new AesMessageEncryptor();
+        clone.SetKeys(_key, _iv);
+        return clone;
     }
 }
