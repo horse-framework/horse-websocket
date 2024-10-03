@@ -156,7 +156,7 @@ public class WebSocketMessageObserver
     /// </summary>
     public void RegisterWebSocketHandler(Type observerType, Type clientType, Func<IServiceProvider> providerFactory)
     {
-        RegisterWebSocketHandler(observerType, observerType, clientType, null, providerFactory);
+        RegisterWebSocketHandler(observerType, observerType.GetGenericArguments()[0], clientType, null, providerFactory);
     }
 
     /// <summary>

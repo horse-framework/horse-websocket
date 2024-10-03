@@ -34,7 +34,7 @@ public class HorseWebSocketConnection : ClientSocketBase<WebSocketMessage>, IHor
     /// Message Encryptor implementation
     /// </summary>
     public EncryptorContainer EncryptorContainer { get; internal set; } = new EncryptorContainer();
-    
+
     /// <summary>
     /// Owner client of the connection. Connection object is created each time connected to the server but the owner is always same instance.
     /// </summary>
@@ -372,6 +372,12 @@ public class HorseWebSocketConnection : ClientSocketBase<WebSocketMessage>, IHor
     {
         byte[] data = await _writer.CreateAsync(message, EncryptorContainer.GetEncryptor(encryptorNumber));
         return await SendAsync(data);
+    }
+
+    /// <inhericdoc />
+    public string GetTag()
+    {
+        return OwnerClient?.Tag;
     }
 
     #endregion

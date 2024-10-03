@@ -31,6 +31,11 @@ public class WsServerSocket : SocketBase, IHorseWebSocket
     public bool IsAuthenticated { get; set; }
 
     /// <summary>
+    /// Tag
+    /// </summary>
+    public string Tag { get; set; }
+
+    /// <summary>
     /// Encryptor Container
     /// </summary>
     public EncryptorContainer EncryptorContainer { get; internal set; } = new EncryptorContainer();
@@ -154,6 +159,12 @@ public class WsServerSocket : SocketBase, IHorseWebSocket
     {
         byte[] data = await _writer.CreateAsync(message, EncryptorContainer.GetEncryptor(encryptorNumber));
         return Send(data);
+    }
+
+    /// <inhericdoc />
+    public string GetTag()
+    {
+        return Tag;
     }
 
     /// <summary>

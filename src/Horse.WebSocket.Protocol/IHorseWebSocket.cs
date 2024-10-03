@@ -21,4 +21,9 @@ public interface IHorseWebSocket
     /// Closes client connection
     /// </summary>
     void Disconnect();
+
+    /// <summary>
+    /// Gets Tag of the client
+    /// </summary>
+    string GetTag();
 }

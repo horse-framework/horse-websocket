@@ -360,7 +360,7 @@ public class HorseWebSocket : IDisposable
             throw new NotSupportedException("Transient handlers are support with Microsoft.Dependency.Injection library. Call UseServices method first");
         }
 
-        Observer.RegisterWebSocketHandler(typeof(TMessageHandler), typeof(TClient), () => _provider);
+        Observer.RegisterWebSocketHandler(typeof(TMessageHandler), typeof(TModel), typeof(TClient), null, () => _provider);
         _services.AddTransient(typeof(TMessageHandler));
     }
 
@@ -374,7 +374,7 @@ public class HorseWebSocket : IDisposable
         if (_services == null)
             throw new NotSupportedException("Scoped handlers are support with Microsoft.Dependency.Injection library. Call UseServices method first");
 
-        Observer.RegisterWebSocketHandler(typeof(TMessageHandler), typeof(TClient), () => _provider);
+        Observer.RegisterWebSocketHandler(typeof(TMessageHandler), typeof(TModel), typeof(TClient), null, () => _provider);
         _services.AddScoped(typeof(TMessageHandler));
     }
 
@@ -402,7 +402,7 @@ public class HorseWebSocket : IDisposable
             return;
         }
 
-        Observer.RegisterWebSocketHandler(typeof(TMessageHandler), typeof(TClient), () => _provider);
+        Observer.RegisterWebSocketHandler(typeof(TMessageHandler), typeof(TModel), typeof(TClient), null, () => _provider);
         _services.AddSingleton(typeof(TMessageHandler));
     }
 
@@ -419,10 +419,10 @@ public class HorseWebSocket : IDisposable
             return;
         }
 
-        Observer.RegisterWebSocketHandler(typeof(TMessageHandler), typeof(TClient), () => _provider);
+        Observer.RegisterWebSocketHandler(typeof(TMessageHandler), typeof(TModel), typeof(TClient), null, () => _provider);
         _services.AddSingleton(instance);
     }
-    
+
     /// <summary>
     /// Adds model handler with transient lifetime
     /// </summary>
@@ -434,7 +434,7 @@ public class HorseWebSocket : IDisposable
             throw new NotSupportedException("Transient handlers are support with Microsoft.Dependency.Injection library. Call UseServices method first");
         }
 
-        Observer.RegisterWebSocketHandler(typeof(TMessageHandler), typeof(HorseWebSocket), () => _provider);
+        Observer.RegisterWebSocketHandler(typeof(TMessageHandler), typeof(TModel), typeof(HorseWebSocket), null, () => _provider);
         _services.AddTransient(typeof(TMessageHandler));
     }
 
@@ -447,7 +447,7 @@ public class HorseWebSocket : IDisposable
         if (_services == null)
             throw new NotSupportedException("Scoped handlers are support with Microsoft.Dependency.Injection library. Call UseServices method first");
 
-        Observer.RegisterWebSocketHandler(typeof(TMessageHandler), typeof(HorseWebSocket), () => _provider);
+        Observer.RegisterWebSocketHandler(typeof(TMessageHandler), typeof(TModel), typeof(HorseWebSocket), null, () => _provider);
         _services.AddScoped(typeof(TMessageHandler));
     }
 
@@ -474,7 +474,7 @@ public class HorseWebSocket : IDisposable
             return;
         }
 
-        Observer.RegisterWebSocketHandler(typeof(TMessageHandler), typeof(HorseWebSocket), () => _provider);
+        Observer.RegisterWebSocketHandler(typeof(TMessageHandler), typeof(TModel), typeof(HorseWebSocket), null, () => _provider);
         _services.AddSingleton(typeof(TMessageHandler));
     }
 
@@ -490,7 +490,7 @@ public class HorseWebSocket : IDisposable
             return;
         }
 
-        Observer.RegisterWebSocketHandler(typeof(TMessageHandler), typeof(HorseWebSocket), () => _provider);
+        Observer.RegisterWebSocketHandler(typeof(TMessageHandler), typeof(TModel), typeof(HorseWebSocket), null, () => _provider);
         _services.AddSingleton(instance);
     }
 
