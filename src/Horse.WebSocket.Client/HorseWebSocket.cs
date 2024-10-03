@@ -50,6 +50,12 @@ public class HorseWebSocket : IDisposable
     public string RemoteHost { get; set; }
 
     /// <summary>
+    /// Tag is for end-user.
+    /// You can set different values for your different clients.
+    /// </summary>
+    public string Tag { get; set; }
+
+    /// <summary>
     /// Base connection object for websocket protocol
     /// </summary>
     public HorseWebSocketConnection Connection { get; private set; }
@@ -234,7 +240,7 @@ public class HorseWebSocket : IDisposable
     {
         try
         {
-            Connection = new HorseWebSocketConnection();
+            Connection = new HorseWebSocketConnection(this);
             Connection.EncryptorContainer = EncryptorContainer;
             foreach (KeyValuePair<string, string> pair in _headers)
                 Connection.Data.Properties.Add(pair.Key, pair.Value);
@@ -414,6 +420,77 @@ public class HorseWebSocket : IDisposable
         }
 
         Observer.RegisterWebSocketHandler(typeof(TMessageHandler), typeof(TClient), () => _provider);
+        _services.AddSingleton(instance);
+    }
+    
+    /// <summary>
+    /// Adds model handler with transient lifetime
+    /// </summary>
+    public void AddHandlerTransient<TMessageHandler, TModel>()
+        where TMessageHandler : IWebSocketMessageHandler<TModel>
+    {
+        if (_services == null)
+        {
+            throw new NotSupportedException("Transient handlers are support with Microsoft.Dependency.Injection library. Call UseServices method first");
+        }
+
+        Observer.RegisterWebSocketHandler(typeof(TMessageHandler), typeof(HorseWebSocket), () => _provider);
+        _services.AddTransient(typeof(TMessageHandler));
+    }
+
+    /// <summary>
+    /// Adds model handler with scoped lifetime
+    /// </summary>
+    public void AddHandlerScoped<TMessageHandler, TModel>()
+        where TMessageHandler : IWebSocketMessageHandler<TModel>
+    {
+        if (_services == null)
+            throw new NotSupportedException("Scoped handlers are support with Microsoft.Dependency.Injection library. Call UseServices method first");
+
+        Observer.RegisterWebSocketHandler(typeof(TMessageHandler), typeof(HorseWebSocket), () => _provider);
+        _services.AddScoped(typeof(TMessageHandler));
+    }
+
+    /// <summary>
+    /// Adds model handler with singleton lifetime
+    /// </summary>
+    public void AddHandlerSingleton<TMessageHandler, TModel>()
+        where TMessageHandler : class, IWebSocketMessageHandler<TModel>
+    {
+        if (_services == null)
+        {
+            Type handlerType = typeof(TMessageHandler);
+            ConstructorInfo parameterlessCtor = handlerType.GetConstructors().FirstOrDefault(x => x.GetParameters().Length == 0);
+
+            if (parameterlessCtor == null)
+            {
+                throw new NotSupportedException($"Microsoft.Dependency.Injection is not implemented. " +
+                                                $"{handlerType.FullName} must have parameterless constructor. " +
+                                                $"Or you can pass singleton instance of handler.");
+            }
+
+            TMessageHandler instance = (TMessageHandler) Activator.CreateInstance(handlerType);
+            Observer.RegisterWebSocketHandler(typeof(TMessageHandler), typeof(TModel), typeof(HorseWebSocket), instance, null);
+            return;
+        }
+
+        Observer.RegisterWebSocketHandler(typeof(TMessageHandler), typeof(HorseWebSocket), () => _provider);
+        _services.AddSingleton(typeof(TMessageHandler));
+    }
+
+    /// <summary>
+    /// Adds model handler with singleton lifetime
+    /// </summary>
+    public void AddHandlerSingleton<TMessageHandler, TModel>(TMessageHandler instance)
+        where TMessageHandler : class, IWebSocketMessageHandler<TModel>
+    {
+        if (_services == null)
+        {
+            Observer.RegisterWebSocketHandler(typeof(TMessageHandler), typeof(TModel), typeof(HorseWebSocket), instance, null);
+            return;
+        }
+
+        Observer.RegisterWebSocketHandler(typeof(TMessageHandler), typeof(HorseWebSocket), () => _provider);
         _services.AddSingleton(instance);
     }
 

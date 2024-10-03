@@ -34,8 +34,21 @@ public class HorseWebSocketConnection : ClientSocketBase<WebSocketMessage>, IHor
     /// Message Encryptor implementation
     /// </summary>
     public EncryptorContainer EncryptorContainer { get; internal set; } = new EncryptorContainer();
+    
+    /// <summary>
+    /// Owner client of the connection. Connection object is created each time connected to the server but the owner is always same instance.
+    /// </summary>
+    public HorseWebSocket OwnerClient { get; }
 
     #endregion
+
+    /// <summary>
+    /// Creates new websocket connection
+    /// </summary>
+    public HorseWebSocketConnection(HorseWebSocket ownerClient)
+    {
+        OwnerClient = ownerClient;
+    }
 
     #region Connect
 
