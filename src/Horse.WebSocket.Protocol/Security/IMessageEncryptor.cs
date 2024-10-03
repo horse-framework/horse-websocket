@@ -8,8 +8,8 @@ public interface IMessageEncryptor
     /// <summary>
     /// Unique Key for Encryptor
     /// </summary>
-    byte Key { get; }
-    
+    byte Key { get; set; }
+
     /// <summary>
     /// Sets encryption keys.
     /// Key1 is usually default key.
