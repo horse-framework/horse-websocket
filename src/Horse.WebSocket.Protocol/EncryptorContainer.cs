@@ -24,6 +24,9 @@ public class EncryptorContainer
     
     public void SetEncryptor(IMessageEncryptor encryptor)
     {
+        if (!HasAnyEncryptor)
+            DefaultKey = encryptor.Key;
+        
         HasAnyEncryptor = true;
         _encryptors[encryptor.Key] = encryptor;
     }

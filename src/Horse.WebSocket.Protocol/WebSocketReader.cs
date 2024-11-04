@@ -139,6 +139,7 @@ public class WebSocketReader
             await message.Content.WriteAsync(_buffer.AsMemory(0, read));
         } while (total < length);
 
+        message.Content.Position = 0;
         return true;
     }
 

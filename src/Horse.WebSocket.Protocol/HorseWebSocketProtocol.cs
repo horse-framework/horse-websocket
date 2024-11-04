@@ -126,7 +126,14 @@ public class HorseWebSocketProtocol : IHorseProtocol
                 byte encryptorKey = (byte) message.Content.ReadByte();
                 IMessageEncryptor encryptor = EncryptorContainer.GetEncryptor(encryptorKey);
                 byte[] array = new byte[message.Content.Length - 1];
-                message.Content.Write(array, 1, array.Length);
+
+                int left = array.Length;
+                while (left > 0)
+                {
+                    int read = message.Content.Read(array, 0, left);
+                    left -= read;
+                }
+
                 message.Content = new MemoryStream(encryptor.DecryptData(array));
             }
 
