@@ -10,7 +10,7 @@ namespace Sample.WebSocket.Client
         static async Task Main(string[] args)
         {
             var enc = new AesMessageEncryptor();
-            enc.Key = 3;
+            enc.EncryptorId = 3;
             byte[] key = new byte[32];
             byte[] iv = new byte[16];
             for (int i = 0; i < 32; i++)
