@@ -6,9 +6,9 @@
 public interface IMessageEncryptor
 {
     /// <summary>
-    /// Unique Key for Encryptor
+    /// Unique Encryptor Id
     /// </summary>
-    byte Key { get; set; }
+    byte EncryptorId { get; set; }
 
     /// <summary>
     /// Sets encryption keys.

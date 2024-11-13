@@ -4,12 +4,22 @@ using Horse.WebSocket.Protocol.Security;
 
 namespace Horse.WebSocket.Protocol;
 
+/// <summary>
+/// Container class for defined encryptors
+/// </summary>
 public class EncryptorContainer
 {
     private readonly Dictionary<byte, IMessageEncryptor> _encryptors = new Dictionary<byte, IMessageEncryptor>();
 
+    /// <summary>
+    /// True, if there is at least one encryptor defined
+    /// </summary>
     public bool HasAnyEncryptor { get; private set; }
-    public byte DefaultKey { get; set; } = 1;
+    
+    /// <summary>
+    /// Default Encryptor Id
+    /// </summary>
+    public byte DefaultId { get; set; } = 1;
 
     internal EncryptorContainer Clone()
     {
@@ -17,47 +27,59 @@ public class EncryptorContainer
         foreach (KeyValuePair<byte,IMessageEncryptor> pair in _encryptors)
             clone._encryptors.Add(pair.Key, pair.Value);
 
-        clone.DefaultKey = DefaultKey;
+        clone.DefaultId = DefaultId;
         clone.HasAnyEncryptor = HasAnyEncryptor;
         return clone;
     }
     
+    /// <summary>
+    /// Adds or changes encryptor
+    /// </summary>
     public void SetEncryptor(IMessageEncryptor encryptor)
     {
         if (!HasAnyEncryptor)
-            DefaultKey = encryptor.Key;
+            DefaultId = encryptor.EncryptorId;
         
         HasAnyEncryptor = true;
-        _encryptors[encryptor.Key] = encryptor;
+        _encryptors[encryptor.EncryptorId] = encryptor;
     }
 
+    /// <summary>
+    /// Adds or sets encryptor and defines it as default
+    /// </summary>
     public void SetDefaultEncryptor(IMessageEncryptor encryptor)
     {
         if (encryptor == null)
             return;
 
         HasAnyEncryptor = true;
-        DefaultKey = encryptor.Key;
-        _encryptors[encryptor.Key] = encryptor;
+        DefaultId = encryptor.EncryptorId;
+        _encryptors[encryptor.EncryptorId] = encryptor;
     }
 
-    public IMessageEncryptor GetEncryptor(byte number)
+    /// <summary>
+    /// Get encryptor by unique encryptor Id
+    /// </summary>
+    public IMessageEncryptor GetEncryptor(byte uniqueId)
     {
         if (!HasAnyEncryptor)
             return null;
 
-        if (number == 0)
+        if (uniqueId == 0)
             throw new InvalidOperationException("Zero Number Key must be plain text");
 
-        _encryptors.TryGetValue(number, out var encryptor);
+        _encryptors.TryGetValue(uniqueId, out var encryptor);
         return encryptor;
     }
 
+    /// <summary>
+    /// Gets default encryptor
+    /// </summary>
     public IMessageEncryptor GetDefaultEncryptor()
     {
         if (!HasAnyEncryptor)
             return null;
 
-        return GetEncryptor(DefaultKey);
+        return GetEncryptor(DefaultId);
     }
 }

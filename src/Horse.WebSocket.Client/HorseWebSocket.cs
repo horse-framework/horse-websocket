@@ -172,8 +172,8 @@ public class HorseWebSocket : IDisposable
     {
         if (EncryptorContainer.HasAnyEncryptor && message.Content.Length > 0)
         {
-            byte encryptorKey = (byte) message.Content.ReadByte();
-            IMessageEncryptor encryptor = EncryptorContainer.GetEncryptor(encryptorKey);
+            byte encryptorId = (byte) message.Content.ReadByte();
+            IMessageEncryptor encryptor = EncryptorContainer.GetEncryptor(encryptorId);
             byte[] array = new byte[message.Content.Length - 1];
 
             int left = array.Length;

@@ -52,7 +52,7 @@ public class WebSocketWriter
         await WriteLengthAsync(stream, length);
 
         if (value.Content != null)
-            await WriteContentAsync(stream, value.Content.ToArray(), useEncryption, encryptor?.Key);
+            await WriteContentAsync(stream, value.Content.ToArray(), useEncryption, encryptor?.EncryptorId);
     }
 
     /// <summary>
@@ -81,7 +81,7 @@ public class WebSocketWriter
         await WriteLengthAsync(ms, length);
 
         if (value.Content != null)
-            await WriteContentAsync(ms, value.Content.ToArray(), useEncryption, encryptor?.Key);
+            await WriteContentAsync(ms, value.Content.ToArray(), useEncryption, encryptor?.EncryptorId);
 
         return ms.ToArray();
     }
@@ -106,7 +106,7 @@ public class WebSocketWriter
             length++;
 
         await WriteLengthAsync(ms, length);
-        await WriteContentAsync(ms, bytes, useEncryption, encryptor?.Key);
+        await WriteContentAsync(ms, bytes, useEncryption, encryptor?.EncryptorId);
         return ms.ToArray();
     }
 
@@ -168,7 +168,7 @@ public class WebSocketWriter
         WriteLength(stream, length);
 
         if (value.Content != null)
-            WriteContent(stream, value.Content.ToArray(), useEncryption, encryptor?.Key);
+            WriteContent(stream, value.Content.ToArray(), useEncryption, encryptor?.EncryptorId);
     }
 
     /// <summary>
@@ -198,7 +198,7 @@ public class WebSocketWriter
         WriteLength(ms, length);
 
         if (value.Content != null)
-            WriteContent(ms, value.Content.ToArray(), useEncryption, encryptor?.Key);
+            WriteContent(ms, value.Content.ToArray(), useEncryption, encryptor?.EncryptorId);
 
         return ms.ToArray();
     }
@@ -222,7 +222,7 @@ public class WebSocketWriter
             length++;
 
         WriteLength(ms, length);
-        WriteContent(ms, bytes, useEncryption, encryptor?.Key);
+        WriteContent(ms, bytes, useEncryption, encryptor?.EncryptorId);
         return ms.ToArray();
     }
 
