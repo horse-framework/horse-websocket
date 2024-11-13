@@ -11,7 +11,11 @@ public class AesMessageEncryptor : IMessageEncryptor
     private byte[] _iv;
     private Aes _aes = Aes.Create();
 
+    /// <inheritdoc/>
     public byte EncryptorId { get; set; } = 2;
+
+    /// <inheritdoc/>
+    public bool CloneForEachConnection { get; set; }
 
     /// <summary>
     /// Key1 is AES RGB Key. Key2 is AES IV (Initialization vector). Key3 in unused.

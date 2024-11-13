@@ -9,6 +9,12 @@ public interface IMessageEncryptor
     /// Unique Encryptor Id
     /// </summary>
     byte EncryptorId { get; set; }
+    
+    /// <summary>
+    /// If true, each client socket in server-side use different encryptor instance.
+    /// It consumes more resources while handshaking connection but each client can have it's own unique encryption keys
+    /// </summary>
+    bool CloneForEachConnection { get; set; }
 
     /// <summary>
     /// Sets encryption keys.

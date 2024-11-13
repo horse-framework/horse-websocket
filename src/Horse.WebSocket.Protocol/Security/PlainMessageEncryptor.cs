@@ -5,7 +5,10 @@ public class PlainMessageEncryptor : IMessageEncryptor
 {
     /// <inheritdoc/>
     public byte EncryptorId { get; set; } = 0;
-    
+
+    /// <inheritdoc/>
+    public bool CloneForEachConnection { get; set; }
+
     /// <inheritdoc/>
     public void SetKeys(byte[] key1, byte[] key2 = null, byte[] key3 = null)
     {

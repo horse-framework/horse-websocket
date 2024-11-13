@@ -13,7 +13,11 @@ public class AesGcmMessageEncryptor : IMessageEncryptor
     private byte[] _defaultNonce;
     private byte[] _tag;
 
+    /// <inheritdoc/>
     public byte EncryptorId { get; set; } = 1;
+
+    /// <inheritdoc/>
+    public bool CloneForEachConnection { get; set; }
 
     /// <inheritdoc/>
     public void SetKeys(byte[] key1, byte[] key2 = null, byte[] key3 = null)

@@ -15,7 +15,7 @@ public class EncryptorContainer
     /// True, if there is at least one encryptor defined
     /// </summary>
     public bool HasAnyEncryptor { get; private set; }
-    
+
     /// <summary>
     /// Default Encryptor Id
     /// </summary>
@@ -24,14 +24,20 @@ public class EncryptorContainer
     internal EncryptorContainer Clone()
     {
         EncryptorContainer clone = new EncryptorContainer();
-        foreach (KeyValuePair<byte,IMessageEncryptor> pair in _encryptors)
-            clone._encryptors.Add(pair.Key, pair.Value);
+        
+        foreach (KeyValuePair<byte, IMessageEncryptor> pair in _encryptors)
+        {
+            if (pair.Value.CloneForEachConnection)
+                clone._encryptors.Add(pair.Key, pair.Value.Clone());
+            else
+                clone._encryptors.Add(pair.Key, pair.Value);
+        }
 
         clone.DefaultId = DefaultId;
         clone.HasAnyEncryptor = HasAnyEncryptor;
         return clone;
     }
-    
+
     /// <summary>
     /// Adds or changes encryptor
     /// </summary>
@@ -39,7 +45,7 @@ public class EncryptorContainer
     {
         if (!HasAnyEncryptor)
             DefaultId = encryptor.EncryptorId;
-        
+
         HasAnyEncryptor = true;
         _encryptors[encryptor.EncryptorId] = encryptor;
     }
