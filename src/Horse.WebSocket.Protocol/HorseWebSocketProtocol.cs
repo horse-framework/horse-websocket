@@ -120,12 +120,12 @@ public class HorseWebSocketProtocol : IHorseProtocol
 
             if (handshakeResult.Socket.SmartHealthCheck)
                 handshakeResult.Socket.KeepAlive();
-
+            
             bool isContentMessage = message.OpCode == SocketOpCode.UTF8 || message.OpCode == SocketOpCode.Binary;
-            if (isContentMessage && EncryptorContainer.HasAnyEncryptor && message.Content.Length > 0)
+            if (isContentMessage && ws.EncryptorContainer.HasAnyEncryptor && message.Content.Length > 0)
             {
                 byte encryptorId = (byte) message.Content.ReadByte();
-                IMessageEncryptor encryptor = EncryptorContainer.GetEncryptor(encryptorId);
+                IMessageEncryptor encryptor = ws.EncryptorContainer.GetEncryptor(encryptorId);
                 byte[] array = new byte[message.Content.Length - 1];
 
                 int left = array.Length;
