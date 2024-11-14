@@ -41,6 +41,7 @@ public class PlainMessageEncryptor : IMessageEncryptor
     {
         PlainMessageEncryptor encryptor = new PlainMessageEncryptor();
         encryptor.EncryptorId = EncryptorId;
+        encryptor.CloneForEachConnection = CloneForEachConnection;
         return encryptor;
     }
 }

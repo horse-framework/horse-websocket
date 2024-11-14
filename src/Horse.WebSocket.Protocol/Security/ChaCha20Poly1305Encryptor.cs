@@ -103,6 +103,8 @@ public class ChaCha20Poly1305Encryptor : IMessageEncryptor
     public IMessageEncryptor Clone()
     {
         ChaCha20Poly1305Encryptor clone = new ChaCha20Poly1305Encryptor();
+        clone.EncryptorId = EncryptorId;
+        clone.CloneForEachConnection = CloneForEachConnection;
         clone.SetKeys(_key, _defaultNonce, _tag);
         return clone;
     }

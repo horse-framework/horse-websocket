@@ -76,6 +76,8 @@ public class AesGcmMessageEncryptor : IMessageEncryptor
     public IMessageEncryptor Clone()
     {
         AesGcmMessageEncryptor clone = new AesGcmMessageEncryptor();
+        clone.EncryptorId = EncryptorId;
+        clone.CloneForEachConnection = CloneForEachConnection;
         clone.SetKeys(_key, _defaultNonce, _tag);
         return clone;
     }

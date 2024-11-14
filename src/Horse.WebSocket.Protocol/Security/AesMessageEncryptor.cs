@@ -65,7 +65,6 @@ public class AesMessageEncryptor : IMessageEncryptor
     public byte[] DecryptData(byte[] cipher, byte[] nonce = null)
     {
         using MemoryStream ms = new MemoryStream();
-
         using (CryptoStream cs = new CryptoStream(ms, _aes.CreateDecryptor(), CryptoStreamMode.Write))
             cs.Write(cipher);
 
@@ -76,6 +75,8 @@ public class AesMessageEncryptor : IMessageEncryptor
     public IMessageEncryptor Clone()
     {
         AesMessageEncryptor clone = new AesMessageEncryptor();
+        clone.EncryptorId = EncryptorId;
+        clone.CloneForEachConnection = CloneForEachConnection;
         clone.SetKeys(_key, _iv);
         return clone;
     }
