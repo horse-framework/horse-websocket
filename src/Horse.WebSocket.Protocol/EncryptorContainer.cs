@@ -28,13 +28,17 @@ public class EncryptorContainer
         foreach (KeyValuePair<byte, IMessageEncryptor> pair in _encryptors)
         {
             if (pair.Value.CloneForEachConnection)
-                clone._encryptors.Add(pair.Key, pair.Value.Clone());
+            {
+                var cloned = pair.Value.Clone();
+                clone._encryptors.Add(cloned.EncryptorId, cloned);
+            }
             else
-                clone._encryptors.Add(pair.Key, pair.Value);
+                clone._encryptors.Add(pair.Value.EncryptorId, pair.Value);
         }
 
         clone.DefaultId = DefaultId;
         clone.HasAnyEncryptor = HasAnyEncryptor;
+        
         return clone;
     }
 
