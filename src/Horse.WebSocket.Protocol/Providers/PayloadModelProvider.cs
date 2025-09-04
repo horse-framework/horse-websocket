@@ -11,6 +11,9 @@ namespace Horse.WebSocket.Protocol.Providers;
 /// </summary>
 public class PayloadModelProvider : ISerializableProvider
 {
+    /// <inheritdoc/>
+    public bool Binary => false;
+
     /// <summary>
     /// JSON serializer
     /// </summary>
@@ -49,7 +52,7 @@ public class PayloadModelProvider : ISerializableProvider
     /// </summary>
     public void Register(Type type)
     {
-        ModelTypeAttribute attribute = type.GetCustomAttribute<ModelTypeAttribute>(false);
+        TextMessageTypeAttribute attribute = type.GetCustomAttribute<TextMessageTypeAttribute>(false);
         string code = attribute != null ? attribute.TypeCode : type.Name;
 
         _typeCodes.Add(type, code);
@@ -81,7 +84,7 @@ public class PayloadModelProvider : ISerializableProvider
             code = _typeCodes[type];
         else
         {
-            ModelTypeAttribute attr = type.GetCustomAttribute<ModelTypeAttribute>();
+            TextMessageTypeAttribute attr = type.GetCustomAttribute<TextMessageTypeAttribute>();
             code = attr == null ? type.Name : attr.TypeCode;
 
             _typeCodes.Add(type, code);

@@ -16,6 +16,9 @@ public class PipeModelProvider : ISerializableProvider
     private const char COLON_CHAR = '|';
     private const byte COLON = (byte) '|';
 
+    /// <inheritdoc/>
+    public bool Binary => false;
+
     /// <summary>
     /// JSON serializer
     /// </summary>
@@ -54,7 +57,7 @@ public class PipeModelProvider : ISerializableProvider
     /// </summary>
     public void Register(Type type)
     {
-        ModelTypeAttribute attribute = type.GetCustomAttribute<ModelTypeAttribute>(false);
+        TextMessageTypeAttribute attribute = type.GetCustomAttribute<TextMessageTypeAttribute>(false);
         string code = attribute != null ? attribute.TypeCode : type.Name;
 
         _typeCodes.Add(type, code);
@@ -84,7 +87,7 @@ public class PipeModelProvider : ISerializableProvider
         Type type = model.GetType();
         if (!_typeCodes.TryGetValue(type, out string code))
         {
-            ModelTypeAttribute attr = type.GetCustomAttribute<ModelTypeAttribute>();
+            TextMessageTypeAttribute attr = type.GetCustomAttribute<TextMessageTypeAttribute>();
             code = attr == null ? type.Name : attr.TypeCode;
 
             _typeCodes.Add(type, code);

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Horse.WebSocket.Protocol.Security;
@@ -29,18 +30,26 @@ public class WebSocketMessageObserver
     internal bool HandlersRegistered { get; private set; }
 
     /// <summary>
-    /// Model provider for websocket
+    /// Model provider for websocket utf-8 stream
     /// </summary>
-    public IWebSocketModelProvider Provider { get; internal set; }
+    public IWebSocketModelProvider TextProvider { get; internal set; }
+
+    /// <summary>
+    /// Model provider for websocket binary stream
+    /// </summary>
+    public IWebSocketModelProvider BinaryProvider { get; internal set; }
 
     internal List<IWebSocketAuthenticator> Authenticators { get; } = new List<IWebSocketAuthenticator>();
 
     /// <summary>
     /// Creates new websocket message observer
     /// </summary>
-    public WebSocketMessageObserver(IWebSocketModelProvider provider, WebSocketErrorHandler errorAction)
+    public WebSocketMessageObserver(IWebSocketModelProvider textProvider,
+        IWebSocketModelProvider binaryProvider,
+        WebSocketErrorHandler errorAction)
     {
-        Provider = provider;
+        TextProvider = textProvider;
+        BinaryProvider = binaryProvider;
         ErrorAction = errorAction;
     }
 
@@ -51,12 +60,19 @@ public class WebSocketMessageObserver
     {
         try
         {
-            Type type = Provider.Resolve(message);
+            IWebSocketModelProvider provider = message.OpCode == SocketOpCode.UTF8
+                ? TextProvider
+                : BinaryProvider;
+
+            if (provider == null)
+                return Task.CompletedTask;
+
+            Type type = provider.Resolve(message);
 
             if (type == null)
                 return Task.CompletedTask;
 
-            object model = Provider.Get(message, type);
+            object model = provider.Get(message, type);
             ObserverExecuter executer = _executers[type];
             return executer.Execute(model, message, client);
         }
@@ -166,12 +182,17 @@ public class WebSocketMessageObserver
     {
         Func<WebSocketErrorHandler> errorFactory = () => ErrorAction;
         Type executerType = typeof(ObserverExecuter<,>).MakeGenericType(modelType, clientType);
-        ObserverExecuter executer = (ObserverExecuter) Activator.CreateInstance(executerType,
+        ObserverExecuter executer = (ObserverExecuter)Activator.CreateInstance(executerType,
             observerType,
             instance,
             providerFactory,
             errorFactory);
-        Provider.Register(modelType);
+
+        if (modelType.GetCustomAttribute<BinaryMessageTypeAttribute>() != null)
+            BinaryProvider.Register(modelType);
+
+        if (modelType.GetCustomAttribute<TextMessageTypeAttribute>() != null)
+            TextProvider.Register(modelType);
 
         executer.IsAuthenticationRequired = null;
         executer.Observer = this;

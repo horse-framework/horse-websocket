@@ -49,7 +49,7 @@ internal class MethodWebSocketConnectionHandler : IProtocolConnectionHandler<WsS
     /// </summary>
     public async Task<WsServerSocket> Connected(IHorseServer server, IConnectionInfo connection, ConnectionData data)
     {
-        WsServerSocket socket = new WsServerSocket(server, connection);
+        WsServerSocket socket = new WsServerSocket(server, connection, null);
 
         if (_connectedHandler != null)
             await _connectedHandler(socket, data);

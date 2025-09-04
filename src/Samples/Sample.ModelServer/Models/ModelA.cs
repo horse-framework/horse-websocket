@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace Sample.ModelServer.Models
 {
-    [ModelType("console-request")]
+    [TextMessageType("console-request")]
     public class ModelA
     {
         [JsonProperty("v")]

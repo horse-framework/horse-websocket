@@ -3,11 +3,11 @@
 namespace Horse.WebSocket.Protocol;
 
 /// <summary>
-/// Model type descriptor attribute for objects.
+/// Message type descriptor attribute for objects.
 /// That attribute should be used on models, not handlers.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
-public class ModelTypeAttribute : Attribute
+public class TextMessageTypeAttribute : Attribute
 {
     /// <summary>
     /// Type code of the model
@@ -17,7 +17,7 @@ public class ModelTypeAttribute : Attribute
     /// <summary>
     /// Creates new model type attribute
     /// </summary>
-    public ModelTypeAttribute(string typeCode)
+    public TextMessageTypeAttribute(string typeCode)
     {
         TypeCode = typeCode;
     }
@@ -25,7 +25,7 @@ public class ModelTypeAttribute : Attribute
     /// <summary>
     /// Creates new model type attribute
     /// </summary>
-    public ModelTypeAttribute(int typeCode)
+    public TextMessageTypeAttribute(int typeCode)
     {
         TypeCode = typeCode.ToString();
     }

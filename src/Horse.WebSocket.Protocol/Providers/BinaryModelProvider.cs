@@ -14,6 +14,9 @@ namespace Horse.WebSocket.Protocol.Providers;
 /// </summary>
 public class BinaryModelProvider : ISerializableProvider
 {
+    /// <inheritdoc/>
+    public bool Binary => true;
+
     /// <summary>
     /// JSON type model serializer is not support for binary model serialization operations
     /// </summary>
@@ -34,7 +37,7 @@ public class BinaryModelProvider : ISerializableProvider
     {
         if (message.OpCode != SocketOpCode.Binary)
             return null;
-            
+
         if (message.Content.Length < 2)
             return null;
 
@@ -53,27 +56,25 @@ public class BinaryModelProvider : ISerializableProvider
     /// <inheritdoc />
     public void Register(Type type)
     {
-        ModelTypeAttribute attribute = type.GetCustomAttribute<ModelTypeAttribute>(false);
-        string code = attribute != null ? attribute.TypeCode : type.Name;
+        BinaryMessageTypeAttribute attribute = type.GetCustomAttribute<BinaryMessageTypeAttribute>(false);
 
-        bool parse = short.TryParse(code, out short codeNumber);
-        if (!parse)
-            throw new InvalidOperationException("BinaryModelProvider supports only Int16 Type Codes");
+        if (attribute == null)
+            throw new InvalidOperationException("Binary model must have BinaryMessageTypeAttribute attribute");
 
-        _typeCodes.Add(type, codeNumber);
-        _codeTypes.Add(codeNumber, type);
+        _typeCodes.Add(type, attribute.TypeCode);
+        _codeTypes.Add(attribute.TypeCode, type);
     }
 
     /// <inheritdoc />
     public object Get(WebSocketMessage message, Type modelType)
     {
-        IBinaryWebSocketModel model = (IBinaryWebSocketModel) Activator.CreateInstance(modelType);
-            
+        IBinaryWebSocketModel model = (IBinaryWebSocketModel)Activator.CreateInstance(modelType);
+
         message.Content.Position = 2;
-            
+
         using BinaryReader reader = new BinaryReader(message.Content, Encoding.UTF8, true);
         model.Deserialize(reader);
-            
+
         return model;
     }
 
@@ -90,14 +91,12 @@ public class BinaryModelProvider : ISerializableProvider
             code = typeCode;
         else
         {
-            ModelTypeAttribute attr = type.GetCustomAttribute<ModelTypeAttribute>();
-            string codeString = attr == null ? type.Name : attr.TypeCode;
+            BinaryMessageTypeAttribute attr = type.GetCustomAttribute<BinaryMessageTypeAttribute>();
+            
+            if (attr == null)
+                throw new InvalidOperationException("Binary model must have BinaryMessageTypeAttribute attribute");
 
-            bool parse = short.TryParse(codeString, out short codeNumber);
-            if (!parse)
-                throw new InvalidOperationException("BinaryModelProvider supports only numeric Type Codes");
-
-            code = codeNumber;
+            code = attr.TypeCode;
             _typeCodes.Add(type, code);
             _codeTypes.Add(code, type);
         }

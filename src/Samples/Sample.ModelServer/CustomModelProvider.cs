@@ -21,6 +21,7 @@ namespace Sample.ModelServer
 
     public class CustomModelProvider : IWebSocketModelProvider
     {
+        public bool Binary => false;
         private readonly Dictionary<string, Type> _types = new(StringComparer.InvariantCultureIgnoreCase);
 
         public Type Resolve(WebSocketMessage message)
@@ -50,7 +51,7 @@ namespace Sample.ModelServer
         {
             string key;
 
-            ModelTypeAttribute typeAttribute = type.GetCustomAttribute<ModelTypeAttribute>();
+            TextMessageTypeAttribute typeAttribute = type.GetCustomAttribute<TextMessageTypeAttribute>();
             key = typeAttribute != null ? typeAttribute.TypeCode : type.Name;
 
             _types.Add(key, type);

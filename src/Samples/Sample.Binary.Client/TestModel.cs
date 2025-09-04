@@ -3,8 +3,8 @@ using Horse.WebSocket.Protocol.Serialization;
 
 namespace Sample.Binary.Client;
 
-
-[ModelType("123")]
+[TextMessageType("Test")]
+[BinaryMessageType(123)]
 public class TestModel : IBinaryWebSocketModel
 {
     public int Item1 { get; set; }

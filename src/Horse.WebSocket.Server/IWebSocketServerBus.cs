@@ -11,12 +11,12 @@ public interface IWebSocketServerBus
     /// <summary>
     /// Sends a message over websocket
     /// </summary>
-    Task<bool> SendAsync<TModel>(IHorseWebSocket target, TModel model);
+    Task<bool> SendAsync<TModel>(IHorseWebSocket target, TModel model, bool binary);
 
     /// <summary>
     /// Sends a message over websocket
     /// </summary>
-    Task<bool> SendAsync<TModel>(IHorseWebSocket target, TModel model, byte encryptorNumber);
+    Task<bool> SendAsync<TModel>(IHorseWebSocket target, TModel model, bool binary, byte encryptorNumber);
 
     /// <summary>
     /// Removes client from server
@@ -26,5 +26,10 @@ public interface IWebSocketServerBus
     /// <summary>
     /// Returns currently used model provider by the buss
     /// </summary>
-    IWebSocketModelProvider GetModelProvider();
+    IWebSocketModelProvider GetTextModelProvider();
+    
+    /// <summary>
+    /// Returns currently used model provider by the buss
+    /// </summary>
+    IWebSocketModelProvider GetBinaryModelProvider();
 }
