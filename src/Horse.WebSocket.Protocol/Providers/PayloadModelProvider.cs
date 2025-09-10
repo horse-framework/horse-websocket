@@ -11,6 +11,12 @@ namespace Horse.WebSocket.Protocol.Providers;
 /// </summary>
 public class PayloadModelProvider : ISerializableProvider
 {
+    /// <inheritdoc />
+    public void WarmUp(params Assembly[] assemblies)
+    {
+        throw new NotSupportedException();
+    }
+
     /// <summary>
     /// JSON serializer
     /// </summary>

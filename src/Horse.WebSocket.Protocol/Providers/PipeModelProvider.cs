@@ -16,6 +16,12 @@ public class PipeModelProvider : ISerializableProvider
     private const char COLON_CHAR = '|';
     private const byte COLON = (byte) '|';
 
+    /// <inheritdoc />
+    public void WarmUp(params Assembly[] assemblies)
+    {
+        throw new NotSupportedException();
+    }
+    
     /// <summary>
     /// JSON serializer
     /// </summary>

@@ -30,18 +30,45 @@ public class BinaryModelProvider : ISerializableProvider
     private readonly Dictionary<short, Type> _codeTypes = new Dictionary<short, Type>();
 
     /// <inheritdoc />
+    public void WarmUp(params Assembly[] assemblies)
+    {
+        _typeCodes.Clear();
+        _codeTypes.Clear();
+        
+        foreach (Assembly assembly in assemblies)
+        {
+            foreach (Type type in assembly.GetTypes())
+            {
+                ModelTypeAttribute attr = type.GetCustomAttribute<ModelTypeAttribute>();
+                if (attr == null)
+                    continue;
+
+                short code = Convert.ToInt16(attr.TypeCode);
+                _typeCodes.Add(type, code);
+                _codeTypes.Add(code, type);
+            }
+        }
+    }
+
+    /// <inheritdoc />
     public Type Resolve(WebSocketMessage message)
     {
         if (message.OpCode != SocketOpCode.Binary)
             return null;
-            
+
         if (message.Content.Length < 2)
             return null;
 
         message.Content.Position = 0;
 
         byte[] bytes = new byte[2];
-        message.Content.Read(bytes, 0, bytes.Length);
+        int readCount = message.Content.Read(bytes, 0, bytes.Length);
+        if (readCount != 2)
+        {
+            readCount = message.Content.Read(bytes, 1, 1);
+            if (readCount == 0)
+                throw new IOException();
+        }
 
         short code = BitConverter.ToInt16(bytes, 0);
 
@@ -67,13 +94,13 @@ public class BinaryModelProvider : ISerializableProvider
     /// <inheritdoc />
     public object Get(WebSocketMessage message, Type modelType)
     {
-        IBinaryWebSocketModel model = (IBinaryWebSocketModel) Activator.CreateInstance(modelType);
-            
+        IBinaryWebSocketModel model = (IBinaryWebSocketModel)Activator.CreateInstance(modelType);
+
         message.Content.Position = 2;
-            
+
         using BinaryReader reader = new BinaryReader(message.Content, Encoding.UTF8, true);
         model.Deserialize(reader);
-            
+
         return model;
     }
 
