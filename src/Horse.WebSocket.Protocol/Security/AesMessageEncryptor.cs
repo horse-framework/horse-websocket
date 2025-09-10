@@ -17,6 +17,9 @@ public class AesMessageEncryptor : IMessageEncryptor
     /// <inheritdoc/>
     public bool CloneForEachConnection { get; set; }
 
+    /// <inheritdoc/>
+    public bool SkipEncryptionTypeData { get; set; }
+
     /// <summary>
     /// Key1 is AES RGB Key. Key2 is AES IV (Initialization vector). Key3 in unused.
     /// </summary>

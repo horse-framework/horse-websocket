@@ -18,6 +18,9 @@ public class ChaCha20Poly1305Encryptor : IMessageEncryptor
     /// <inheritdoc/>
     public bool CloneForEachConnection { get; set; }
 
+    /// <inheritdoc/>
+    public bool SkipEncryptionTypeData { get; set; }
+
     /// <summary>
     /// Sets nonce value for encryptor
     /// </summary>

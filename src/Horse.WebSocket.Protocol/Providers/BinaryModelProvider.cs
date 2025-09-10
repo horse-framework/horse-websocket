@@ -42,7 +42,7 @@ public class BinaryModelProvider : ISerializableProvider
         {
             foreach (Type type in assembly.GetTypes())
             {
-                ModelTypeAttribute attr = type.GetCustomAttribute<ModelTypeAttribute>();
+                BinaryMessageTypeAttribute attr = type.GetCustomAttribute<BinaryMessageTypeAttribute>();
                 if (attr == null)
                     continue;
 
@@ -65,13 +65,7 @@ public class BinaryModelProvider : ISerializableProvider
         message.Content.Position = 0;
 
         byte[] bytes = new byte[2];
-        int readCount = message.Content.Read(bytes, 0, bytes.Length);
-        if (readCount != 2)
-        {
-            readCount = message.Content.Read(bytes, 1, 1);
-            if (readCount == 0)
-                throw new IOException();
-        }
+        message.Content.ReadExactly(bytes, 0, bytes.Length);
 
         short code = BitConverter.ToInt16(bytes, 0);
 

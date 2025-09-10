@@ -15,6 +15,13 @@ public interface IMessageEncryptor
     /// It consumes more resources while handshaking connection but each client can have it's own unique encryption keys
     /// </summary>
     bool CloneForEachConnection { get; set; }
+    
+    /// <summary>
+    /// If true, messages don't include encryption type definition byte in each stream.
+    /// Encryption is always applied with only one type.
+    /// By default, it's false and usable for backward compatibility
+    /// </summary>
+    bool SkipEncryptionTypeData { get; set; }
 
     /// <summary>
     /// Sets encryption keys.

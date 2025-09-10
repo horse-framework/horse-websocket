@@ -96,7 +96,7 @@ public class HorseWebSocketProtocol : IHorseProtocol
     public async Task HandleConnection(IConnectionInfo info, ProtocolHandshakeResult handshakeResult)
     {
         //if user makes a mistake in ready method, we should not interrupt connection handling
-        WsServerSocket ws = (WsServerSocket) handshakeResult.Socket;
+        WsServerSocket ws = (WsServerSocket)handshakeResult.Socket;
         try
         {
             await _handler.Ready(_server, ws);
@@ -120,12 +120,20 @@ public class HorseWebSocketProtocol : IHorseProtocol
 
             if (handshakeResult.Socket.SmartHealthCheck)
                 handshakeResult.Socket.KeepAlive();
-            
+
             bool isContentMessage = message.OpCode == SocketOpCode.UTF8 || message.OpCode == SocketOpCode.Binary;
             if (isContentMessage && ws.EncryptorContainer.HasAnyEncryptor && message.Content.Length > 0)
             {
-                byte encryptorId = (byte) message.Content.ReadByte();
-                IMessageEncryptor encryptor = ws.EncryptorContainer.GetEncryptor(encryptorId);
+                IMessageEncryptor encryptor = ws.EncryptorContainer.GetDefaultEncryptor();
+
+                if (!encryptor.SkipEncryptionTypeData)
+                {
+                    byte encryptorId = (byte)message.Content.ReadByte();
+                    
+                    if (encryptorId != ws.EncryptorContainer.DefaultId)
+                        encryptor = ws.EncryptorContainer.GetEncryptor(encryptorId);
+                }
+
                 byte[] array = new byte[message.Content.Length - 1];
 
                 int left = array.Length;
@@ -181,7 +189,7 @@ public class HorseWebSocketProtocol : IHorseProtocol
                 //if user makes a mistake in received method, we should not interrupt connection handling
                 try
                 {
-                    await _handler.Received(_server, info, (WsServerSocket) socket, message);
+                    await _handler.Received(_server, info, (WsServerSocket)socket, message);
                 }
                 catch (Exception e)
                 {

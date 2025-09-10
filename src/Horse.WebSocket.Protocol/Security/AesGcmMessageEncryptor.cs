@@ -20,6 +20,9 @@ public class AesGcmMessageEncryptor : IMessageEncryptor
     public bool CloneForEachConnection { get; set; }
 
     /// <inheritdoc/>
+    public bool SkipEncryptionTypeData { get; set; }
+
+    /// <inheritdoc/>
     public void SetKeys(byte[] key1, byte[] key2 = null, byte[] key3 = null)
     {
         if (key1.Length != 32)
