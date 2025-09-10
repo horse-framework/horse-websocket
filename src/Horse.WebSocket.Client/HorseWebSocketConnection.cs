@@ -170,7 +170,7 @@ public class HorseWebSocketConnection : ClientSocketBase<WebSocketMessage>, IHor
 
         //Creates HttpRequest class from the response message
         RequestBuilder reader = new RequestBuilder();
-        HttpRequest requestResponse = reader.Build(response.Split(new[] {"\r\n"}, StringSplitOptions.RemoveEmptyEntries));
+        HttpRequest requestResponse = reader.Build(response.Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries));
 
         //server must send the web socket accept key for the websocket protocol
         if (!requestResponse.Headers.ContainsKey(HttpHeaders.WEBSOCKET_ACCEPT))
@@ -372,6 +372,34 @@ public class HorseWebSocketConnection : ClientSocketBase<WebSocketMessage>, IHor
     {
         byte[] data = await _writer.CreateAsync(message, EncryptorContainer.GetEncryptor(encryptorNumber));
         return await SendAsync(data);
+    }
+
+    /// <inhericdoc />
+    public Task<bool> SendTextModel<TModel>(TModel model)
+    {
+        WebSocketMessage message = OwnerClient.Observer.TextProvider.Write(model);
+        return SendAsync(message);
+    }
+
+    /// <inhericdoc />
+    public Task<bool> SendTextModel<TModel>(TModel model, byte encryptorNumber)
+    {
+        WebSocketMessage message = OwnerClient.Observer.TextProvider.Write(model);
+        return SendAsync(message, encryptorNumber);
+    }
+
+    /// <inhericdoc />
+    public Task<bool> SendBinaryModel<TModel>(TModel model)
+    {
+        WebSocketMessage message = OwnerClient.Observer.BinaryProvider.Write(model);
+        return SendAsync(message);
+    }
+
+    /// <inhericdoc />
+    public Task<bool> SendBinaryModel<TModel>(TModel model, byte encryptorNumber)
+    {
+        WebSocketMessage message = OwnerClient.Observer.BinaryProvider.Write(model);
+        return SendAsync(message, encryptorNumber);
     }
 
     /// <inhericdoc />

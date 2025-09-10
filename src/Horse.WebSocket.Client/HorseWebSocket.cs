@@ -137,7 +137,7 @@ public class HorseWebSocket : IDisposable
     /// </summary>
     public HorseWebSocket()
     {
-        Observer = new WebSocketMessageObserver(new PipeModelProvider(new SystemJsonModelSerializer()), OnErrorOccured);
+        Observer = new WebSocketMessageObserver(new PipeModelProvider(new SystemJsonModelSerializer()), new BinaryModelProvider(), OnErrorOccured);
     }
 
     /// <summary>
@@ -172,7 +172,7 @@ public class HorseWebSocket : IDisposable
     {
         if (EncryptorContainer.HasAnyEncryptor && message.Content.Length > 0)
         {
-            byte encryptorId = (byte) message.Content.ReadByte();
+            byte encryptorId = (byte)message.Content.ReadByte();
             IMessageEncryptor encryptor = EncryptorContainer.GetEncryptor(encryptorId);
             byte[] array = new byte[message.Content.Length - 1];
 
@@ -404,7 +404,7 @@ public class HorseWebSocket : IDisposable
                                                 $"Or you can pass singleton instance of handler.");
             }
 
-            TMessageHandler instance = (TMessageHandler) Activator.CreateInstance(handlerType);
+            TMessageHandler instance = (TMessageHandler)Activator.CreateInstance(handlerType);
             Observer.RegisterWebSocketHandler(typeof(TMessageHandler), typeof(TModel), typeof(HorseWebSocketConnection), instance, null);
             return;
         }
@@ -476,7 +476,7 @@ public class HorseWebSocket : IDisposable
                                                 $"Or you can pass singleton instance of handler.");
             }
 
-            TMessageHandler instance = (TMessageHandler) Activator.CreateInstance(handlerType);
+            TMessageHandler instance = (TMessageHandler)Activator.CreateInstance(handlerType);
             Observer.RegisterWebSocketHandler(typeof(TMessageHandler), typeof(TModel), typeof(HorseWebSocketConnection), instance, null);
             return;
         }
@@ -554,7 +554,24 @@ public class HorseWebSocket : IDisposable
     /// </summary>
     public Task<bool> SendAsync<TModel>(TModel model)
     {
-        WebSocketMessage message = Observer.Provider.Write(model);
+        IWebSocketModelProvider provider = Observer.BinaryProvider != null && model is IBinaryWebSocketModel
+            ? Observer.BinaryProvider
+            : Observer.TextProvider;
+
+        WebSocketMessage message = provider.Write(model);
+        return Connection.SendAsync(message);
+    }
+
+    /// <summary>
+    /// Sends a model to websocket server
+    /// </summary>
+    public Task<bool> SendAsync<TModel>(TModel model, bool binary)
+    {
+        IWebSocketModelProvider provider = binary
+            ? Observer.BinaryProvider
+            : Observer.TextProvider;
+        
+        WebSocketMessage message = provider.Write(model);
         return Connection.SendAsync(message);
     }
 
@@ -566,7 +583,19 @@ public class HorseWebSocket : IDisposable
     public void UseCustomModelProvider<TProvider>()
         where TProvider : IWebSocketModelProvider, new()
     {
-        Observer.Provider = new TProvider();
+        TProvider provider = new TProvider();
+        if (provider.Binary)
+            Observer.BinaryProvider = provider;
+        else
+            Observer.TextProvider = provider;
+    }
+
+    /// <summary>
+    /// Uses binary model provider
+    /// </summary>
+    public void UseBinaryModelProvider()
+    {
+        Observer.BinaryProvider = new BinaryModelProvider();
     }
 
     /// <summary>
@@ -574,7 +603,10 @@ public class HorseWebSocket : IDisposable
     /// </summary>
     public void UseCustomModelProvider(IWebSocketModelProvider provider)
     {
-        Observer.Provider = provider;
+        if (provider.Binary)
+            Observer.BinaryProvider = provider;
+        else
+            Observer.TextProvider = provider;
     }
 
     /// <summary>
@@ -586,7 +618,7 @@ public class HorseWebSocket : IDisposable
         if (serializer == null)
             serializer = new NewtonsoftJsonModelSerializer();
 
-        Observer.Provider = new PipeModelProvider(serializer);
+        Observer.TextProvider = new PipeModelProvider(serializer);
     }
 
     /// <summary>
@@ -598,7 +630,7 @@ public class HorseWebSocket : IDisposable
         if (serializer == null)
             serializer = new NewtonsoftJsonModelSerializer();
 
-        Observer.Provider = new PayloadModelProvider(serializer);
+        Observer.TextProvider = new PayloadModelProvider(serializer);
     }
 
     #endregion

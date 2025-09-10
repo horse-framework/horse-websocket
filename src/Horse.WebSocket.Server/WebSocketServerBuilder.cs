@@ -182,10 +182,10 @@ public class WebSocketServerBuilder<TClient> where TClient : IHorseWebSocket
         if (Handler.Observer.HandlersRegistered)
             throw new InvalidOperationException("You must use Use...Provider methods before Add..Handler(s) methods. Change method call order.");
 
-        Handler.Observer.Provider = new PipeModelProvider(serializer);
+        Handler.Observer.TextProvider = new PipeModelProvider(serializer);
 
         if (_services != null)
-            _services.AddSingleton(Handler.Observer.Provider);
+            _services.AddSingleton(Handler.Observer.TextProvider);
 
         return this;
     }
@@ -201,10 +201,10 @@ public class WebSocketServerBuilder<TClient> where TClient : IHorseWebSocket
         if (Handler.Observer.HandlersRegistered)
             throw new InvalidOperationException("You must use Use...Provider methods before Add..Handler(s) methods. Change method call order.");
 
-        Handler.Observer.Provider = new PayloadModelProvider(serializer);
+        Handler.Observer.TextProvider = new PayloadModelProvider(serializer);
 
         if (_services != null)
-            _services.AddSingleton(Handler.Observer.Provider);
+            _services.AddSingleton(Handler.Observer.TextProvider);
 
         return this;
     }
@@ -217,10 +217,10 @@ public class WebSocketServerBuilder<TClient> where TClient : IHorseWebSocket
         if (Handler.Observer.HandlersRegistered)
             throw new InvalidOperationException("You must use Use...Provider methods before Add..Handler(s) methods. Change method call order.");
 
-        Handler.Observer.Provider = new BinaryModelProvider();
+        Handler.Observer.BinaryProvider = new BinaryModelProvider();
 
         if (_services != null)
-            _services.AddSingleton(Handler.Observer.Provider);
+            _services.AddSingleton(Handler.Observer.BinaryProvider);
 
         return this;
     }
@@ -233,11 +233,12 @@ public class WebSocketServerBuilder<TClient> where TClient : IHorseWebSocket
         if (Handler.Observer.HandlersRegistered)
             throw new InvalidOperationException("You must use Use...Provider methods before Add..Handler(s) methods. Change method call order.");
 
-        Handler.Observer.Provider = provider;
+        if (provider.Binary)
+            Handler.Observer.BinaryProvider = provider;
+        else
+            Handler.Observer.TextProvider = provider;
 
-        if (_services != null)
-            _services.AddSingleton(Handler.Observer.Provider);
-
+        _services?.AddSingleton(Handler.Observer.TextProvider);
         return this;
     }
 
@@ -250,11 +251,13 @@ public class WebSocketServerBuilder<TClient> where TClient : IHorseWebSocket
         if (Handler.Observer.HandlersRegistered)
             throw new InvalidOperationException("You must use Use...Provider methods before Add..Handler(s) methods. Change method call order.");
 
-        Handler.Observer.Provider = new TWebSocketModelProvider();
+        TWebSocketModelProvider provider = new TWebSocketModelProvider();
+        if (provider.Binary)
+            Handler.Observer.BinaryProvider = provider;
+        else
+            Handler.Observer.TextProvider = provider;
 
-        if (_services != null)
-            _services.AddSingleton(Handler.Observer.Provider);
-
+        _services?.AddSingleton<IWebSocketModelProvider>(provider);
         return this;
     }
 

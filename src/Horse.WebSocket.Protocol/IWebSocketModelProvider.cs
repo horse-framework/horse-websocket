@@ -9,6 +9,11 @@ namespace Horse.WebSocket.Protocol;
 public interface IWebSocketModelProvider
 {
     /// <summary>
+    /// True, if provider reads and writes data with binary OpCode on websocket connection.
+    /// </summary>
+    bool Binary { get; }
+    
+    /// <summary>
     /// Resolves model type from websocket message
     /// </summary>
     Type Resolve(WebSocketMessage message);

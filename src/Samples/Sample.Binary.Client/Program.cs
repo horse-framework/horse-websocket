@@ -1,12 +1,12 @@
 ﻿using Horse.WebSocket.Client;
-using Horse.WebSocket.Protocol.Providers;
 using Microsoft.Extensions.DependencyInjection;
 using Sample.Binary.Client;
 
 IServiceCollection services = new ServiceCollection();
 
 HorseWebSocket client = new HorseWebSocket();
-client.UseCustomModelProvider<BinaryModelProvider>();
+client.UsePipeModelProvider();
+client.UseBinaryModelProvider();
 
 client.UseServices(services);
 client.AddHandlersTransient(typeof(Program));
@@ -23,10 +23,11 @@ TestModel model = new TestModel
     Item4 = 43543254
 };
 
+bool binary = true;
 while (true)
 {
-    Console.WriteLine("press enter to send");
-    await Task.Delay(5000);
-    await client.SendAsync(model);
-    await Task.Delay(60000);
+    var line = Console.ReadLine()!;
+    model.Item3 = line;
+    await client.SendAsync(model, binary);
+    binary = !binary;
 }

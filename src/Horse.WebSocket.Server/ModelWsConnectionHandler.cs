@@ -12,7 +12,7 @@ namespace Horse.WebSocket.Server;
 /// Executed when a client is connected to the server.
 /// The client class should be decided, instantiated in this method.
 /// </summary>
-public delegate Task<WsServerSocket> ConnectedHandler(IServiceProvider services, IConnectionInfo info, ConnectionData data);
+public delegate Task<WsServerSocket> ConnectedHandler(IServiceProvider services, IConnectionInfo info, ConnectionData data, WebSocketMessageObserver observer);
 
 /// <summary>
 /// Executed after client is connected and completed all handshaking operations.
@@ -65,7 +65,7 @@ internal sealed class ModelWsConnectionHandler : IWebSocketServerBus, IProtocolC
 
     internal ModelWsConnectionHandler()
     {
-        Observer = new WebSocketMessageObserver(new PipeModelProvider(new NewtonsoftJsonModelSerializer()), ErrorAction);
+        Observer = new WebSocketMessageObserver(new PipeModelProvider(new NewtonsoftJsonModelSerializer()), new BinaryModelProvider(), ErrorAction);
     }
 
     #region Events
@@ -78,9 +78,9 @@ internal sealed class ModelWsConnectionHandler : IWebSocketServerBus, IProtocolC
         WsServerSocket socket;
 
         if (ConnectedFunc != null)
-            socket = await ConnectedFunc(ServiceProvider, connection, data);
+            socket = await ConnectedFunc(ServiceProvider, connection, data, Observer);
         else
-            socket = new WsServerSocket(server, connection);
+            socket = new WsServerSocket(server, connection, Observer);
 
         return socket;
     }
@@ -125,15 +125,17 @@ internal sealed class ModelWsConnectionHandler : IWebSocketServerBus, IProtocolC
     /// <summary>
     /// Sends a model to a receiver client
     /// </summary>
-    public Task<bool> SendAsync<TModel>(IHorseWebSocket target, TModel model)
+    public Task<bool> SendAsync<TModel>(IHorseWebSocket target, TModel model, bool binary)
     {
-        WebSocketMessage message = Observer.Provider.Write(model);
+        IWebSocketModelProvider provider = binary ? Observer.BinaryProvider : Observer.TextProvider;
+        WebSocketMessage message = provider.Write(model);
         return target.SendAsync(message);
     }
 
-    public Task<bool> SendAsync<TModel>(IHorseWebSocket target, TModel model, byte encryptorNumber)
+    public Task<bool> SendAsync<TModel>(IHorseWebSocket target, TModel model, bool binary, byte encryptorNumber)
     {
-        WebSocketMessage message = Observer.Provider.Write(model);
+        IWebSocketModelProvider provider = binary ? Observer.BinaryProvider : Observer.TextProvider;
+        WebSocketMessage message = provider.Write(model);
         return target.SendAsync(message, encryptorNumber);
     }
 
@@ -146,7 +148,10 @@ internal sealed class ModelWsConnectionHandler : IWebSocketServerBus, IProtocolC
     }
 
     /// <inheritdoc />
-    public IWebSocketModelProvider GetModelProvider() => Observer.Provider;
+    public IWebSocketModelProvider GetTextModelProvider() => Observer.TextProvider;
+
+    /// <inheritdoc />
+    public IWebSocketModelProvider GetBinaryModelProvider() => Observer.BinaryProvider;
 
     #endregion
 }
