@@ -125,7 +125,7 @@ internal sealed class ModelWsConnectionHandler : IWebSocketServerBus, IProtocolC
     /// <summary>
     /// Sends a model to a receiver client
     /// </summary>
-    public Task<bool> SendAsync<TModel>(IHorseWebSocket target, TModel model, bool binary)
+    public ValueTask<bool> SendAsync<TModel>(IHorseWebSocket target, TModel model, bool binary)
     {
         IWebSocketModelProvider provider = binary ? Observer.BinaryProvider : Observer.TextProvider;
         WebSocketMessage message = provider.Write(model);
@@ -133,7 +133,7 @@ internal sealed class ModelWsConnectionHandler : IWebSocketServerBus, IProtocolC
     }
 
     /// <inheritdoc />
-    public Task<bool> SendAsync<TModel>(IHorseWebSocket target, TModel model, bool binary, byte encryptorNumber)
+    public ValueTask<bool> SendAsync<TModel>(IHorseWebSocket target, TModel model, bool binary, byte encryptorNumber)
     {
         IWebSocketModelProvider provider = binary ? Observer.BinaryProvider : Observer.TextProvider;
         WebSocketMessage message = provider.Write(model);
@@ -141,28 +141,28 @@ internal sealed class ModelWsConnectionHandler : IWebSocketServerBus, IProtocolC
     }
 
     /// <inheritdoc />
-    public Task<bool> SendBinaryAsync<TModel>(IHorseWebSocket target, TModel model) where TModel : IBinaryWebSocketModel
+    public ValueTask<bool> SendBinaryAsync<TModel>(IHorseWebSocket target, TModel model) where TModel : IBinaryWebSocketModel
     {
         WebSocketMessage message = Observer.BinaryProvider.Write(model);
         return target.SendAsync(message);
     }
 
     /// <inheritdoc />
-    public Task<bool> SendBinaryAsync<TModel>(IHorseWebSocket target, TModel model, byte encryptorNumber) where TModel : IBinaryWebSocketModel
+    public ValueTask<bool> SendBinaryAsync<TModel>(IHorseWebSocket target, TModel model, byte encryptorNumber) where TModel : IBinaryWebSocketModel
     {
         WebSocketMessage message = Observer.BinaryProvider.Write(model);
         return target.SendAsync(message, encryptorNumber);
     }
 
     /// <inheritdoc />
-    public Task<bool> SendTextAsync<TModel>(IHorseWebSocket target, TModel model)
+    public ValueTask<bool> SendTextAsync<TModel>(IHorseWebSocket target, TModel model)
     {
         WebSocketMessage message = Observer.TextProvider.Write(model);
         return target.SendAsync(message);
     }
 
     /// <inheritdoc />
-    public Task<bool> SendTextAsync<TModel>(IHorseWebSocket target, TModel model, byte encryptorNumber)
+    public ValueTask<bool> SendTextAsync<TModel>(IHorseWebSocket target, TModel model, byte encryptorNumber)
     {
         WebSocketMessage message = Observer.TextProvider.Write(model);
         return target.SendAsync(message, encryptorNumber);

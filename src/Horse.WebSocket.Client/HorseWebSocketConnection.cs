@@ -341,7 +341,7 @@ public class HorseWebSocketConnection : ClientSocketBase<WebSocketMessage>, IHor
     /// <summary>
     /// Sends a string websocket message
     /// </summary>
-    public async Task<bool> SendAsync(string message)
+    public async ValueTask<bool> SendAsync(string message)
     {
         byte[] data = await _writer.CreateAsync(message, EncryptorContainer.GetDefaultEncryptor());
         return await SendAsync(data);
@@ -350,7 +350,7 @@ public class HorseWebSocketConnection : ClientSocketBase<WebSocketMessage>, IHor
     /// <summary>
     /// Sends a string websocket message
     /// </summary>
-    public async Task<bool> SendAsync(string message, byte encryptorNumber)
+    public async ValueTask<bool> SendAsync(string message, byte encryptorNumber)
     {
         byte[] data = await _writer.CreateAsync(message, EncryptorContainer.GetEncryptor(encryptorNumber));
         return await SendAsync(data);
@@ -359,7 +359,7 @@ public class HorseWebSocketConnection : ClientSocketBase<WebSocketMessage>, IHor
     /// <summary>
     /// Sends a string websocket message
     /// </summary>
-    public async Task<bool> SendAsync(WebSocketMessage message)
+    public async ValueTask<bool> SendAsync(WebSocketMessage message)
     {
         byte[] data = await _writer.CreateAsync(message, EncryptorContainer.GetDefaultEncryptor());
         return await SendAsync(data);
@@ -368,35 +368,35 @@ public class HorseWebSocketConnection : ClientSocketBase<WebSocketMessage>, IHor
     /// <summary>
     /// Sends a string websocket message with encryption
     /// </summary>
-    public async Task<bool> SendAsync(WebSocketMessage message, byte encryptorNumber)
+    public async ValueTask<bool> SendAsync(WebSocketMessage message, byte encryptorNumber)
     {
         byte[] data = await _writer.CreateAsync(message, EncryptorContainer.GetEncryptor(encryptorNumber));
         return await SendAsync(data);
     }
 
     /// <inhericdoc />
-    public Task<bool> SendTextModel<TModel>(TModel model)
+    public ValueTask<bool> SendTextModel<TModel>(TModel model)
     {
         WebSocketMessage message = OwnerClient.Observer.TextProvider.Write(model);
         return SendAsync(message);
     }
 
     /// <inhericdoc />
-    public Task<bool> SendTextModel<TModel>(TModel model, byte encryptorNumber)
+    public ValueTask<bool> SendTextModel<TModel>(TModel model, byte encryptorNumber)
     {
         WebSocketMessage message = OwnerClient.Observer.TextProvider.Write(model);
         return SendAsync(message, encryptorNumber);
     }
 
     /// <inhericdoc />
-    public Task<bool> SendBinaryModel<TModel>(TModel model)
+    public ValueTask<bool> SendBinaryModel<TModel>(TModel model)
     {
         WebSocketMessage message = OwnerClient.Observer.BinaryProvider.Write(model);
         return SendAsync(message);
     }
 
     /// <inhericdoc />
-    public Task<bool> SendBinaryModel<TModel>(TModel model, byte encryptorNumber)
+    public ValueTask<bool> SendBinaryModel<TModel>(TModel model, byte encryptorNumber)
     {
         WebSocketMessage message = OwnerClient.Observer.BinaryProvider.Write(model);
         return SendAsync(message, encryptorNumber);

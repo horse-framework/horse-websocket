@@ -10,32 +10,32 @@ public interface IHorseWebSocket
     /// <summary>
     /// Sends a websocket message
     /// </summary>
-    Task<bool> SendAsync(WebSocketMessage message);
+    ValueTask<bool> SendAsync(WebSocketMessage message);
 
     /// <summary>
     /// Sends a websocket message
     /// </summary>
-    Task<bool> SendAsync(WebSocketMessage message, byte encryptorNumber);
+    ValueTask<bool> SendAsync(WebSocketMessage message, byte encryptorNumber);
     
     /// <summary>
     /// Sends a websocket message
     /// </summary>
-    Task<bool> SendTextModel<TModel>(TModel model);
+    ValueTask<bool> SendTextModel<TModel>(TModel model);
     
     /// <summary>
     /// Sends a websocket message
     /// </summary>
-    Task<bool> SendTextModel<TModel>(TModel model, byte encryptorNumber);
+    ValueTask<bool> SendTextModel<TModel>(TModel model, byte encryptorNumber);
     
     /// <summary>
     /// Sends a websocket message
     /// </summary>
-    Task<bool> SendBinaryModel<TModel>(TModel model);
+    ValueTask<bool> SendBinaryModel<TModel>(TModel model);
     
     /// <summary>
     /// Sends a websocket message
     /// </summary>
-    Task<bool> SendBinaryModel<TModel>(TModel model, byte encryptorNumber);
+    ValueTask<bool> SendBinaryModel<TModel>(TModel model, byte encryptorNumber);
 
     /// <summary>
     /// Closes client connection

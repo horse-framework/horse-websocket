@@ -152,23 +152,23 @@ public class WsServerSocket : SocketBase, IHorseWebSocket
     /// <summary>
     /// Sends websocket message to client
     /// </summary>
-    public async Task<bool> SendAsync(WebSocketMessage message)
+    public async ValueTask<bool> SendAsync(WebSocketMessage message)
     {
         byte[] data = await _writer.CreateAsync(message, EncryptorContainer.GetDefaultEncryptor());
-        return Send(data);
+        return await SendAsync(data);
     }
 
     /// <summary>
     /// Sends websocket message to client
     /// </summary>
-    public async Task<bool> SendAsync(WebSocketMessage message, byte encryptorNumber)
+    public async ValueTask<bool> SendAsync(WebSocketMessage message, byte encryptorNumber)
     {
         byte[] data = await _writer.CreateAsync(message, EncryptorContainer.GetEncryptor(encryptorNumber));
-        return Send(data);
+        return await SendAsync(data);
     }
 
     /// <inhericdoc />
-    public Task<bool> SendTextModel<TModel>(TModel model)
+    public ValueTask<bool> SendTextModel<TModel>(TModel model)
     {
         if (Observer == null)
             throw new Exception("Message Observer is null");
@@ -178,7 +178,7 @@ public class WsServerSocket : SocketBase, IHorseWebSocket
     }
 
     /// <inhericdoc />
-    public Task<bool> SendTextModel<TModel>(TModel model, byte encryptorNumber)
+    public ValueTask<bool> SendTextModel<TModel>(TModel model, byte encryptorNumber)
     {
         if (Observer == null)
             throw new Exception("Message Observer is null");
@@ -188,7 +188,7 @@ public class WsServerSocket : SocketBase, IHorseWebSocket
     }
 
     /// <inhericdoc />
-    public Task<bool> SendBinaryModel<TModel>(TModel model)
+    public ValueTask<bool> SendBinaryModel<TModel>(TModel model)
     {
         if (Observer == null)
             throw new Exception("Message Observer is null");
@@ -198,7 +198,7 @@ public class WsServerSocket : SocketBase, IHorseWebSocket
     }
 
     /// <inhericdoc />
-    public Task<bool> SendBinaryModel<TModel>(TModel model, byte encryptorNumber)
+    public ValueTask<bool> SendBinaryModel<TModel>(TModel model, byte encryptorNumber)
     {
         if (Observer == null)
             throw new Exception("Message Observer is null");
@@ -237,7 +237,7 @@ public class WsServerSocket : SocketBase, IHorseWebSocket
     public async Task SendAsync(string message)
     {
         byte[] data = await _writer.CreateAsync(WebSocketMessage.FromString(message), EncryptorContainer.GetDefaultEncryptor());
-        Send(data);
+        await SendAsync(data);
     }
 
     /// <summary>
@@ -246,6 +246,6 @@ public class WsServerSocket : SocketBase, IHorseWebSocket
     public async Task SendAsync(string message, byte encryptorNumber)
     {
         byte[] data = await _writer.CreateAsync(WebSocketMessage.FromString(message), EncryptorContainer.GetDefaultEncryptor());
-        Send(data);
+        await SendAsync(data);
     }
 }

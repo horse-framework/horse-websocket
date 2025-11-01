@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Text;
 
@@ -32,6 +33,11 @@ public class WebSocketMessage
     /// Message content stream
     /// </summary>
     public MemoryStream Content { get; set; }
+    
+    /// <summary>
+    /// Readonly Memory Content
+    /// </summary>
+    public ReadOnlyMemory<byte>? ReadOnlyContent { get; set; }
 
     /// <summary>
     /// Creates new message from string

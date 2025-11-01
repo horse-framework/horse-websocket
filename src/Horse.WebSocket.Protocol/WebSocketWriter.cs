@@ -1,4 +1,5 @@
 using System;
+using System.Buffers;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,6 +14,7 @@ public class WebSocketWriter
 {
     private readonly bool _masking;
     private static readonly Random _random = new Random();
+    private static readonly ArrayPool<byte> _arrayPool = ArrayPool<byte>.Shared;
 
     /// <summary>
     /// RFC-6455 Section 5.1 Rule:
@@ -51,6 +53,8 @@ public class WebSocketWriter
         //length
         await WriteLengthAsync(stream, length);
 
+        if (value.ReadOnlyContent.HasValue)
+            await WriteContentAsync(stream, value.ReadOnlyContent.Value, useEncryption, encryptor != null && !encryptor.SkipEncryptionTypeData ? encryptor.EncryptorId : null);
         if (value.Content != null)
             await WriteContentAsync(stream, value.Content.ToArray(), useEncryption, encryptor != null && !encryptor.SkipEncryptionTypeData ? encryptor.EncryptorId : null);
     }
@@ -80,6 +84,8 @@ public class WebSocketWriter
 
         await WriteLengthAsync(ms, length);
 
+        if (value.ReadOnlyContent.HasValue)
+            await WriteContentAsync(ms, value.ReadOnlyContent.Value, useEncryption, encryptor != null && !encryptor.SkipEncryptionTypeData ? encryptor.EncryptorId : null);
         if (value.Content != null)
             await WriteContentAsync(ms, value.Content.ToArray(), useEncryption, encryptor != null && !encryptor.SkipEncryptionTypeData ? encryptor.EncryptorId : null);
 
@@ -167,7 +173,9 @@ public class WebSocketWriter
         //length
         WriteLength(stream, length);
 
-        if (value.Content != null)
+        if (value.ReadOnlyContent.HasValue)
+            WriteContent(stream, value.ReadOnlyContent.Value, useEncryption, encryptor?.EncryptorId);
+        else if (value.Content != null)
             WriteContent(stream, value.Content.ToArray(), useEncryption, encryptor?.EncryptorId);
     }
 
@@ -197,7 +205,9 @@ public class WebSocketWriter
 
         WriteLength(ms, length);
 
-        if (value.Content != null)
+        if (value.ReadOnlyContent.HasValue)
+            WriteContent(ms, value.ReadOnlyContent.Value, useEncryption, encryptor?.EncryptorId);
+        else if (value.Content != null)
             WriteContent(ms, value.Content.ToArray(), useEncryption, encryptor?.EncryptorId);
 
         return ms.ToArray();
@@ -284,6 +294,45 @@ public class WebSocketWriter
         }
     }
 
+    private void WriteContent(Stream destination, ReadOnlyMemory<byte> data, bool useEncryption, byte? encryptorKey)
+    {
+        if (_masking)
+        {
+            byte[] mask = BitConverter.GetBytes(_random.Next(int.MaxValue / 2, int.MaxValue));
+            int maskIndexPadding = 0;
+
+            destination.Write(mask);
+
+            if (useEncryption && encryptorKey.HasValue)
+            {
+                destination.WriteByte((byte)(encryptorKey.Value ^ mask[maskIndexPadding]));
+                maskIndexPadding = 1;
+            }
+
+            byte[] maskData = _arrayPool.Rent(data.Length);
+            try
+            {
+                data.CopyTo(maskData);
+
+                for (int i = 0; i < maskData.Length; i++)
+                    maskData[i] = (byte)(maskData[i] ^ mask[(i + maskIndexPadding) % 4]);
+
+                destination.Write(maskData);
+            }
+            finally
+            {
+                _arrayPool.Return(maskData);
+            }
+        }
+        else
+        {
+            if (useEncryption && encryptorKey.HasValue)
+                destination.WriteByte(encryptorKey.Value);
+
+            destination.Write(data.Span);
+        }
+    }
+
     private async Task WriteContentAsync(Stream destination, byte[] data, bool useEncryption, byte? encryptorKey)
     {
         if (_masking)
@@ -303,6 +352,45 @@ public class WebSocketWriter
                 data[i] = (byte)(data[i] ^ mask[(i + maskIndexPadding) % 4]);
 
             await destination.WriteAsync(data);
+        }
+        else
+        {
+            if (useEncryption && encryptorKey.HasValue)
+                destination.WriteByte(encryptorKey.Value);
+
+            await destination.WriteAsync(data);
+        }
+    }
+
+    private async Task WriteContentAsync(Stream destination, ReadOnlyMemory<byte> data, bool useEncryption, byte? encryptorKey)
+    {
+        if (_masking)
+        {
+            byte[] mask = BitConverter.GetBytes(_random.Next(int.MaxValue / 2, int.MaxValue));
+            int maskIndexPadding = 0;
+
+            destination.Write(mask);
+
+            if (useEncryption && encryptorKey.HasValue)
+            {
+                destination.WriteByte((byte)(encryptorKey.Value ^ mask[maskIndexPadding]));
+                maskIndexPadding = 1;
+            }
+
+            byte[] maskData = _arrayPool.Rent(data.Length);
+            try
+            {
+                data.CopyTo(maskData);
+
+                for (int i = 0; i < maskData.Length; i++)
+                    maskData[i] = (byte)(maskData[i] ^ mask[(i + maskIndexPadding) % 4]);
+
+                await destination.WriteAsync(maskData);
+            }
+            finally
+            {
+                _arrayPool.Return(maskData);
+            }
         }
         else
         {

@@ -552,7 +552,7 @@ public class HorseWebSocket : IDisposable
     /// <summary>
     /// Sends a model to websocket server
     /// </summary>
-    public Task<bool> SendAsync<TModel>(TModel model)
+    public ValueTask<bool> SendAsync<TModel>(TModel model)
     {
         IWebSocketModelProvider provider = Observer.BinaryProvider != null && model is IBinaryWebSocketModel
             ? Observer.BinaryProvider
@@ -565,7 +565,7 @@ public class HorseWebSocket : IDisposable
     /// <summary>
     /// Sends a model to websocket server
     /// </summary>
-    public Task<bool> SendAsync<TModel>(TModel model, bool binary)
+    public ValueTask<bool> SendAsync<TModel>(TModel model, bool binary)
     {
         IWebSocketModelProvider provider = binary
             ? Observer.BinaryProvider
