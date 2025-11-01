@@ -1,9 +1,9 @@
 ﻿using System;
 using Horse.Core;
 using Horse.Core.Protocols;
-using Horse.Protocols.Http;
 using Horse.Server;
 using Horse.WebSocket.Protocol;
+using Horse.WebSocket.Protocol.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 

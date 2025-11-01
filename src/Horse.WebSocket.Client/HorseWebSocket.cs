@@ -616,7 +616,7 @@ public class HorseWebSocket : IDisposable
     public void UsePipeModelProvider(IJsonModelSerializer serializer = null)
     {
         if (serializer == null)
-            serializer = new NewtonsoftJsonModelSerializer();
+            serializer = new SystemJsonModelSerializer();
 
         Observer.TextProvider = new PipeModelProvider(serializer);
     }
@@ -628,7 +628,7 @@ public class HorseWebSocket : IDisposable
     public void UsePayloadModelProvider(IJsonModelSerializer serializer = null)
     {
         if (serializer == null)
-            serializer = new NewtonsoftJsonModelSerializer();
+            serializer = new SystemJsonModelSerializer();
 
         Observer.TextProvider = new PayloadModelProvider(serializer);
     }

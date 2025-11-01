@@ -65,7 +65,7 @@ internal sealed class ModelWsConnectionHandler : IWebSocketServerBus, IProtocolC
 
     internal ModelWsConnectionHandler()
     {
-        Observer = new WebSocketMessageObserver(new PipeModelProvider(new NewtonsoftJsonModelSerializer()), new BinaryModelProvider(), ErrorAction);
+        Observer = new WebSocketMessageObserver(new PipeModelProvider(new SystemJsonModelSerializer()), new BinaryModelProvider(), ErrorAction);
     }
 
     #region Events

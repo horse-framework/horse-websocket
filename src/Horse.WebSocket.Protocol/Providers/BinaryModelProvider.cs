@@ -37,7 +37,7 @@ public class BinaryModelProvider : ISerializableProvider
     {
         _typeCodes.Clear();
         _codeTypes.Clear();
-        
+
         foreach (Assembly assembly in assemblies)
         {
             foreach (Type type in assembly.GetTypes())
@@ -113,7 +113,7 @@ public class BinaryModelProvider : ISerializableProvider
         else
         {
             BinaryMessageTypeAttribute attr = type.GetCustomAttribute<BinaryMessageTypeAttribute>();
-            
+
             if (attr == null)
                 throw new InvalidOperationException("Binary model must have BinaryMessageTypeAttribute attribute");
 

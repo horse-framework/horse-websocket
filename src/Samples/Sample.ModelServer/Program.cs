@@ -1,16 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
-using Horse.Protocols.Http;
 using Horse.Server;
-using Horse.WebSocket.Protocol;
+using Horse.WebSocket.Protocol.Http;
 using Horse.WebSocket.Protocol.Serialization;
 using Horse.WebSocket.Server;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Sample.ModelServer.Handlers;
-using Sample.ModelServer.Models;
 
 namespace Sample.ModelServer
 {

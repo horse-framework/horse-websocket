@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 using System.Text;
-using Horse.Protocols.Http;
+using Horse.WebSocket.Protocol.Http;
 
 namespace Horse.WebSocket.Client;
 

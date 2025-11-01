@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using Horse.Core.Protocols;
-using Horse.Protocols.Http;
 using Horse.Server;
 using Horse.WebSocket.Protocol;
+using Horse.WebSocket.Protocol.Http;
 using Horse.WebSocket.Protocol.Providers;
 using Horse.WebSocket.Protocol.Security;
 using Horse.WebSocket.Protocol.Serialization;
@@ -177,7 +177,7 @@ public class WebSocketServerBuilder<TClient> where TClient : IHorseWebSocket
     public WebSocketServerBuilder<TClient> UsePipeModelProvider(IJsonModelSerializer serializer = null)
     {
         if (serializer == null)
-            serializer = new NewtonsoftJsonModelSerializer();
+            serializer = new SystemJsonModelSerializer();
 
         if (Handler.Observer.HandlersRegistered)
             throw new InvalidOperationException("You must use Use...Provider methods before Add..Handler(s) methods. Change method call order.");
@@ -196,7 +196,7 @@ public class WebSocketServerBuilder<TClient> where TClient : IHorseWebSocket
     public WebSocketServerBuilder<TClient> UsePayloadModelProvider(IJsonModelSerializer serializer = null)
     {
         if (serializer == null)
-            serializer = new NewtonsoftJsonModelSerializer();
+            serializer = new SystemJsonModelSerializer();
 
         if (Handler.Observer.HandlersRegistered)
             throw new InvalidOperationException("You must use Use...Provider methods before Add..Handler(s) methods. Change method call order.");

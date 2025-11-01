@@ -7,6 +7,17 @@ namespace Horse.WebSocket.Protocol;
 /// </summary>
 public static class PredefinedMessages
 {
+    public const byte CR = (byte)'\r';
+    public const byte LF = (byte)'\n';
+    public const byte COLON = (byte)':';
+    public const byte SEMICOLON = (byte)';';
+    public const byte QMARK = (byte)'?';
+    public const byte AND = (byte)'&';
+    public const byte EQUALS = (byte)'=';
+    public const byte SPACE = (byte)' ';
+    public static readonly byte[] CRLF = { CR, LF };
+    public static readonly byte[] COLON_SPACE = { COLON, SPACE };
+
     /// <summary>
     /// Websocket PING message 0x89 0x00
     /// </summary>
@@ -26,6 +37,7 @@ public static class PredefinedMessages
     /// "HTTP/1.1 " as bytes
     /// </summary>
     public static readonly byte[] HTTP_VERSION = Encoding.ASCII.GetBytes("HTTP/1.1 ");
+
     /// <summary>
     /// "Server: horse\r\n" as bytes
     /// </summary>

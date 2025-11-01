@@ -8,8 +8,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Horse.Core;
-using Horse.Protocols.Http;
 using Horse.WebSocket.Protocol;
+using Horse.WebSocket.Protocol.Http;
 using PredefinedMessages = Horse.WebSocket.Protocol.PredefinedMessages;
 
 namespace Horse.WebSocket.Client;

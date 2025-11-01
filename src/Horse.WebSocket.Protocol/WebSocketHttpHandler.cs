@@ -2,7 +2,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Horse.Core;
 using Horse.Core.Protocols;
-using Horse.Protocols.Http;
+using Horse.WebSocket.Protocol.Http;
 
 namespace Horse.WebSocket.Protocol;
 
