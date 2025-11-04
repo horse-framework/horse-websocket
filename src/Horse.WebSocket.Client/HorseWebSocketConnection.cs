@@ -112,6 +112,10 @@ public class HorseWebSocketConnection : ClientSocketBase<WebSocketMessage>, IHor
             IsConnected = true;
             IsSsl = host.SSL;
 
+            bool defaultPort = host.Port == 443 && host.SSL || host.Port == 80 && !host.SSL;
+            if (!defaultPort)
+                host.Hostname += ":" + host.Port;
+
             //creates SSL Stream or Insecure stream
             if (host.SSL)
             {
@@ -217,21 +221,15 @@ public class HorseWebSocketConnection : ClientSocketBase<WebSocketMessage>, IHor
     /// </summary>
     private byte[] CreateRequest(DnsInfo dns)
     {
-        using (SHA1 sha1 = SHA1.Create())
-        {
-            byte[] hash = sha1.ComputeHash(Guid.NewGuid().ToByteArray());
-            WebSocketKey = Convert.ToBase64String(hash);
-        }
+        byte[] keyBytes = new byte[16];
+        RandomNumberGenerator.Fill(keyBytes);
+        WebSocketKey = Convert.ToBase64String(keyBytes);
 
         string request = HttpHeaders.HTTP_GET + " " + dns.Path + " " + HttpHeaders.HTTP_VERSION + "\r\n" +
                          HttpHeaders.Create(HttpHeaders.HOST, dns.Hostname) +
                          HttpHeaders.Create(HttpHeaders.CONNECTION, HttpHeaders.UPGRADE) +
-                         HttpHeaders.Create(HttpHeaders.PRAGMA, HttpHeaders.VALUE_NO_CACHE) +
-                         HttpHeaders.Create(HttpHeaders.CACHE_CONTROL, HttpHeaders.VALUE_NO_CACHE) +
                          HttpHeaders.Create(HttpHeaders.UPGRADE, HttpHeaders.VALUE_WEBSOCKET) +
                          HttpHeaders.Create(HttpHeaders.WEBSOCKET_VERSION, HttpHeaders.VALUE_WEBSOCKET_VERSION) +
-                         HttpHeaders.Create(HttpHeaders.ACCEPT_ENCODING, HttpHeaders.VALUE_GZIP_DEFLATE_BR) +
-                         HttpHeaders.Create(HttpHeaders.ACCEPT_LANGUAGE, HttpHeaders.VALUE_ACCEPT_EN) +
                          HttpHeaders.Create(HttpHeaders.WEBSOCKET_KEY, WebSocketKey) +
                          HttpHeaders.Create(HttpHeaders.WEBSOCKET_EXTENSIONS, HttpHeaders.VALUE_WEBSOCKET_EXTENSIONS);
 
