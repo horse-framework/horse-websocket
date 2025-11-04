@@ -7,13 +7,13 @@ namespace Sample.ModelServer.Handlers
 {
     public class ModelAHandler : IWebSocketMessageHandler<ModelA, WsServerSocket>
     {
-        public Task Handle(ModelA model, WebSocketMessage message, WsServerSocket client)
+        public ValueTask Handle(ModelA model, WebSocketMessage message, WsServerSocket client)
         {
             Console.WriteLine("Model A received: " + model.Value);
-            return Task.CompletedTask;
+            return ValueTask.CompletedTask;
         }
 
-        public Task OnError(Exception exception, ModelA model, WebSocketMessage message, WsServerSocket client)
+        public ValueTask OnError(Exception exception, ModelA model, WebSocketMessage message, WsServerSocket client)
         {
             throw new NotImplementedException();
         }

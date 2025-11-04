@@ -18,21 +18,21 @@ public interface IWebSocketMessageHandler<in TModel, in TClient> where TClient :
     /// <summary>
     /// Handles websocket message
     /// </summary>
-    Task Handle(TModel model, WebSocketMessage message, TClient client);
+    ValueTask Handle(TModel model, WebSocketMessage message, TClient client);
 
     /// <summary>
     /// Triggered when an error occured in handle method
     /// </summary>
-    Task OnError(Exception exception, TModel model, WebSocketMessage message, TClient client)
+    ValueTask OnError(Exception exception, TModel model, WebSocketMessage message, TClient client)
     {
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 
     /// <summary>
     /// Triggered when an authentication failed
     /// </summary>
-    Task OnUnauthenticated(TModel model, WebSocketMessage message, TClient client)
+    ValueTask OnUnauthenticated(TModel model, WebSocketMessage message, TClient client)
     {
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 }
